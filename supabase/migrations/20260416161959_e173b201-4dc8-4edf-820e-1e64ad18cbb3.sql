@@ -1,0 +1,1 @@
+ALTER TABLE public.projects ADD COLUMN eje_estrategico text DEFAULT NULL;

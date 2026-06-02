@@ -1,0 +1,1124 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>Red organizacional — Dashboard</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+  <style>
+    :root { 
+      --primary-blue: #2563eb;
+      --light-blue: #3b82f6;
+      --bg-primary: #f8fafc;
+      --bg-secondary: #ffffff;
+      --header-bg: #1e293b;
+      --sidebar-bg: #1e293b;
+      --footer-bg: #1e293b;
+      --sidebar-text: #cbd5e1;
+      --text-primary: #0f172a;
+      --text-secondary: #64748b;
+      --text-muted: #94a3b8;
+      --border: #e2e8f0;
+      --border-dark: #334155;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    }
+
+    * { 
+      box-sizing: border-box; 
+      margin: 0; 
+      padding: 0; 
+    }
+
+    body {
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      display: grid;
+      grid-template-areas: 
+        "header header"
+        "sidebar main"
+        "footer footer";
+      grid-template-rows: auto 1fr auto;
+      grid-template-columns: 320px 1fr;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Header */
+    .header {
+      grid-area: header;
+      background: linear-gradient(135deg, var(--header-bg), var(--primary-blue));
+      color: white;
+      padding: 16px 24px;
+      box-shadow: var(--shadow-md);
+      border-bottom: 1px solid var(--border-dark);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .header h1 {
+      font-size: 24px;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .header .subtitle {
+      font-size: 14px;
+      color: rgba(255,255,255,0.8);
+      font-weight: 400;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 14px;
+      color: rgba(255,255,255,0.9);
+    }
+
+    .status-indicator {
+      width: 8px;
+      height: 8px;
+      background: var(--success);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    /* Sidebar */
+    .sidebar { 
+      grid-area: sidebar;
+      background: var(--sidebar-bg);
+      color: var(--sidebar-text);
+      padding: 24px;
+      overflow-y: auto;
+      box-shadow: var(--shadow-lg);
+      border-right: 1px solid var(--border-dark);
+    }
+
+    .sidebar::-webkit-scrollbar { width: 6px; }
+    .sidebar::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); }
+    .sidebar::-webkit-scrollbar-thumb { 
+      background: rgba(59,130,246,0.5); 
+      border-radius: 3px; 
+    }
+    .sidebar::-webkit-scrollbar-thumb:hover { background: rgba(59,130,246,0.7); }
+
+    /* Contenido principal */
+    .main {
+      grid-area: main;
+      background: var(--bg-secondary);
+      position: relative;
+      overflow: hidden;
+    }
+
+    #chart { 
+      width: 100%; 
+      height: 100%;
+      background: var(--bg-secondary);
+    }
+
+    /* Footer con métricas */
+    .footer {
+      grid-area: footer;
+      background: var(--footer-bg);
+      color: white;
+      padding: 20px 24px;
+      box-shadow: 0 -4px 6px -1px rgb(0 0 0 / 0.1);
+      border-top: 1px solid var(--border-dark);
+    }
+
+    .metrics-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+      flex: 1;
+    }
+
+    .metric-card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      backdrop-filter: blur(10px);
+      transition: all 0.2s;
+    }
+
+    .metric-card:hover {
+      background: rgba(255,255,255,0.1);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .metric-card .label {
+      font-size: 12px;
+      color: var(--sidebar-text);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+
+    .metric-card .value {
+      font-size: 28px;
+      font-weight: 700;
+      color: white;
+      line-height: 1;
+    }
+
+    .footer-info {
+      margin-left: 24px;
+      text-align: right;
+      color: rgba(255,255,255,0.7);
+      font-size: 12px;
+    }
+
+    /* Secciones del sidebar */
+    .section {
+      margin-bottom: 32px;
+    }
+
+    .section:last-child {
+      margin-bottom: 0;
+    }
+
+    .section-title { 
+      font-size: 14px;
+      font-weight: 600;
+      color: white;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-title::before {
+      content: '';
+      width: 3px;
+      height: 14px;
+      background: var(--light-blue);
+      border-radius: 2px;
+    }
+
+    /* Controles */
+    .control-group {
+      margin-bottom: 20px;
+    }
+
+    .control-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+
+    select, input[type="text"], input[type="number"] {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: white;
+      padding: 10px 12px;
+      border-radius: 6px;
+      outline: none;
+      transition: all 0.2s;
+      font-size: 13px;
+      flex: 1;
+      min-width: 0;
+    }
+
+    select:focus, input:focus {
+      border-color: var(--light-blue);
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+    }
+
+    select option {
+      background: var(--sidebar-bg);
+      color: white;
+    }
+
+    button {
+      background: var(--light-blue);
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 6px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    button:hover {
+      background: var(--primary-blue);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    .btn-secondary {
+      background: rgba(255,255,255,0.1);
+      color: white;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255,255,255,0.2);
+    }
+
+    /* Checkboxes de tipos */
+    .types-container {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .checkbox-item {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 6px;
+      padding: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .checkbox-item:hover {
+      background: rgba(255,255,255,0.1);
+      border-color: var(--light-blue);
+    }
+
+    .checkbox-item input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--light-blue);
+      margin: 0;
+      flex-shrink: 0;
+    }
+
+    .checkbox-item label {
+      font-size: 13px;
+      color: var(--sidebar-text);
+      cursor: pointer;
+      margin: 0;
+      flex: 1;
+    }
+
+    /* Lista top */
+    .top-list {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .top-list-item {
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 13px;
+      color: var(--sidebar-text);
+    }
+
+    .top-list-item:last-child {
+      border-bottom: none;
+    }
+
+    .top-list-item:hover {
+      background: rgba(59,130,246,0.1);
+      color: var(--light-blue);
+      padding-left: 20px;
+    }
+
+    /* Switch */
+    .switch-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 12px;
+      font-size: 13px;
+      color: var(--sidebar-text);
+    }
+
+    .switch-container input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--light-blue);
+    }
+
+    /* Separador */
+    .divider {
+      height: 1px;
+      background: rgba(255,255,255,0.1);
+      margin: 24px 0;
+    }
+
+    /* Descripción */
+    .description {
+      background: rgba(59,130,246,0.1);
+      border: 1px solid rgba(59,130,246,0.2);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 24px;
+      font-size: 13px;
+      line-height: 1.5;
+      color: rgba(255,255,255,0.9);
+    }
+
+    /* Responsive */
+    @media (max-width: 1200px) {
+      body { grid-template-columns: 280px 1fr; }
+      .metrics-grid { gap: 16px; }
+    }
+
+    @media (max-width: 768px) {
+      body { 
+        grid-template-areas: 
+          "header"
+          "main"
+          "footer";
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr auto;
+      }
+      
+      .sidebar {
+        position: fixed;
+        top: 0;
+        left: -320px;
+        width: 320px;
+        height: 100vh;
+        z-index: 1000;
+        transition: left 0.3s;
+      }
+      
+      .sidebar.open {
+        left: 0;
+      }
+      
+      .metrics-grid { 
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+      }
+      
+      .control-row { 
+        flex-direction: column; 
+      }
+      
+      .header {
+        padding: 12px 16px;
+      }
+      
+      .header h1 {
+        font-size: 20px;
+      }
+      
+      .footer {
+        padding: 16px;
+      }
+      
+      .metrics-container {
+        flex-direction: column;
+        gap: 16px;
+      }
+      
+      .footer-info {
+        margin-left: 0;
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-left">
+      <div>
+        <h1>Red Organizacional</h1>
+        <div class="subtitle">Sistema de análisis de relaciones empresariales</div>
+      </div>
+    </div>
+    
+  </header>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="description">
+      Visualiza y analiza las relaciones entre organizaciones de manera interactiva
+    </div>
+
+    <!-- NUEVA sección: Red / Capa -->
+    <div class="section">
+      <div class="section-title">Red / Capa</div>
+      <div class="control-group">
+        <select id="layerSelect">
+          <option value="" selected>Todo (sin filtro)</option>
+          <option value="relacionamiento">Relacionamiento</option>
+          <option value="reconocimiento">Reconocimiento</option>
+          <option value="recomendacion">Recomendación</option>
+        </select>
+
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="section">
+      <div class="section-title">Buscar por Organización</div>
+      <div class="control-group">
+        <select id="orgSelect">
+          <option value="" disabled selected>Seleccionar organización</option>
+        </select>
+        <div class="control-row">
+          <button id="go">Mostrar Red</button>
+          <button id="reset" class="btn-secondary">Ver Todo</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="section">
+      <div class="section-title">Tipos de Relación</div>
+      <div class="control-group">
+        <div id="typesBox" class="types-container"></div>
+        <div class="switch-container">
+          <input type="checkbox" id="includeUntyped" checked />
+          <label for="includeUntyped">Incluir aristas sin tipo específico</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="section">
+      <div class="section-title">Análisis Top N</div>
+      <div class="control-group">
+        <input id="topN" type="number" min="1" step="1" value="5" placeholder="Número de elementos"/>
+        <div class="control-row">
+          <button id="topBest">Top Mejores</button>
+          <button id="topWorst">Top Peores</button>
+        </div>
+        <div class="control-row">
+          <button id="topClear" class="btn-secondary">Limpiar Filtro</button>
+          <button id="export" class="btn-secondary">Exportar Vista</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="section">
+      <div class="section-title">Top 5 Organizaciones</div>
+      <div id="topList" class="top-list">
+        <!-- Se llena dinámicamente -->
+      </div>
+    </div>
+  </aside>
+
+  <!-- Contenido Principal -->
+  <main class="main">
+    <div id="chart"></div>
+  </main>
+
+  <!-- Footer con métricas -->
+  <footer class="footer">
+    <div class="metrics-container">
+      <div class="metrics-grid" style="grid-template-columns: repeat(5, 1fr);">
+        <div class="metric-card">
+          <div class="label">Nodos visibles</div>
+          <div id="m_nodes" class="value">—</div>
+        </div>
+        <div class="metric-card">
+          <div class="label">Aristas visibles</div>
+          <div id="m_edges" class="value">—</div>
+        </div>
+        <div class="metric-card">
+          <div class="label">Densidad</div>
+          <div id="m_density" class="value">—</div>
+        </div>
+        <div class="metric-card">
+          <div class="label">Centralidad (prom. grado)</div>
+          <div id="m_centrality" class="value">—</div>
+        </div>
+        <div class="metric-card">
+          <div class="label">Cohesión (WCC)</div>
+          <div id="m_cohesion" class="value">—</div>
+        </div>
+      </div>
+      
+    </div>
+  </footer>
+
+  <!-- Config del backend -->
+  <script>
+    const API_BASE_URL = "https://73b86eb92f68.ngrok-free.app";
+    const GRAPH_ENDPOINT = "/graph";
+    const API_URL = `${API_BASE_URL}${GRAPH_ENDPOINT}`;
+  </script>
+
+  <script>
+    const elChart = document.getElementById('chart');
+    const chart = echarts.init(elChart, null, { renderer: 'canvas' });
+
+    // UI refs
+    const elOrgSelect = document.getElementById('orgSelect');
+    const elGo = document.getElementById('go');
+    const elReset = document.getElementById('reset');
+    // NUEVO: refs de capa
+    const elLayerSelect = document.getElementById('layerSelect');
+    const elTypesBox = document.getElementById('typesBox');
+    const elIncludeUntyped = document.getElementById('includeUntyped');
+    const elTopN = document.getElementById('topN');
+    const elTopBest = document.getElementById('topBest');
+    const elTopWorst = document.getElementById('topWorst');
+    const elTopClear = document.getElementById('topClear');
+    const elExport = document.getElementById('export');
+    const elTopList = document.getElementById('topList');
+    const m_nodes = document.getElementById('m_nodes');
+    const m_edges = document.getElementById('m_edges');
+    const m_density = document.getElementById('m_density');
+    const m_centrality = document.getElementById('m_centrality');
+    const m_cohesion   = document.getElementById('m_cohesion');
+    
+
+    // Estado
+    let RAW = { nodes: [], links: [], diagnostics: {} };
+    let GRAPH = { nodes: [], links: [] };  // tras filtros por tipo
+    let VIEW  = { nodes: [], links: [] };  // ego/top sobre GRAPH
+
+    // estado de capa
+    let CURRENT_LAYER = ""; // "", "relacionamiento", "reconocimiento", "recomendacion"
+    
+    // Cómo escalar el tamaño según la capa activa
+    // relacionamiento -> IN ; reconocimiento -> OUT ; (por ahora recomendación no se usa)
+    function sizeModeForCurrentLayer() {
+      switch (CURRENT_LAYER) {
+        case 'relacionamiento': return 'in';
+        case 'reconocimiento':  return 'out';
+        default:                return 'out'; // por defecto
+      }
+    }
+    const MIN_NODE_SIZE = 18;
+    const MAX_NODE_SIZE = 160;
+
+    // Tipos
+    const DEFAULT_TYPES_META = {
+      1: 'Intercambio de información',
+      2: 'Realizan proyectos conjuntamente',
+      3: 'Realizan labores de incidencia'
+    };
+    let TYPES_META = { ...DEFAULT_TYPES_META };
+    let AVAILABLE_TYPES = [];                // p.ej. [1,2,3]
+    const selectedTypes = new Set();         // tipos marcados
+    let topMode = 'none';                    // 'none' | 'best' | 'worst'
+    let egoCenterId = null;                  // id de ego-red activa
+
+    // Paleta de colores
+    const COLOR_PALETTE = [
+      '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#98D8C8', '#F7DC6F',
+      '#BB8FCE', '#85C1E9', '#F8C471', '#82E0AA', '#F1948A', '#85929E', '#5DADE2', '#58D68D',
+      '#EC7063', '#AF7AC5', '#5499C7', '#52C4A4', '#F4D03F', '#EB984E', '#CD6155', '#A569BD',
+      '#3498DB', '#1ABC9C', '#F39C12', '#E74C3C', '#9B59B6', '#2ECC71', '#E67E22', '#34495E',
+      '#16A085', '#27AE60', '#2980B9', '#8E44AD', '#F1C40F', '#D35400', '#C0392B', '#BDC3C7'
+    ];
+
+    /* ================= Utils ================= */
+    // Construye la URL considerando la capa
+    function graphUrlFor(layer) {
+      return layer ? `${API_URL}?layer=${encodeURIComponent(layer)}` : API_URL;
+    }
+
+    // Carga grafo (opcionalmente por capa)
+    async function loadGraph(layer) {
+      const r = await fetch(graphUrlFor(layer), {
+        mode: 'cors',
+        cache: 'no-cache',
+        headers: {
+          'Accept': 'application/json',
+          'ngrok-skip-browser-warning': 'true'
+        }
+      });
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      const ct = r.headers.get('content-type') || '';
+      if (!ct.includes('application/json')) {
+        const txt = await r.text();
+        throw new Error(`Respuesta no-JSON: ${txt.slice(0,200)}`);
+      }
+      const raw = await r.json();
+      const g = unwrapGraph(raw);
+
+      RAW = {
+        nodes: Array.isArray(g.nodes) ? g.nodes : [],
+        links: Array.isArray(g.links) ? g.links : [],
+        diagnostics: g.diagnostics || {}
+      };
+
+      // types_meta / types disponibles
+      if (RAW.diagnostics && RAW.diagnostics.types_meta) {
+        TYPES_META = { ...DEFAULT_TYPES_META, ...RAW.diagnostics.types_meta };
+      }
+      if (RAW.diagnostics && Array.isArray(RAW.diagnostics.types_filter_available)) {
+        AVAILABLE_TYPES = RAW.diagnostics.types_filter_available.map(Number);
+      } else {
+        AVAILABLE_TYPES = buildTypesFromLinks(RAW.links);
+      }
+
+      // Rebuild UI + vista
+      buildTypeCheckboxes();
+      elIncludeUntyped.checked = true;
+      egoCenterId = null;
+      topMode = 'none';
+      applyGlobalFilters();
+      applyView();
+      render(true);
+      buildOrgSelect(GRAPH.nodes);
+    }
+
+    // (Opcional) Poblar select de capas desde backend
+    async function populateLayerSelect() {
+      try {
+        const r = await fetch(`${API_BASE_URL}/graph/layers`, {
+          headers: { 'Accept': 'application/json', 'ngrok-skip-browser-warning': 'true' }
+        });
+        if (!r.ok) return;
+        const { layers = [], counts = {} } = await r.json();
+        // deja la opción "Todo" y añade dinámicamente las disponibles
+        const fixed = new Set(["relacionamiento","reconocimiento","recomendacion"]);
+        const unique = [...new Set(layers.filter(Boolean))];
+        for (const layer of unique) {
+          if (fixed.has(layer)) continue; // ya existen en HTML por defecto
+          const opt = document.createElement('option');
+          opt.value = layer;
+          opt.textContent = `${layer} (${counts[layer] ?? 0})`;
+          elLayerSelect.appendChild(opt);
+        }
+      } catch { /* noop */ }
+    }
+
+
+    function updateLastUpdate() {}
+
+    function unwrapGraph(raw) {
+      if (raw && Array.isArray(raw.nodes) && Array.isArray(raw.links)) return raw;
+      if (raw && raw.graph && Array.isArray(raw.graph.nodes)) return raw.graph;
+      if (Array.isArray(raw) && raw[0] && raw[0].json && raw[0].json.nodes) return raw[0].json;
+      throw new Error("Respuesta sin nodes/links");
+    }
+
+    // Llena el <select> con todas las organizaciones (orden alfabético)
+    function buildOrgSelect(nodes) {
+      if (!elOrgSelect) return;
+      const opts = nodes
+        .map(n => ({ id: n.id, label: n.label || n.name || n.id }))
+        .sort((a,b) => a.label.localeCompare(b.label, 'es', { sensitivity: 'base' }));
+      const placeholder = `<option value="" disabled selected>Seleccionar organización</option>`;
+      elOrgSelect.innerHTML = placeholder + opts.map(o => `<option value="${o.id}">${o.label}</option>`).join('');
+    }
+
+    function getUniqueColor(nodeId) {
+      let hash = 0; const str = nodeId.toString();
+      for (let i = 0; i < str.length; i++) { hash = ((hash<<5)-hash) + str.charCodeAt(i); hash |= 0; }
+      const index = Math.abs(hash) % COLOR_PALETTE.length;
+      return COLOR_PALETTE[index];
+    }
+
+    function degreeScore(out, inn) {
+      const mode = sizeModeForCurrentLayer();
+      switch (mode) {
+        case 'in':  return inn;
+        case 'out': return out;
+        default:    return out; // fallback
+      }
+    }
+
+    function sizeFromDegrees(out, inn) {
+      const s = degreeScore(out, inn);
+      return Math.max(MIN_NODE_SIZE, Math.min(18 + 10 * Math.sqrt(s), MAX_NODE_SIZE));
+    }
+    function forceDefaults() {
+      return {
+        repulsion: 32000,  gravity: 0.008,
+        edgeLength: [800, 1800], friction: 0.05
+      };
+    }
+    function setStatsBox(n, m, nodesArr, linksArr) {
+      m_nodes.textContent     = n;
+      m_edges.textContent     = m;
+      m_density.textContent   = densityDirected(n, m).toFixed(3);
+      m_centrality.textContent= (avgDegreeCentrality(nodesArr, linksArr) * 100).toFixed(1) + '%';
+      m_cohesion.textContent  = (cohesionWCC(nodesArr, linksArr) * 100).toFixed(1) + '%';
+      updateLastUpdate();
+    }
+    function buildTypesFromLinks(links) {
+      const s = new Set();
+      for (const e of links) {
+        const arr = Array.isArray(e.types_present) ? e.types_present : [];
+        for (const t of arr) s.add(Number(t));
+      }
+      return Array.from(s).sort((a,b)=>a-b);
+    }
+    function buildTypeCheckboxes() {
+      elTypesBox.innerHTML = '';
+      for (const t of AVAILABLE_TYPES) {
+        const label = TYPES_META[t] || `Tipo ${t}`;
+        const id = `type_${t}`;
+        const wrap = document.createElement('div');
+        wrap.className = 'checkbox-item';
+        wrap.innerHTML = `
+          <input type="checkbox" id="${id}">
+          <label for="${id}">${t}. ${label}</label>
+        `;
+        elTypesBox.appendChild(wrap);
+        const cb = wrap.querySelector('input');
+        // Marcar todos por defecto
+        cb.checked = true;
+        selectedTypes.add(t);
+        cb.addEventListener('change', () => {
+          if (cb.checked) selectedTypes.add(t); else selectedTypes.delete(t);
+          applyGlobalFilters(); applyView(); render(true);
+        });
+      }
+    }
+
+    /* ============== Filtrado global por tipos ============== */
+    function linkPassesType(e) {
+      const arr = Array.isArray(e.types_present) ? e.types_present.map(Number) : [];
+      if (selectedTypes.size === 0) {
+        return elIncludeUntyped.checked ? true : (arr.length > 0);
+      }
+      const hasAny = arr.some(t => selectedTypes.has(t));
+      if (hasAny) return true;
+      if (arr.length === 0 && elIncludeUntyped.checked) return true;
+      return false;
+    }
+    function applyGlobalFilters() {
+      const links = RAW.links.filter(linkPassesType);
+      const keep = new Set(); links.forEach(e => { keep.add(e.source); keep.add(e.target); });
+      const nodes = RAW.nodes.filter(n => keep.has(n.id));
+      GRAPH = { nodes, links };
+    }
+
+    /* ============== Vista (ego/top) sobre GRAPH ============== */
+    function computeDerivedDegrees(nodes, links) {
+      const out = new Map(), inn = new Map();
+      for (const n of nodes) { out.set(n.id, 0); inn.set(n.id, 0); }
+      for (const e of links) {
+        if (out.has(e.source)) out.set(e.source, out.get(e.source)+1);
+        if (inn.has(e.target)) inn.set(e.target, inn.get(e.target)+1);
+      }
+      return { out, inn };
+    }
+
+    // Densidad (dirigida): m / [n*(n-1)]
+    function densityDirected(n, m) {
+      if (n <= 1) return 0;
+      return m / (n * (n - 1));
+    }
+
+    // Centralidad promedio de grado (normalizada):
+    // para cada nodo: (out+in)/(n-1); luego promedio sobre todos los nodos
+    function avgDegreeCentrality(nodes, links) {
+      const n = nodes.length;
+      if (n <= 1) return 0;
+      const { out, inn } = computeDerivedDegrees(nodes, links);
+      let acc = 0;
+      for (const node of nodes) {
+        const d = (out.get(node.id) || 0) + (inn.get(node.id) || 0);
+        acc += d / (n - 1);
+      }
+      return acc / n; // ∈ [0,1]
+    }
+
+    // Cohesión (WCC): fracción de nodos en el mayor componente conexo (no dirigido)
+    function cohesionWCC(nodes, links) {
+      const n = nodes.length;
+      if (n === 0) return 0;
+      const idSet = new Set(nodes.map(x => x.id));
+      const adj = new Map();
+      for (const id of idSet) adj.set(id, new Set());
+      for (const e of links) {
+        if (idSet.has(e.source) && idSet.has(e.target)) {
+          adj.get(e.source).add(e.target);
+          adj.get(e.target).add(e.source); // no dirigido para WCC
+        }
+      }
+      const seen = new Set();
+      let maxComp = 0;
+      for (const id of idSet) {
+        if (seen.has(id)) continue;
+        let size = 0;
+        const q = [id]; seen.add(id);
+        while (q.length) {
+          const u = q.shift();
+          size++;
+          for (const v of adj.get(u)) {
+            if (!seen.has(v)) { seen.add(v); q.push(v); }
+          }
+        }
+        if (size > maxComp) maxComp = size;
+      }
+      return maxComp / n; // ∈ (0,1]
+    }
+    // === Métrica del TOP (independiente del SIZE_MODE de los nodos)
+    const TOP_METRIC = 'out'; // 'out' | 'in' | 'total' | 'max'
+    function topScore(o, i){
+      switch (TOP_METRIC){
+        case 'in':    return i;
+        case 'total': return o + i;
+        case 'max':   return Math.max(o, i);
+        default:      return o; // 'out'
+      }
+    }
+    function egoSubgraph(centerId, nodes, links) {
+      const keep = new Set([centerId]);
+      const e1 = [];
+      for (const e of links) {
+        if (e.source === centerId || e.target === centerId) { keep.add(e.source); keep.add(e.target); e1.push(e); }
+      }
+      const e2 = links.filter(e => keep.has(e.source) && keep.has(e.target) && !e1.includes(e));
+      return { nodes: nodes.filter(n => keep.has(n.id)), links: e1.concat(e2) };
+    }
+
+    // Subgrafo estrella: centro + SOLO sus aristas incidentes
+    function egoStar(centerId, nodes, links) {
+      const keep = new Set([centerId]);
+      const starEdges = [];
+      for (const e of links) {
+        if (e.source === centerId || e.target === centerId) {
+          keep.add(e.source); keep.add(e.target);
+          starEdges.push(e);
+        }
+      }
+      const subNodes = nodes.filter(n => keep.has(n.id));
+      return { nodes: subNodes, links: starEdges };
+    }
+    function subgraphTop(nodes, links, mode, n) {
+      const { out, inn } = computeDerivedDegrees(nodes, links);
+      const arr = nodes.map(nod => {
+        const o = out.get(nod.id) || 0, i = inn.get(nod.id) || 0;
+        return { id: nod.id, label: nod.label || nod.name || nod.id, score: topScore(o,i) };
+      });
+      arr.sort((a,b) => mode==='best' ? (b.score - a.score) || a.label.localeCompare(b.label)
+                                      : (a.score - b.score) || a.label.localeCompare(b.label));
+      const pick = new Set(arr.slice(0, Math.max(1, n|0)).map(x => x.id));
+      return { nodes: nodes.filter(n => pick.has(n.id)), links: links.filter(e => pick.has(e.source) && pick.has(e.target)) };
+    }
+    function buildTopListSidebar(nodes, links) {
+      const { out, inn } = computeDerivedDegrees(nodes, links);
+      const arr = nodes.map(n => {
+        const o = out.get(n.id) || 0, i = inn.get(n.id) || 0;
+        return { id: n.id, label: n.label || n.name || n.id, score: topScore(o,i) };
+      });
+      arr.sort((a,b)=> (b.score - a.score) || a.label.localeCompare(b.label));
+      const top5 = arr.slice(0, 5);
+      elTopList.innerHTML = '';
+      for (const x of top5) {
+        const div = document.createElement('div');
+        div.className = 'top-list-item';
+        div.textContent = `${x.label} — ${x.score}`;
+        div.title = 'Click para ver ego-red';
+        div.addEventListener('click', () => { egoCenterId = x.id; applyView(); render(true); });
+        elTopList.appendChild(div);
+      }
+    }
+    function applyView() {
+      let base = { nodes: [...GRAPH.nodes], links: [...GRAPH.links] };
+      if (egoCenterId) base = egoSubgraph(egoCenterId, base.nodes, base.links);
+      const n = parseInt(elTopN.value,10) || 5;
+      if (topMode==='best' || topMode==='worst') base = subgraphTop(base.nodes, base.links, topMode, n);
+      VIEW = base;
+      const { nodes, links } = VIEW;
+      setStatsBox(nodes.length, links.length, nodes, links);
+      buildTopListSidebar(GRAPH.nodes, GRAPH.links);
+    }
+
+    /* ============== Render ============== */
+    function render(layoutFresh = true) {
+      const { nodes, links } = VIEW;
+      const { out, inn } = computeDerivedDegrees(nodes, links);
+
+      const series = {
+        type: 'graph',
+        layout: 'force',
+        roam: true,
+        draggable: true,
+        emphasis: { focus: 'adjacency' },
+        force: forceDefaults(),
+        label: {
+          show: true, color: '#1f2937', fontSize: 12, fontWeight: 'bold',
+          formatter: p => p.data.name,
+          backgroundColor: 'rgba(255,255,255,0.9)', padding: [6,12], borderRadius: 6,
+          shadowColor: 'rgba(0,0,0,0.2)', shadowBlur: 4, shadowOffsetY: 2
+        },
+        data: nodes.map(n => {
+          const o = out.get(n.id) || 0, i = inn.get(n.id) || 0;
+          return {
+            id: n.id, name: n.label || n.name || n.id,
+            out_relations: o, in_relations: i,
+            symbolSize: sizeFromDegrees(o, i),
+            itemStyle: {
+              color: getUniqueColor(n.id),
+              shadowBlur: 8, shadowColor: 'rgba(0,0,0,0.2)', shadowOffsetY: 2,
+              borderColor: 'rgba(255,255,255,0.8)', borderWidth: 2
+            }
+          };
+        }),
+        edges: links.map(e => ({
+          source: e.source,
+          target: e.target,
+          // pasamos meta útil al tooltip
+          layer: e.layer || CURRENT_LAYER || '',
+          types_present_labels: Array.isArray(e.types_present_labels) ? e.types_present_labels : [],
+          lineStyle: { width: 1, color: '#777777', opacity: 0.6, curveness: 0.08 },
+          label: { show: false }
+        })),
+        tooltip: {
+          trigger: 'item',
+          formatter: (p) => {
+            if (p.dataType === 'edge') {
+              const d = p.data;
+              const tipos = d.types_present_labels && d.types_present_labels.length
+                ? `<br/>Tipos: <b>${d.types_present_labels.join(', ')}</b>` : '';
+              const capa = d.layer ? `<br/>Capa: <b>${d.layer}</b>` : '';
+              return `${d.source} → ${d.target}${capa}${tipos}`;
+            } else {
+              const d = p.data;
+              return `<b>${d.name}</b><br/>salidas: <b>${d.out_relations||0}</b><br/>entradas: <b>${d.in_relations||0}</b>`;
+            }
+          }
+        }
+      };
+
+      chart.setOption({
+        backgroundColor: '#ffffff',
+        textStyle: { color: '#0b0c10' },
+        animation: layoutFresh,
+        series: [series]
+      }, true);
+    }
+
+    /* ============== Bootstrap (¡IMPORTANTE!) ============== */
+    async function bootstrap() {
+      try {
+        await populateLayerSelect();                 // opcional
+        await loadGraph(CURRENT_LAYER);              // carga inicial (sin capa o la seleccionada)
+      } catch (err) {
+        console.error('[Graph load error]', err);
+        chart.setOption({
+          title: { 
+            text: 'No se pudo cargar /graph. Ver consola', 
+            left: 'center', top: 'middle', 
+            textStyle: { color: '#000' } 
+          }
+        });
+      }
+    }
+
+    /* ============== Eventos ============== */
+    // Click en "Ir" => muestra ego-estrella de la org seleccionada
+    elGo.addEventListener('click', () => {
+      const id = elOrgSelect?.value;
+      if (!id) return;
+      topMode = 'none';
+      egoCenterId = null;
+      VIEW = egoStar(id, GRAPH.nodes, GRAPH.links);
+      setStatsBox(VIEW.nodes.length, VIEW.links.length, VIEW.nodes, VIEW.links);
+      render(true);
+    });
+    
+    // "Ver todo" => vuelve al grafo completo (respetando filtros por tipo)
+    elReset.addEventListener('click', () => {
+      topMode = 'none';
+      egoCenterId = null;
+      applyView();
+      render(true);
+    });
+
+    elIncludeUntyped.addEventListener('change', () => { 
+      applyGlobalFilters(); 
+      applyView(); 
+      render(true); 
+    });
+
+    // Cambio de capa
+    elLayerSelect.addEventListener('change', async () => {
+      CURRENT_LAYER = elLayerSelect.value || "";
+      await loadGraph(CURRENT_LAYER);
+    });
+
+    elTopBest.addEventListener('click', () => { 
+      topMode = 'best'; 
+      egoCenterId = null; 
+      applyView(); 
+      render(true); 
+    });
+    
+    elTopWorst.addEventListener('click', () => { 
+      topMode = 'worst'; 
+      egoCenterId = null; 
+      applyView(); 
+      render(true); 
+    });
+    
+    elTopClear.addEventListener('click', () => { 
+      topMode = 'none'; 
+      egoCenterId = null;
+      applyView(); 
+      render(true); 
+    });
+
+    elExport.addEventListener('click', () => {
+      const blob = new Blob([JSON.stringify(VIEW, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'subgrafo.json';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    });
+
+    // Resize del chart
+    window.addEventListener('resize', () => {
+      chart.resize();
+    });
+
+    // Inicializar
+    bootstrap();
+    
+    // Tras la primera carga, poblar select si ya hay GRAPH
+    chart?.on?.('finished', () => { 
+      if (GRAPH?.nodes?.length) {
+        buildOrgSelect(GRAPH.nodes); 
+      }
+    });
+  </script>
+</body>
+</html>

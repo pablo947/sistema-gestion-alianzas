@@ -1,0 +1,1 @@
+ALTER TABLE public.actors ADD COLUMN anios_alianza integer[] DEFAULT '{}'::integer[];

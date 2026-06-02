@@ -1,0 +1,1 @@
+ALTER TABLE public.programs DROP COLUMN IF EXISTS area;

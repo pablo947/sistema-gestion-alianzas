@@ -1,0 +1,1 @@
+ALTER TABLE public.programs ALTER COLUMN area DROP NOT NULL;

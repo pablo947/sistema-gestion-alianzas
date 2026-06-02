@@ -1,0 +1,1 @@
+DELETE FROM projects WHERE proyecto_id IN ('3098ddc2-140d-4179-a722-d6d996a54cfc', 'd8072887-58ae-4008-842f-9defeb9ae742');
