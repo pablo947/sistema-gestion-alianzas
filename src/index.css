@@ -6,11 +6,11 @@
 
 @layer base {
   :root {
-    /* Clean institutional blue/white palette */
-    --background: 210 20% 98%;
-    --foreground: 220 30% 15%;
+    /* Modern soft blue palette – trend 2024/2025 */
+    --background: 214 60% 95%;
+    --foreground: 220 35% 14%;
     
-    --card: 0 0% 100%;
+    --card: 210 40% 98%;
     --card-foreground: 220 30% 15%;
     
     --popover: 0 0% 100%;
@@ -22,17 +22,17 @@
     --secondary: 210 15% 93%;
     --secondary-foreground: 220 30% 25%;
     
-    --muted: 210 15% 95%;
-    --muted-foreground: 220 15% 45%;
+    --muted: 214 40% 92%;
+    --muted-foreground: 220 20% 48%;
     
-    --accent: 210 20% 90%;
-    --accent-foreground: 220 30% 15%;
+    --accent: 214 50% 90%;
+    --accent-foreground: 220 35% 14%;
     
     --destructive: 0 72% 55%;
     --destructive-foreground: 0 0% 100%;
     
-    --border: 210 15% 90%;
-    --input: 210 15% 90%;
+    --border: 214 40% 88%;
+    --input: 214 40% 88%;
     --ring: 215 70% 45%;
     
     --radius: 0.75rem;
@@ -51,7 +51,7 @@
     
     --transition-smooth: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 
-    --sidebar-background: 0 0% 100%;
+    --sidebar-background: 215 55% 97%;
     --sidebar-foreground: 220 30% 15%;
     --sidebar-primary: 215 70% 45%;
     --sidebar-primary-foreground: 0 0% 100%;
