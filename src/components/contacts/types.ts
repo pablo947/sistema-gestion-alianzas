@@ -31,6 +31,7 @@ export interface Contact {
   updated_at: string;
   nivel_direccion?: NivelDireccion | null;
   nivel_direccion_auto?: boolean;
+  es_estrategico?: boolean;
 }
 
 export interface ContactDialogProps {
