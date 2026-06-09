@@ -9,46 +9,46 @@
     /* Modern soft blue palette – trend 2024/2025 */
     --background: 214 60% 95%;
     --foreground: 220 35% 14%;
-    
+
     --card: 210 40% 98%;
     --card-foreground: 220 30% 15%;
-    
+
     --popover: 0 0% 100%;
     --popover-foreground: 220 30% 15%;
-    
+
     --primary: 215 70% 45%;
     --primary-foreground: 0 0% 100%;
-    
+
     --secondary: 210 15% 93%;
     --secondary-foreground: 220 30% 25%;
-    
+
     --muted: 214 40% 92%;
     --muted-foreground: 220 20% 48%;
-    
+
     --accent: 214 50% 90%;
     --accent-foreground: 220 35% 14%;
-    
+
     --destructive: 0 72% 55%;
     --destructive-foreground: 0 0% 100%;
-    
+
     --border: 214 40% 88%;
     --input: 214 40% 88%;
     --ring: 215 70% 45%;
-    
+
     --radius: 0.75rem;
-    
+
     /* Institutional brand colors */
     --luker-blue: 215 70% 45%;
     --luker-blue-light: 215 70% 95%;
     --luker-green: 160 50% 45%;
     --luker-orange: 30 90% 55%;
     --luker-red: 0 72% 55%;
-    
+
     /* Shadows */
     --shadow-card: 0 1px 3px 0 hsl(0 0% 0% / 0.04), 0 1px 2px -1px hsl(0 0% 0% / 0.04);
     --shadow-hover: 0 4px 12px -2px hsl(0 0% 0% / 0.08);
     --shadow-elevated: 0 10px 25px -5px hsl(0 0% 0% / 0.08);
-    
+
     --transition-smooth: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 
     --sidebar-background: 215 55% 97%;
@@ -118,8 +118,15 @@
   }
 
   @keyframes gradient {
-    0%, 100% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
+
+    0%,
+    100% {
+      background-position: 0% 50%;
+    }
+
+    50% {
+      background-position: 100% 50%;
+    }
   }
 }
 
@@ -127,9 +134,11 @@
   .btn-animate {
     @apply transition-all duration-200 ease-out;
   }
+
   .btn-animate:hover {
     @apply scale-[1.02];
   }
+
   .btn-animate:active {
     @apply scale-[0.98];
   }
@@ -137,9 +146,11 @@
   .custom-scrollbar::-webkit-scrollbar {
     width: 5px;
   }
+
   .custom-scrollbar::-webkit-scrollbar-track {
     @apply bg-transparent;
   }
+
   .custom-scrollbar::-webkit-scrollbar-thumb {
     @apply bg-border rounded-full;
   }
@@ -157,49 +168,115 @@
     height: 100vh;
     overflow: hidden;
   }
-  .graph-panel { 
-    position: relative; z-index: 3; overflow-y: auto; height: 100%;
+
+  .graph-panel {
+    position: relative;
+    z-index: 3;
+    overflow-y: auto;
+    height: 100%;
     background: hsl(var(--background));
     border: 1px solid hsl(var(--border));
     border-radius: 8px;
   }
-  .dark .graph-panel { background: hsl(var(--card)); border-color: hsl(var(--border)); }
-  .graph-stage { position: relative; height: 100%; overflow: hidden; }
-  .graph-canvas { width: 100%; height: 100%; }
+
+  .dark .graph-panel {
+    background: hsl(var(--card));
+    border-color: hsl(var(--border));
+  }
+
+  .graph-stage {
+    position: relative;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .graph-canvas {
+    width: 100%;
+    height: 100%;
+  }
 
   body.theater {
-    background: hsl(var(--background)); overflow: hidden;
+    background: hsl(var(--background));
+    overflow: hidden;
   }
-  body.theater .app-header, body.theater .app-sidebar, body.theater .app-footer,
-  body.theater .topbar, body.theater .breadcrumb, body.theater header, body.theater .sidebar {
+
+  body.theater .app-header,
+  body.theater .app-sidebar,
+  body.theater .app-footer,
+  body.theater .topbar,
+  body.theater .breadcrumb,
+  body.theater header,
+  body.theater .sidebar {
     display: none !important;
   }
+
   body.theater .graph-layout {
-    position: fixed !important; inset: 0 !important;
-    width: 100vw !important; height: 100vh !important;
-    padding: 16px !important; background: hsl(var(--background));
-    z-index: 9999; display: grid; grid-template-columns: 360px 1fr; gap: 16px;
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    padding: 16px !important;
+    background: hsl(var(--background));
+    z-index: 9999;
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    gap: 16px;
   }
-  body.theater .graph-stage { width: 100%; height: 100%; }
-  body.theater .graph-canvas { width: 100% !important; height: 100% !important; }
-  body.theater #theaterBtn { position: sticky; top: 8px; z-index: 4; }
+
+  body.theater .graph-stage {
+    width: 100%;
+    height: 100%;
+  }
+
+  body.theater .graph-canvas {
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  body.theater #theaterBtn {
+    position: sticky;
+    top: 8px;
+    z-index: 4;
+  }
 
   .custom-scroll {
     scrollbar-width: thin;
     scrollbar-color: hsl(var(--border)) transparent;
   }
-  .custom-scroll::-webkit-scrollbar { width: 6px; }
-  .custom-scroll::-webkit-scrollbar-track { background: transparent; border-radius: 4px; }
-  .custom-scroll::-webkit-scrollbar-thumb { background: hsl(var(--border)); border-radius: 4px; }
-  .custom-scroll::-webkit-scrollbar-thumb:hover { background: hsl(var(--muted-foreground) / 0.3); }
+
+  .custom-scroll::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .custom-scroll::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 4px;
+  }
+
+  .custom-scroll::-webkit-scrollbar-thumb {
+    background: hsl(var(--border));
+    border-radius: 4px;
+  }
+
+  .custom-scroll::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.3);
+  }
 }
 
 body.presentation-mode {
-  overflow: hidden !important; position: fixed; width: 100%; height: 100%;
+  overflow: hidden !important;
+  position: fixed;
+  width: 100%;
+  height: 100%;
 }
+
 body.presentation-mode * {
-  -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
+
 .presentation-panel {
   background: hsl(var(--card) / 0.95);
   border: 1px solid hsl(var(--border));
