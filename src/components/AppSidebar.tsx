@@ -64,7 +64,7 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar collapsible="icon" className={collapsed ? "w-14" : "w-64"}>
+    <Sidebar collapsible="offcanvas">
       <SidebarContent className="flex flex-col h-full">
         {/* Logo area */}
         {!collapsed && (
