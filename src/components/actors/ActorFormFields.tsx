@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import {
   Select,
   SelectContent,
@@ -29,6 +30,8 @@ import {
   PROYECTOS_OPTIONS,
   TIPO_RELACION_OPTIONS,
   NIVEL_OPTIONS,
+  NIVEL_INTERES_OPCIONES,
+  NIVEL_INFLUENCIA_PODER_OPCIONES,
 } from './constants';
 import { useProjects } from '@/hooks/useProjects';
 
@@ -301,21 +304,33 @@ export function ActorFormFields({ control, setValue, duplicateWarning }: ActorFo
         name="nivel_influencia"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Nivel de Influencia/Poder</FormLabel>
-            <Select onValueChange={(value) => field.onChange(parseInt(value))} defaultValue={field.value?.toString()}>
-              <FormControl>
-                <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar nivel (1-5)" />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                {NIVEL_OPTIONS.map((option) => (
-                  <SelectItem key={option} value={option.toString()}>
-                    {option}
-                  </SelectItem>
+            <FormLabel className="text-base font-semibold">Nivel de Influencia/Poder</FormLabel>
+            <FormControl>
+              <RadioGroup
+                onValueChange={(value) => field.onChange(parseInt(value))}
+                defaultValue={field.value?.toString()}
+                className="flex flex-col space-y-2 mt-2"
+              >
+                {NIVEL_INFLUENCIA_PODER_OPCIONES.map((opcion) => (
+                  <FormItem
+                    key={opcion.value}
+                    className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 shadow-sm transition-colors hover:bg-accent/50 cursor-pointer"
+                  >
+                    <FormControl>
+                      <RadioGroupItem value={opcion.value.toString()} className="mt-1" />
+                    </FormControl>
+                    <div className="space-y-1.5 leading-none w-full">
+                      <FormLabel className="font-bold cursor-pointer text-sm block w-full">
+                        {opcion.title}
+                      </FormLabel>
+                      <p className="text-xs text-muted-foreground">
+                        {opcion.description}
+                      </p>
+                    </div>
+                  </FormItem>
                 ))}
-              </SelectContent>
-            </Select>
+              </RadioGroup>
+            </FormControl>
             <FormMessage />
           </FormItem>
         )}
@@ -326,21 +341,33 @@ export function ActorFormFields({ control, setValue, duplicateWarning }: ActorFo
         name="nivel_interes"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Nivel de Interés</FormLabel>
-            <Select onValueChange={(value) => field.onChange(parseInt(value))} defaultValue={field.value?.toString()}>
-              <FormControl>
-                <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar nivel (1-5)" />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                {NIVEL_OPTIONS.map((option) => (
-                  <SelectItem key={option} value={option.toString()}>
-                    {option}
-                  </SelectItem>
+            <FormLabel className="text-base font-semibold">Nivel de Interés</FormLabel>
+            <FormControl>
+              <RadioGroup
+                onValueChange={(value) => field.onChange(parseInt(value))}
+                defaultValue={field.value?.toString()}
+                className="flex flex-col space-y-2 mt-2"
+              >
+                {NIVEL_INTERES_OPCIONES.map((opcion) => (
+                  <FormItem
+                    key={opcion.value}
+                    className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 shadow-sm transition-colors hover:bg-accent/50 cursor-pointer"
+                  >
+                    <FormControl>
+                      <RadioGroupItem value={opcion.value.toString()} className="mt-1" />
+                    </FormControl>
+                    <div className="space-y-1.5 leading-none w-full">
+                      <FormLabel className="font-bold cursor-pointer text-sm block w-full">
+                        {opcion.title}
+                      </FormLabel>
+                      <p className="text-xs text-muted-foreground">
+                        {opcion.description}
+                      </p>
+                    </div>
+                  </FormItem>
                 ))}
-              </SelectContent>
-            </Select>
+              </RadioGroup>
+            </FormControl>
             <FormMessage />
           </FormItem>
         )}

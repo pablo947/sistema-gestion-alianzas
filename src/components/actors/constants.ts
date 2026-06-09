@@ -59,6 +59,21 @@ export const TIPO_RELACION_OPTIONS = [
 
 export const NIVEL_OPTIONS = [1, 2, 3, 4, 5] as const;
 
+export const NIVEL_INTERES_OPCIONES = [
+  { value: 1, title: "1. Muy bajo", description: "Contribución marginal al cumplimiento de objetivos." },
+  { value: 2, title: "2. Bajo", description: "Puede ser relevante en situaciones específicas, pero no es estratégico." },
+  { value: 3, title: "3. Medio", description: "Relación útil y alineada en algunos frentes." },
+  { value: 4, title: "4. Alto", description: "Existe alineación clara y oportunidades de trabajo conjunto." },
+  { value: 5, title: "5. Muy alto", description: "Su vinculación es crítica para el logro de resultados y la sostenibilidad de la estrategia." },
+];
+
+export const NIVEL_INFLUENCIA_PODER_OPCIONES = [
+  { value: 1, title: "1. Nulo", description: "No moviliza recursos ni actores relevantes." },
+  { value: 2, title: "2. Bajo", description: "Influencia limitada a su ámbito interno o a proyectos específicos." },
+  { value: 3, title: "3. Medio", description: "Puede movilizar recursos o alianzas de manera puntual." },
+  { value: 4, title: "4. Alto", description: "Influye de manera consistente en decisiones, actores o agendas. Moviliza recursos, posiciona temas y conecta actores relevantes." },
+  { value: 5, title: "5. Muy alto", description: "Define agendas, moviliza múltiples actores y recursos, y tiene capacidad de transformar decisiones a nivel sistémico." },
+];
 export const ESTADO_RELACION_OPTIONS = [
   'Activa',
   'Potencial', 
