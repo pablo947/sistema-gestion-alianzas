@@ -3,7 +3,7 @@ import { AdminRoute } from '@/components/AdminRoute';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { UserManagement } from '@/components/admin/UserManagement';
-import { PermissionManagement } from '@/components/admin/PermissionManagement';
+import { PermissionsPanel } from '@/components/admin/PermissionsPanel';
 import { SystemSettings } from '@/components/admin/SystemSettings';
 import { UserActivationPanel } from '@/components/admin/UserActivationPanel';
 import { AuditLogPanel } from '@/components/admin/AuditLogPanel';
@@ -66,17 +66,7 @@ export default function Administration() {
           </TabsContent>
 
           <TabsContent value="permissions">
-            <Card>
-              <CardHeader>
-                <CardTitle>Gestión de Permisos</CardTitle>
-                <CardDescription>
-                  Configura permisos específicos por usuario y módulo
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <PermissionManagement />
-              </CardContent>
-            </Card>
+            <PermissionsPanel />
           </TabsContent>
 
           <TabsContent value="audit">

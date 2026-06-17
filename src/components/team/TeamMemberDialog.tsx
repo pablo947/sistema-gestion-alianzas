@@ -20,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { usePermissions } from "@/hooks/usePermissions";
 
 const AREA_OPTIONS = [
   "Gerencia",
@@ -63,6 +64,7 @@ export const TeamMemberDialog = ({ open, onClose, member }: TeamMemberDialogProp
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { canEditTeam } = usePermissions();
 
   useEffect(() => {
     if (member) {
@@ -294,14 +296,16 @@ export const TeamMemberDialog = ({ open, onClose, member }: TeamMemberDialogProp
 
           <div className="flex justify-end space-x-2 pt-4">
             <Button type="button" variant="outline" onClick={onClose}>
-              Cancelar
+              {canEditTeam() ? 'Cancelar' : 'Cerrar'}
             </Button>
-            <Button 
-              type="submit" 
-              disabled={createMemberMutation.isPending || updateMemberMutation.isPending}
-            >
-              {member ? "Actualizar" : "Agregar"}
-            </Button>
+            {canEditTeam() && (
+              <Button 
+                type="submit" 
+                disabled={createMemberMutation.isPending || updateMemberMutation.isPending}
+              >
+                {member ? "Actualizar" : "Agregar"}
+              </Button>
+            )}
           </div>
         </form>
       </DialogContent>

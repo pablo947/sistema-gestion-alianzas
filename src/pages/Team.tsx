@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import { usePermissions } from "@/hooks/usePermissions";
 import { TeamMemberDialog } from "@/components/team/TeamMemberDialog";
 import { TeamOrgChart } from "@/components/team/TeamOrgChart";
 
@@ -24,6 +25,7 @@ const Team = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingMember, setEditingMember] = useState<TeamMember | null>(null);
   const { toast } = useToast();
+  const { canEditTeam, canDeleteTeam } = usePermissions();
   const queryClient = useQueryClient();
 
   const { data: teamMembers = [], isLoading } = useQuery({
@@ -104,13 +106,15 @@ const Team = () => {
           <Building2 className="h-6 w-6" />
           <h1 className="text-3xl font-bold">Equipo Fundación Luker</h1>
         </div>
-        <Button
-          onClick={() => setIsDialogOpen(true)}
-          className="flex items-center gap-2"
-        >
-          <Plus className="h-4 w-4" />
-          Agregar Funcionario/a
-        </Button>
+        {canEditTeam() && (
+          <Button
+            onClick={() => setIsDialogOpen(true)}
+            className="flex items-center gap-2"
+          >
+            <Plus className="h-4 w-4" />
+            Agregar Funcionario/a
+          </Button>
+        )}
       </div>
 
       {teamMembers.length > 0 && (
@@ -158,20 +162,24 @@ const Team = () => {
                 </div>
               )}
               <div className="flex gap-2 pt-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleEdit(member)}
-                >
-                  Editar
-                </Button>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => handleDelete(member.id)}
-                >
-                  Eliminar
-                </Button>
+                {canEditTeam() && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleEdit(member)}
+                  >
+                    Editar
+                  </Button>
+                )}
+                {canDeleteTeam() && (
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => handleDelete(member.id)}
+                  >
+                    Eliminar
+                  </Button>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -186,10 +194,12 @@ const Team = () => {
             <p className="text-muted-foreground mb-4">
               Comienza agregando el primer funcionario del equipo.
             </p>
-            <Button onClick={() => setIsDialogOpen(true)}>
-              <Plus className="h-4 w-4 mr-2" />
-              Agregar Funcionario/a
-            </Button>
+            {canEditTeam() && (
+              <Button onClick={() => setIsDialogOpen(true)}>
+                <Plus className="h-4 w-4 mr-2" />
+                Agregar Funcionario/a
+              </Button>
+            )}
           </CardContent>
         </Card>
       )}

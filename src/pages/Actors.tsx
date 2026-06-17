@@ -20,6 +20,7 @@ import { useTeamMembers } from '@/hooks/useTeamMembers';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ModuleStatsPanel } from '@/components/ModuleStatsPanel';
 import { useAuth } from '@/hooks/useAuth';
+import { usePermissions } from '@/hooks/usePermissions';
 import {
   TIPO_RELACION_OPTIONS,
   MUNICIPIOS_POR_DEPARTAMENTO,
@@ -51,6 +52,7 @@ const getEstrategiaMatriz = (influencia?: number | null, interes?: number | null
 
 export default function Actors() {
   const { user } = useAuth();
+  const { canEditActors } = usePermissions();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState('');
@@ -249,11 +251,13 @@ export default function Actors() {
             Gestiona los actores del ecosistema de la Fundación Luker
           </p>
         </div>
-        <Button onClick={handleNewActor} className="btn-animate">
-          <Plus className="mr-2 h-4 w-4" />
-          Nuevo Actor
-          <kbd className="ml-2 kbd-shortcut">N</kbd>
-        </Button>
+        {canEditActors() && (
+          <Button onClick={handleNewActor} className="btn-animate">
+            <Plus className="mr-2 h-4 w-4" />
+            Nuevo Actor
+            <kbd className="ml-2 kbd-shortcut">N</kbd>
+          </Button>
+        )}
       </div>
 
       <ModuleStatsPanel
@@ -604,7 +608,7 @@ export default function Actors() {
               ? 'No se encontraron actores con esos criterios.'
               : 'Usa la barra de búsqueda para encontrar actores específicos.'}
           </p>
-          {!hasActiveFilters && (
+          {!hasActiveFilters && canEditActors() && (
             <div className="mt-6">
               <Button onClick={handleNewActor} className="btn-animate">
                 <Plus className="mr-2 h-4 w-4" />

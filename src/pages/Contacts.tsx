@@ -17,8 +17,8 @@ import { toast } from '@/hooks/use-toast';
 import { ContactDialog } from '@/components/contacts/ContactDialog';
 import { DidYouMean } from '@/components/DidYouMean';
 import { Contact } from '@/components/contacts/types';
-import { ModuleStatsPanel } from '@/components/ModuleStatsPanel';
 import { useAuth } from '@/hooks/useAuth';
+import { usePermissions } from '@/hooks/usePermissions';
 import { useSearchParams } from 'react-router-dom';
 
 // Ejes Estratégicos oficiales Fundación Luker (sin tilde en "Luker")
@@ -52,6 +52,7 @@ const getEstrategiaMatriz = (influencia: number | null, interes: number | null):
 
 export default function Contacts() {
   const { user } = useAuth();
+  const { canEditContacts } = usePermissions();
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState('');
   const [showDialog, setShowDialog] = useState(false);
@@ -286,11 +287,13 @@ export default function Contacts() {
             Gestiona los contactos del ecosistema de la Fundacion Luker
           </p>
         </div>
-        <Button onClick={handleNewContact} className="btn-animate">
-          <Plus className="mr-2 h-4 w-4" />
-          Nuevo Contacto
-          <kbd className="ml-2 kbd-shortcut">N</kbd>
-        </Button>
+        {canEditContacts() && (
+          <Button onClick={handleNewContact} className="btn-animate">
+            <Plus className="mr-2 h-4 w-4" />
+            Nuevo Contacto
+            <kbd className="ml-2 kbd-shortcut">N</kbd>
+          </Button>
+        )}
       </div>
 
       <ModuleStatsPanel
@@ -562,7 +565,7 @@ export default function Contacts() {
           <p className="mt-1 text-sm text-muted-foreground">
             {hasActiveFilters ? 'No se encontraron contactos con esos criterios.' : 'Comienza agregando tu primer contacto.'}
           </p>
-          {!hasActiveFilters && (
+          {!hasActiveFilters && canEditContacts() && (
             <div className="mt-6">
               <Button onClick={handleNewContact} className="btn-animate">
                 <Plus className="mr-2 h-4 w-4" />

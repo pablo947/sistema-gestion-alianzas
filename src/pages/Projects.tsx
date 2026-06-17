@@ -13,6 +13,7 @@ import { Plus, Search, Target, Users, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { usePermissions } from "@/hooks/usePermissions";
 import { ProjectDialog } from "@/components/projects/ProjectDialog";
 import { ProjectDetailView } from "@/components/projects/ProjectDetailView";
 import { Project } from "@/components/projects/types";
@@ -42,6 +43,7 @@ export default function Projects() {
   });
   const { toast } = useToast();
   const { isAdmin } = useAuth();
+  const { canEditProjects } = usePermissions();
   const queryClient = useQueryClient();
 
   React.useEffect(() => {
@@ -191,7 +193,7 @@ export default function Projects() {
                 Limpiar filtros
               </Button>
             )}
-            {isAdmin && (
+            {canEditProjects() && (
               <Button onClick={handleCreateNew}>
                 <Plus className="mr-2 h-4 w-4" />
                 Nuevo Programa / Iniciativa
@@ -239,7 +241,7 @@ export default function Projects() {
           <p className="text-muted-foreground mb-4">
             {searchTerm || hasActiveFilters ? "No se encontraron programas con ese criterio de búsqueda." : "Comienza creando tu primer programa o iniciativa."}
           </p>
-          {!searchTerm && !hasActiveFilters && isAdmin && (
+          {!searchTerm && !hasActiveFilters && canEditProjects() && (
             <Button onClick={handleCreateNew}>
               <Plus className="mr-2 h-4 w-4" />
               Crear Primer Programa / Iniciativa
@@ -325,6 +327,7 @@ export default function Projects() {
         onOpenChange={(open) => { if (!open) setDetailProject(null); }}
         project={detailProject}
         isAdmin={isAdmin}
+        canEdit={canEditProjects()}
         onEdit={handleEditFromDetail}
       />
 

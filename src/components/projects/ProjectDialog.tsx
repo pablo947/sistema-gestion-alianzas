@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ProjectFormFields } from "./ProjectFormFields";
 import { ProjectDialogProps } from "./types";
 import { useEffect } from "react";
+import { usePermissions } from "@/hooks/usePermissions";
 
 import { EJES } from "@/lib/ejes";
 
@@ -70,6 +71,7 @@ const defaultProjectValues: Partial<ProjectFormData> = {
 export function ProjectDialog({ open, onOpenChange, project, onSuccess }: ProjectDialogProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { canEditProjects, canDeleteProjects } = usePermissions();
 
   const form = useForm<ProjectFormData>({
     resolver: zodResolver(projectSchema),
@@ -245,7 +247,7 @@ export function ProjectDialog({ open, onOpenChange, project, onSuccess }: Projec
 
             <div className="flex flex-col gap-3 border-t bg-background px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                {project && (
+                {project && canDeleteProjects() && (
                   <Button
                     type="button"
                     variant="destructive"
@@ -259,18 +261,20 @@ export function ProjectDialog({ open, onOpenChange, project, onSuccess }: Projec
 
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                 <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-                  Cancelar
+                  {canEditProjects() ? 'Cancelar' : 'Cerrar'}
                 </Button>
-                <Button
-                  type="submit"
-                  disabled={createMutation.isPending || updateMutation.isPending}
-                  className="min-w-[120px]"
-                >
-                  {createMutation.isPending || updateMutation.isPending
-                    ? "Guardando..."
-                    : project ? "Actualizar" : "Crear"
-                  }
-                </Button>
+                {canEditProjects() && (
+                  <Button
+                    type="submit"
+                    disabled={createMutation.isPending || updateMutation.isPending}
+                    className="min-w-[120px]"
+                  >
+                    {createMutation.isPending || updateMutation.isPending
+                      ? "Guardando..."
+                      : project ? "Actualizar" : "Crear"
+                    }
+                  </Button>
+                )}
               </div>
             </div>
           </form>

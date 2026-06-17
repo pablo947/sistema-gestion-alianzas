@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
 import { ImportanceIndexTab } from '@/components/strategies/ImportanceIndexTab';
+import { usePermissions } from '@/hooks/usePermissions';
 
 
 interface ActorItem {
@@ -105,6 +106,7 @@ export default function Strategies() {
   const [programsByActor, setProgramsByActor] = useState<Record<string, ProgramInfo[]>>({});
   const [quadrantNotes, setQuadrantNotes] = useState<Record<string, string>>({});
   const [allyNotes, setAllyNotes] = useState<Record<string, string>>({});
+  const { canEditActors } = usePermissions();
 
   const defaultTab = location.hash === '#tipos' ? 'tipos' : 'matriz';
 
@@ -273,6 +275,7 @@ export default function Strategies() {
                         value={quadrantNotes[q.key] || ''}
                         onChange={(e) => setQuadrantNotes({ ...quadrantNotes, [q.key]: e.target.value })}
                         className="text-xs min-h-[60px] resize-none"
+                        disabled={!canEditActors()}
                       />
                     </div>
                   </CardContent>
@@ -320,6 +323,7 @@ export default function Strategies() {
                         value={allyNotes[type.key] || ''}
                         onChange={(e) => setAllyNotes({ ...allyNotes, [type.key]: e.target.value })}
                         className="text-xs min-h-[60px] resize-none"
+                        disabled={!canEditActors()}
                       />
                     </div>
                   </CardContent>

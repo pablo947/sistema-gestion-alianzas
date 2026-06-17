@@ -1,5 +1,6 @@
 import { NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { usePermissions } from '@/hooks/usePermissions';
 import {
   Sidebar,
   SidebarContent,
@@ -32,15 +33,15 @@ import { useToast } from '@/hooks/use-toast';
 import { useTheme } from 'next-themes';
 
 const menuItems = [
-  { title: "Home", url: "/", icon: Home },
-  { title: "Actores", url: "/actors", icon: Building2 },
-  { title: "Contactos", url: "/contacts", icon: Contact },
-  { title: "Clasificación de Aliados", url: "/strategies", icon: Award },
-  { title: "Análisis de Redes y Relaciones", url: "/grafos", icon: Search },
-  { title: "Programas e Iniciativas", url: "/projects", icon: FolderKanban },
-  { title: "Equipo Fundación Luker", url: "/team", icon: Users },
-  { title: "Descarga de Reportes", url: "/reports", icon: FileDown },
-  { title: "Administración", url: "/admin", icon: Shield, adminOnly: true },
+  { title: "Home", url: "/", icon: Home, moduleId: 'home' },
+  { title: "Actores", url: "/actors", icon: Building2, moduleId: 'actors' },
+  { title: "Contactos", url: "/contacts", icon: Contact, moduleId: 'contacts' },
+  { title: "Clasificación de Aliados", url: "/strategies", icon: Award, moduleId: 'strategies' },
+  { title: "Análisis de Redes y Relaciones", url: "/grafos", icon: Search, moduleId: 'grafos' },
+  { title: "Programas e Iniciativas", url: "/projects", icon: FolderKanban, moduleId: 'projects' },
+  { title: "Equipo Fundación Luker", url: "/team", icon: Users, moduleId: 'team' },
+  { title: "Descarga de Reportes", url: "/reports", icon: FileDown, moduleId: 'reports' },
+  { title: "Administración", url: "/admin", icon: Shield, moduleId: 'admin', adminOnly: true },
 ];
 
 export function AppSidebar() {
@@ -49,6 +50,7 @@ export function AppSidebar() {
   const { user, userProfile, isAdmin, signOut } = useAuth();
   const { toast } = useToast();
   const { theme, setTheme } = useTheme();
+  const { hasModuleVisibility } = usePermissions();
   const collapsed = state === 'collapsed';
 
   const isActive = (path: string) => {
@@ -85,7 +87,7 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {menuItems
-                .filter(item => !item.adminOnly || isAdmin)
+                .filter(item => hasModuleVisibility(item.moduleId))
                 .map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>

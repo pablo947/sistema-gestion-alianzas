@@ -21,6 +21,7 @@ import { Trash } from 'lucide-react';
 import { useDuplicateDetection } from '@/hooks/useDuplicateDetection';
 import { DuplicateWarning } from '@/components/DuplicateWarning';
 import { sanitizeFormData } from '@/lib/textUtils';
+import { usePermissions } from '@/hooks/usePermissions';
 
 const contactSchema = z.object({
   nombre: z.string().min(1, 'El nombre es requerido'),
@@ -39,6 +40,7 @@ const contactSchema = z.object({
 export function ContactDialog({ open, onOpenChange, contact, onSuccess, preselectedActorId }: ContactDialogProps) {
   const [acknowledgedDuplicateSignature, setAcknowledgedDuplicateSignature] = useState<string | null>(null);
   const duplicateWarningRef = useRef<HTMLDivElement>(null);
+  const { canEditContacts, canDeleteContacts } = usePermissions();
   const { data: allContacts = [] } = useQuery({
     queryKey: ['contacts-list'],
     queryFn: async () => {
@@ -224,7 +226,7 @@ export function ContactDialog({ open, onOpenChange, contact, onSuccess, preselec
             />
 
             <div className="flex flex-col gap-3 pt-4 sm:flex-row sm:justify-between">
-              {contact && (
+              {contact && canDeleteContacts() && (
                 <Button
                   type="button"
                   variant="destructive"
@@ -243,15 +245,17 @@ export function ContactDialog({ open, onOpenChange, contact, onSuccess, preselec
                   onClick={() => onOpenChange(false)}
                   className="min-h-10"
                 >
-                  Cancelar
+                  {canEditContacts() ? 'Cancelar' : 'Cerrar'}
                 </Button>
-                <Button
-                  type="submit"
-                  disabled={mutation.isPending}
-                  className="min-h-10 btn-animate"
-                >
-                  {contact ? 'Actualizar' : 'Crear'} Contacto
-                </Button>
+                {canEditContacts() && (
+                  <Button
+                    type="submit"
+                    disabled={mutation.isPending}
+                    className="min-h-10 btn-animate"
+                  >
+                    {contact ? 'Actualizar' : 'Crear'} Contacto
+                  </Button>
+                )}
               </div>
             </div>
           </form>

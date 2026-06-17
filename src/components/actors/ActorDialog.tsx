@@ -21,6 +21,7 @@ import { RelatedContactsDialog } from './RelatedContactsDialog';
 import { Actor, ActorDialogProps } from './types';
 import { useActorProjects } from '@/hooks/useProjects';
 import { useActorsList } from '@/hooks/useActorsList';
+import { usePermissions } from '@/hooks/usePermissions';
 import { useDuplicateDetection } from '@/hooks/useDuplicateDetection';
 import { DuplicateWarning } from '@/components/DuplicateWarning';
 import { sanitizeFormData } from '@/lib/textUtils';
@@ -48,6 +49,7 @@ export function ActorDialog({ open, onOpenChange, actor, onSuccess }: ActorDialo
   const [showRelatedContacts, setShowRelatedContacts] = React.useState(false);
   const [acknowledgedDuplicateSignature, setAcknowledgedDuplicateSignature] = useState<string | null>(null);
   const { data: allActors = [] } = useActorsList();
+  const { canEditActors, canDeleteActors } = usePermissions();
 
   const form = useForm<z.infer<typeof actorSchema>>({
     resolver: zodResolver(actorSchema),
@@ -257,16 +259,18 @@ export function ActorDialog({ open, onOpenChange, actor, onSuccess }: ActorDialo
                   >
                     Contactos Relacionados
                   </Button>
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    onClick={handleDelete}
-                    disabled={deleteMutation.isPending}
-                    className="btn-animate"
-                  >
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    Eliminar
-                  </Button>
+                  {canDeleteActors() && (
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      onClick={handleDelete}
+                      disabled={deleteMutation.isPending}
+                      className="btn-animate"
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Eliminar
+                    </Button>
+                  )}
                 </div>
               )}
               <div className="flex space-x-2 ml-auto">
@@ -275,15 +279,17 @@ export function ActorDialog({ open, onOpenChange, actor, onSuccess }: ActorDialo
                   variant="outline"
                   onClick={() => onOpenChange(false)}
                 >
-                  Cancelar
+                  {canEditActors() ? 'Cancelar' : 'Cerrar'}
                 </Button>
-                <Button
-                  type="submit"
-                  disabled={mutation.isPending}
-                  className="btn-animate"
-                >
-                  {actor ? 'Actualizar' : 'Crear'} Actor
-                </Button>
+                {canEditActors() && (
+                  <Button
+                    type="submit"
+                    disabled={mutation.isPending}
+                    className="btn-animate"
+                  >
+                    {actor ? 'Actualizar' : 'Crear'} Actor
+                  </Button>
+                )}
               </div>
             </div>
           </form>

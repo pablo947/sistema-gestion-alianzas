@@ -42,6 +42,7 @@ interface ProjectDetailViewProps {
   onOpenChange: (open: boolean) => void;
   project: any;
   isAdmin: boolean;
+  canEdit: boolean;
   onEdit: () => void;
 }
 
@@ -54,7 +55,7 @@ const STATUS_COLORS: Record<string, string> = {
   "Planificado": "bg-yellow-500/10 text-yellow-700 border-yellow-200",
 };
 
-export function ProjectDetailView({ open, onOpenChange, project, isAdmin, onEdit }: ProjectDetailViewProps) {
+export function ProjectDetailView({ open, onOpenChange, project, isAdmin, canEdit, onEdit }: ProjectDetailViewProps) {
   const navigate = useNavigate();
   if (!project) return null;
 
@@ -178,7 +179,7 @@ export function ProjectDetailView({ open, onOpenChange, project, isAdmin, onEdit
                 </Badge>
               </div>
             </div>
-            {isAdmin && (
+            {canEdit && (
               <Button onClick={onEdit} size="sm" className="shrink-0 mt-1">
                 <Edit className="h-4 w-4 mr-2" />
                 Editar Información
