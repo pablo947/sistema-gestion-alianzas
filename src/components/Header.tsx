@@ -32,7 +32,7 @@ export function Header() {
         <div className="flex items-center gap-4">
           <SidebarTrigger className="text-white hover:bg-white/10" />
           <div className="flex items-center gap-3">
-            <img src="/lovable-uploads/bf9d79fe-6f69-4035-bb1f-6067d269f895.png" alt="Fundación Luker" className="w-8 h-8" />
+            <img src="/lovable-uploads/bf9d79fe-6f69-4035-bb1f-6067d269f895.png" alt="Fundación Luker" className="w-8 h-8 mix-blend-multiply" />
             <div className="text-white">
               <h1 className="text-lg font-semibold">Fundación Luker</h1>
               <p className="text-xs text-white/80">Sistema de Gestión de Alianzas y Proyectos</p>

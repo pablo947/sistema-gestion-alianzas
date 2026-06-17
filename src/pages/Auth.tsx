@@ -128,7 +128,7 @@ export default function Auth() {
         <img 
           src="/assets/logo-funluker.jpg" 
           alt="Fundación Luker" 
-          className="w-40 h-auto object-contain"
+          className="w-40 h-auto object-contain mix-blend-multiply"
         />
         <Card className="w-full max-w-md">
           <CardHeader className="space-y-1 text-center">
@@ -177,14 +177,16 @@ export default function Auth() {
                     </Alert>
                   )}
                   
-                  <Button 
-                    type="submit" 
-                    className="w-full" 
-                    disabled={isLoading}
-                  >
-                    {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Iniciar Sesión
-                  </Button>
+                  <div className="flex justify-center w-full">
+                    <Button 
+                      type="submit" 
+                      className="px-8 btn-animate" 
+                      disabled={isLoading}
+                    >
+                      {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      Iniciar Sesión
+                    </Button>
+                  </div>
                   <Button
                     type="button"
                     variant="link"
@@ -264,14 +266,16 @@ export default function Auth() {
                     </Alert>
                   )}
                   
-                  <Button 
-                    type="submit" 
-                    className="w-full" 
-                    disabled={isLoading}
-                  >
-                    {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Registrarse
-                  </Button>
+                  <div className="flex justify-center w-full">
+                    <Button 
+                      type="submit" 
+                      className="px-8 btn-animate" 
+                      disabled={isLoading}
+                    >
+                      {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      Registrarse
+                    </Button>
+                  </div>
                 </form>
               </TabsContent>
             </Tabs>
