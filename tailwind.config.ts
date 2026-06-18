@@ -66,13 +66,17 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-			luker: {
-					blue: 'hsl(var(--luker-blue))',
-					'blue-light': 'hsl(var(--luker-blue-light))',
+				luker: {
+					brown: 'hsl(var(--luker-brown))',
 					green: 'hsl(var(--luker-green))',
-					red: 'hsl(var(--luker-red))',
 					orange: 'hsl(var(--luker-orange))',
+					red: 'hsl(var(--luker-red))',
+					teal: 'hsl(var(--luker-teal))',
 				},
+			},
+			boxShadow: {
+				sm: '0 2px 8px -2px hsl(0 0% 0% / 0.06)',
+				hover: '0 8px 24px -4px hsl(0 0% 0% / 0.12)',
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
