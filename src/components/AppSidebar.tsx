@@ -34,6 +34,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useTheme } from 'next-themes';
 
 const menuItems = [
+  { title: "Inicio", url: "/", icon: Home, moduleId: 'home' },
   { title: "Actores", url: "/actors", icon: Building2, moduleId: 'actors' },
   { title: "Contactos", url: "/contacts", icon: Contact, moduleId: 'contacts' },
   { title: "Clasificación de Aliados", url: "/strategies", icon: Award, moduleId: 'strategies' },
