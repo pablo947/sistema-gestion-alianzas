@@ -20,6 +20,8 @@ import { Contact } from '@/components/contacts/types';
 import { useAuth } from '@/hooks/useAuth';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useSearchParams } from 'react-router-dom';
+import { ModuleStatsPanel } from '@/components/ModuleStatsPanel';
+import { PageHeader } from '@/components/layout/PageHeader';
 
 // Ejes Estratégicos oficiales Fundación Luker (sin tilde en "Luker")
 const EJES_ESTRATEGICOS_OFICIALES = [
@@ -280,21 +282,20 @@ export default function Contacts() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Contactos</h1>
-          <p className="text-muted-foreground">
-            Gestiona los contactos del ecosistema de la Fundacion Luker
-          </p>
-        </div>
-        {canEditContacts() && (
-          <Button onClick={handleNewContact} className="btn-animate">
-            <Plus className="mr-2 h-4 w-4" />
-            Nuevo Contacto
-            <kbd className="ml-2 kbd-shortcut">N</kbd>
-          </Button>
-        )}
-      </div>
+      <PageHeader 
+        title="Contactos"
+        description="Gestiona los contactos del ecosistema de la Fundación Luker"
+        icon={User}
+        action={
+          canEditContacts() && (
+            <Button onClick={handleNewContact} className="btn-animate">
+              <Plus className="mr-2 h-4 w-4" />
+              Nuevo Contacto
+              <kbd className="ml-2 kbd-shortcut">N</kbd>
+            </Button>
+          )
+        }
+      />
 
       <ModuleStatsPanel
         totalCount={filteredContacts.length}

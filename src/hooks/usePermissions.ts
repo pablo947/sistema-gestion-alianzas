@@ -44,7 +44,7 @@ export function usePermissions() {
   }, [localPermissions]);
 
   const isSuperAdmin = (email?: string) => {
-    return SUPERADMIN_EMAILS.includes(email || userProfile?.email || '');
+    return userProfile?.role === 'admin' || SUPERADMIN_EMAILS.includes(email || userProfile?.email || '');
   };
 
   const getUserPermissions = (userId: string, email?: string): UserPermission => {
