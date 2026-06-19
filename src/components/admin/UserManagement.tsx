@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { UserPermissionsDialog } from './UserPermissionsDialog';
 import { UserFormDialog } from './UserFormDialog';
 import { useAuth } from '@/hooks/useAuth';
 import { useAuditLog } from '@/hooks/useAuditLog';
@@ -26,7 +25,8 @@ interface User {
   id: string;
   email: string;
   full_name: string | null;
-  role: 'admin' | 'editor' | 'viewer' | 'custom';
+  cargo: string | null;
+  role: 'admin' | 'strategic' | 'operative' | 'auditor';
   is_active?: boolean;
   created_at: string;
 }
@@ -34,7 +34,6 @@ interface User {
 export function UserManagement() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [permissionsDialogOpen, setPermissionsDialogOpen] = useState(false);
   const [userFormDialogOpen, setUserFormDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [deactivateTarget, setDeactivateTarget] = useState<User | null>(null);
@@ -48,7 +47,7 @@ export function UserManagement() {
     queryFn: async () => {
       const { data: profiles } = await supabase
         .from('profiles')
-        .select('id, email, full_name, created_at, is_active');
+        .select('id, email, full_name, cargo, created_at, is_active');
 
       const { data: roles } = await supabase
         .from('user_roles')
@@ -58,27 +57,14 @@ export function UserManagement() {
 
       return profiles?.map(profile => ({
         ...profile,
-        role: rolesMap.get(profile.id) || 'viewer',
+        cargo: (profile as any).cargo || null,
+        role: rolesMap.get(profile.id) || 'operative',
         is_active: (profile as any).is_active ?? true,
       })) || [];
     }
   });
 
-  const updateRoleMutation = useMutation({
-    mutationFn: async ({ userId, role }: { userId: string; role: 'admin' | 'editor' | 'viewer' | 'custom' }) => {
-      const { error } = await supabase
-        .from('user_roles')
-        .upsert({ user_id: userId, role }, { onConflict: 'user_id' });
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-users'] });
-      toast.success('Rol actualizado correctamente');
-    },
-    onError: (error) => {
-      toast.error('Error al actualizar el rol: ' + error.message);
-    }
-  });
+
 
   const toggleActiveMutation = useMutation({
     mutationFn: async ({ userId, activate }: { userId: string; activate: boolean }) => {
@@ -156,9 +142,9 @@ export function UserManagement() {
   const getRoleBadgeVariant = (role: string) => {
     switch (role) {
       case 'admin': return 'destructive' as const;
-      case 'editor': return 'default' as const;
-      case 'viewer': return 'secondary' as const;
-      case 'custom': return 'outline' as const;
+      case 'strategic': return 'default' as const;
+      case 'operative': return 'secondary' as const;
+      case 'auditor': return 'outline' as const;
       default: return 'secondary' as const;
     }
   };
@@ -166,10 +152,10 @@ export function UserManagement() {
   const getRoleLabel = (role: string) => {
     switch (role) {
       case 'admin': return 'Administrador';
-      case 'editor': return 'Editor';
-      case 'viewer': return 'Consulta';
-      case 'custom': return 'Personalizado';
-      default: return 'Consulta';
+      case 'strategic': return 'Gestor Estratégico';
+      case 'operative': return 'Gestor Operativo';
+      case 'auditor': return 'Auditor de Sistema';
+      default: return 'Gestor Operativo';
     }
   };
 
@@ -219,6 +205,9 @@ export function UserManagement() {
                     )}
                   </div>
                   <p className="text-sm text-muted-foreground">{user.email}</p>
+                  {user.cargo && (
+                    <p className="text-xs font-medium text-primary mt-1">Cargo: {user.cargo}</p>
+                  )}
                 </div>
                 <div className="flex items-center gap-2">
                   <Badge variant={getRoleBadgeVariant(user.role)}>
@@ -230,12 +219,6 @@ export function UserManagement() {
                         <Edit className="h-4 w-4" />
                       </Button>
                     )}
-                    <Button
-                      size="sm"
-                      onClick={() => { setSelectedUser(user); setPermissionsDialogOpen(true); }}
-                    >
-                      <Settings className="h-4 w-4" />
-                    </Button>
                     {isSuperAdmin && !isSelf(user) && (
                       <>
                         <Button
@@ -268,15 +251,6 @@ export function UserManagement() {
           </Card>
         ))}
       </div>
-
-      {selectedUser && (
-        <UserPermissionsDialog
-          open={permissionsDialogOpen}
-          onOpenChange={setPermissionsDialogOpen}
-          user={selectedUser}
-          onRoleUpdate={(role) => updateRoleMutation.mutate({ userId: selectedUser.id, role: role as any })}
-        />
-      )}
 
       <UserFormDialog
         open={userFormDialogOpen}

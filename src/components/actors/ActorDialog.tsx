@@ -22,6 +22,7 @@ import { Actor, ActorDialogProps } from './types';
 import { useActorProjects } from '@/hooks/useProjects';
 import { useActorsList } from '@/hooks/useActorsList';
 import { usePermissions } from '@/hooks/usePermissions';
+import { useAuth } from '@/hooks/useAuth';
 import { useDuplicateDetection } from '@/hooks/useDuplicateDetection';
 import { DuplicateWarning } from '@/components/DuplicateWarning';
 import { sanitizeFormData } from '@/lib/textUtils';
@@ -50,6 +51,7 @@ export function ActorDialog({ open, onOpenChange, actor, onSuccess }: ActorDialo
   const [acknowledgedDuplicateSignature, setAcknowledgedDuplicateSignature] = useState<string | null>(null);
   const { data: allActors = [] } = useActorsList();
   const { canEditActors, canDeleteActors } = usePermissions();
+  const { userProfile } = useAuth();
 
   const form = useForm<z.infer<typeof actorSchema>>({
     resolver: zodResolver(actorSchema),
@@ -141,6 +143,7 @@ export function ActorDialog({ open, onOpenChange, actor, onSuccess }: ActorDialo
         direccion_entidad: sanitized.direccion_entidad || null,
         correo_entidad: sanitized.correo_entidad || null,
         anios_alianza: sanitized.anios_alianza,
+        // Status only sent for creations, not updates (Auditor updates status via Actors page)
       };
 
       console.log('Sending actor data:', actorData);
@@ -156,9 +159,13 @@ export function ActorDialog({ open, onOpenChange, actor, onSuccess }: ActorDialo
         if (error) throw error;
       } else {
         // Create new actor
+        const newActorData = {
+          ...actorData,
+          status: userProfile?.role === 'strategic' ? 'pending_approval' : 'active'
+        };
         const { data, error } = await supabase
           .from('actors')
-          .insert(actorData)
+          .insert(newActorData)
           .select('actor_id')
           .single();
         if (error) throw error;

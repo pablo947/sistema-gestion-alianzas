@@ -10,7 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGr
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
-import { Plus, Search, Users, MapPin, Target, FolderOpen, X, Contact } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Plus, Search, Users, MapPin, Target, FolderOpen, X, Contact, CheckCircle, XCircle } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { ActorDialog } from '@/components/actors/ActorDialog';
 import { DidYouMean } from '@/components/DidYouMean';
@@ -69,7 +70,9 @@ export default function Actors() {
     estrategiaMatriz: '',
     programa: '',
   });
+  });
   const [multiProgramOnly, setMultiProgramOnly] = useState(false);
+  const [activeTab, setActiveTab] = useState('active');
   const queryClient = useQueryClient();
 
   // Sync URL params (tipoRelacion) with internal state
@@ -161,7 +164,10 @@ export default function Actors() {
   const hasActiveFilters =
     Object.values(filters).some(v => v !== '') || searchTerm.trim() !== '' || multiProgramOnly;
 
-  const filteredActors = (actors || []).filter(actor => {
+  const activeActors = (actors || []).filter(actor => actor.status !== 'pending_approval');
+  const pendingActors = (actors || []).filter(actor => actor.status === 'pending_approval');
+
+  const filteredActors = (activeTab === 'active' ? activeActors : pendingActors).filter(actor => {
     // Búsqueda flexible (acentos / mayúsculas / múltiples palabras)
     const matchesSearch = fuzzyMatchAll([actor.nombre_actor], searchTerm);
 
@@ -206,6 +212,14 @@ export default function Actors() {
   };
 
   const handleEditActor = (actor: any) => {
+    if (!canEditActors()) {
+      // Strategic can create, but not edit
+      if (user?.role === 'strategic') {
+        toast({ title: 'Acceso denegado', description: 'Los gestores estratégicos solo pueden crear nuevos actores.' });
+        return;
+      }
+      return;
+    }
     setSelectedActor({ ...actor, lugares_actuacion: actor.lugares_actuacion || [] });
     setShowDialog(true);
   };
@@ -235,6 +249,23 @@ export default function Actors() {
     return findDidYouMean(searchTerm, actors.map(a => a.nombre_actor));
   }, [searchTerm, actors, filteredActors]);
 
+  const updateStatusMutation = useMutation({
+    mutationFn: async ({ actorId, status }: { actorId: string, status: string }) => {
+      const { error } = await supabase
+        .from('actors')
+        .update({ status })
+        .eq('actor_id', actorId);
+      if (error) throw error;
+    },
+    onSuccess: (_, vars) => {
+      queryClient.invalidateQueries({ queryKey: ['actors'] });
+      toast({
+        title: vars.status === 'active' ? 'Actor Aprobado' : 'Actor Rechazado',
+        description: vars.status === 'active' ? 'El actor ahora es público.' : 'La solicitud ha sido rechazada.',
+      });
+    }
+  });
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -250,7 +281,7 @@ export default function Actors() {
         description="Gestiona los actores del ecosistema de la Fundación Luker"
         icon={Users}
         action={
-          canEditActors() && (
+          (canEditActors() || user?.role === 'strategic') && (
             <Button onClick={handleNewActor} className="btn-animate">
               <Plus className="mr-2 h-4 w-4" />
               Nuevo Actor
@@ -261,11 +292,25 @@ export default function Actors() {
       />
 
       <ModuleStatsPanel
-        totalCount={actors?.length ?? 0}
-        label="actores registrados"
+        totalCount={activeActors.length}
+        label="actores activos"
         lastUpdatedAt={lastUpdatedActor?.updated_at}
         lastUpdatedBy={user?.email ?? null}
       />
+
+      {(user?.role === 'auditor' || user?.role === 'admin') && pendingActors.length > 0 && (
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="mb-4">
+            <TabsTrigger value="active">Actores Activos</TabsTrigger>
+            <TabsTrigger value="pending">
+              Solicitudes Pendientes
+              <Badge variant="secondary" className="ml-2 bg-primary text-primary-foreground">
+                {pendingActors.length}
+              </Badge>
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+      )}
 
       {/* Búsqueda y filtros */}
       <div className="space-y-4">
@@ -580,16 +625,45 @@ export default function Actors() {
                   </div>
                 )}
 
-                <div className="flex items-center justify-end pt-2 border-t border-border">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={e => handleShowContacts(e, actor.actor_id, actor.nombre_actor)}
-                    className="text-xs"
-                  >
-                    <Contact className="mr-1 h-3 w-3" />
-                    Contactos Relacionados
-                  </Button>
+                <div className="flex items-center justify-between pt-2 border-t border-border">
+                  {activeTab === 'pending' && (user?.role === 'auditor' || user?.role === 'admin') ? (
+                    <div className="flex gap-2 w-full">
+                      <Button
+                        variant="default"
+                        size="sm"
+                        className="flex-1 bg-green-600 hover:bg-green-700"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          updateStatusMutation.mutate({ actorId: actor.actor_id, status: 'active' });
+                        }}
+                      >
+                        <CheckCircle className="mr-1 h-4 w-4" /> Aprobar
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        className="flex-1"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (window.confirm('¿Seguro que deseas rechazar y ocultar este actor?')) {
+                            updateStatusMutation.mutate({ actorId: actor.actor_id, status: 'rejected' });
+                          }
+                        }}
+                      >
+                        <XCircle className="mr-1 h-4 w-4" /> Rechazar
+                      </Button>
+                    </div>
+                  ) : (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={e => handleShowContacts(e, actor.actor_id, actor.nombre_actor)}
+                      className="text-xs ml-auto"
+                    >
+                      <Contact className="mr-1 h-3 w-3" />
+                      Contactos Relacionados
+                    </Button>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -608,7 +682,7 @@ export default function Actors() {
               ? 'No se encontraron actores con esos criterios.'
               : 'Usa la barra de búsqueda para encontrar actores específicos.'}
           </p>
-          {!hasActiveFilters && canEditActors() && (
+          {!hasActiveFilters && (canEditActors() || user?.role === 'strategic') && (
             <div className="mt-6">
               <Button onClick={handleNewActor} className="btn-animate">
                 <Plus className="mr-2 h-4 w-4" />

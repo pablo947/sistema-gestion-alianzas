@@ -112,7 +112,7 @@ export default function Strategies() {
   const [programsByActor, setProgramsByActor] = useState<Record<string, ProgramInfo[]>>({});
   const [quadrantNotes, setQuadrantNotes] = useState<Record<string, string>>({});
   const [allyNotes, setAllyNotes] = useState<Record<string, string>>({});
-  const { canEditActors } = usePermissions();
+  const { canEdit } = usePermissions();
   const { data: influenceInterest } = useInfluenceInterest();
   const { data: relationsData } = useActorRelations();
 
@@ -292,7 +292,7 @@ export default function Strategies() {
                         value={quadrantNotes[q.key] || ''}
                         onChange={(e) => setQuadrantNotes({ ...quadrantNotes, [q.key]: e.target.value })}
                         className="text-xs min-h-[60px] resize-none"
-                        disabled={!canEditActors()}
+                        disabled={!canEdit('strategies')}
                       />
                     </div>
                   </CardContent>
@@ -380,7 +380,7 @@ export default function Strategies() {
                         value={allyNotes[type.key] || ''}
                         onChange={(e) => setAllyNotes({ ...allyNotes, [type.key]: e.target.value })}
                         className="text-xs min-h-[60px] resize-none"
-                        disabled={!canEditActors()}
+                        disabled={!canEdit('strategies')}
                       />
                     </div>
                   </CardContent>

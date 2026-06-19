@@ -34,15 +34,7 @@ interface User {
   id: string;
   email: string;
   full_name: string | null;
-  role: 'admin' | 'editor' | 'viewer' | 'custom';
-}
-
-interface Permission {
-  id: string;
-  name: string;
-  description: string;
-  module: string;
-  action: string;
+  role: 'admin' | 'strategic' | 'operative' | 'auditor';
 }
 
 interface UserFormDialogProps {
@@ -55,13 +47,12 @@ interface UserFormDialogProps {
 const userSchema = z.object({
   full_name: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
   email: z.string().email('Email inválido'),
-  role: z.enum(['admin', 'editor', 'viewer', 'custom']),
+  role: z.enum(['admin', 'strategic', 'operative', 'auditor']),
 });
 
 type UserFormData = z.infer<typeof userSchema>;
 
 export function UserFormDialog({ open, onOpenChange, user, onSuccess }: UserFormDialogProps) {
-  const [selectedPermissions, setSelectedPermissions] = useState<string[]>([]);
   const queryClient = useQueryClient();
   const isEdit = !!user;
 
@@ -70,7 +61,7 @@ export function UserFormDialog({ open, onOpenChange, user, onSuccess }: UserForm
     defaultValues: {
       full_name: '',
       email: '',
-      role: 'viewer',
+      role: 'operative',
     },
   });
 
@@ -87,55 +78,17 @@ export function UserFormDialog({ open, onOpenChange, user, onSuccess }: UserForm
       form.reset({
         full_name: '',
         email: '',
-        role: 'viewer',
+        role: 'operative',
       });
-      setSelectedPermissions([]);
     }
   }, [user, open, form]);
-
-  const { data: permissions } = useQuery({
-    queryKey: ['permissions'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('permissions')
-        .select('*')
-        .order('module, action');
-      
-      if (error) throw error;
-      return data;
-    }
-  });
-
-  const { data: userPermissions } = useQuery({
-    queryKey: ['user-permissions', user?.id],
-    queryFn: async () => {
-      if (!user?.id) return [];
-      
-      const { data, error } = await supabase
-        .from('user_permissions')
-        .select('permission_id, permissions(name)')
-        .eq('user_id', user.id);
-      
-      if (error) throw error;
-      return data;
-    },
-    enabled: isEdit && open
-  });
-
-  useEffect(() => {
-    if (userPermissions && open) {
-      setSelectedPermissions(userPermissions.map(up => up.permissions.name));
-    }
-  }, [userPermissions, open]);
 
   const createUserMutation = useMutation({
     mutationFn: async (formData: UserFormData) => {
       const { data: { user } } = await supabase.auth.getUser();
       
-      // Prepare permissions array for custom role
-      const permissionsArray = formData.role === 'custom' 
-        ? selectedPermissions
-        : [];
+      // Prepare permissions array for custom role (no longer used under strict RBAC, kept empty)
+      const permissionsArray: string[] = [];
 
       // Insert into pending_users table
       const { error: pendingUserError } = await supabase
@@ -154,8 +107,9 @@ export function UserFormDialog({ open, onOpenChange, user, onSuccess }: UserForm
     },
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-users'] });
       toast.success(
-        `Usuario preparado exitosamente. ${result.email} puede registrarse en /auth y tendrá permisos automáticamente.`,
+        `Usuario preparado exitosamente. ${result.email} puede registrarse en /auth y tendrá el rol asignado automáticamente.`,
         { duration: 6000 }
       );
       onSuccess();
@@ -184,7 +138,7 @@ export function UserFormDialog({ open, onOpenChange, user, onSuccess }: UserForm
       const { error: roleError } = await supabase
         .from('user_roles')
         .update({
-          role: formData.role === 'custom' ? 'viewer' : formData.role,
+          role: formData.role,
         })
         .eq('user_id', user.id);
 
@@ -193,55 +147,14 @@ export function UserFormDialog({ open, onOpenChange, user, onSuccess }: UserForm
       return user.id;
     },
     onSuccess: (userId) => {
-      if (userId && watchedRole === 'custom') {
-        savePermissionsMutation.mutate(userId);
-      } else {
-        queryClient.invalidateQueries({ queryKey: ['users'] });
-        toast.success('Usuario actualizado correctamente');
-        onSuccess();
-        onOpenChange(false);
-      }
-    },
-    onError: (error: any) => {
-      toast.error('Error al actualizar usuario: ' + error.message);
-    }
-  });
-
-  const savePermissionsMutation = useMutation({
-    mutationFn: async (userId: string) => {
-      // First, delete existing permissions
-      await supabase
-        .from('user_permissions')
-        .delete()
-        .eq('user_id', userId);
-
-      // Then insert new permissions if role is custom
-      if (watchedRole === 'custom' && selectedPermissions.length > 0) {
-        const permissionIds = selectedPermissions
-          .map(permName => permissions?.find(p => p.name === permName)?.id)
-          .filter(Boolean);
-
-        const permissionsToInsert = permissionIds.map(permissionId => ({
-          user_id: userId,
-          permission_id: permissionId,
-        }));
-
-        const { error } = await supabase
-          .from('user_permissions')
-          .insert(permissionsToInsert);
-
-        if (error) throw error;
-      }
-    },
-    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
-      queryClient.invalidateQueries({ queryKey: ['user-permissions'] });
-      toast.success(isEdit ? 'Usuario actualizado correctamente' : `Usuario preparado exitosamente. ${form.getValues().email} puede ahora registrarse en /auth.`);
+      queryClient.invalidateQueries({ queryKey: ['admin-users'] });
+      toast.success('Usuario actualizado correctamente');
       onSuccess();
       onOpenChange(false);
     },
-    onError: (error) => {
-      toast.error('Error al configurar permisos: ' + error.message);
+    onError: (error: any) => {
+      toast.error('Error al actualizar usuario: ' + error.message);
     }
   });
 
@@ -253,47 +166,7 @@ export function UserFormDialog({ open, onOpenChange, user, onSuccess }: UserForm
     }
   };
 
-  const togglePermission = (permissionName: string) => {
-    setSelectedPermissions(prev =>
-      prev.includes(permissionName)
-        ? prev.filter(p => p !== permissionName)
-        : [...prev, permissionName]
-    );
-  };
-
-  const groupedPermissions = permissions?.reduce((acc, permission) => {
-    if (!acc[permission.module]) {
-      acc[permission.module] = [];
-    }
-    acc[permission.module].push(permission);
-    return acc;
-  }, {} as Record<string, Permission[]>);
-
-  const getModuleLabel = (module: string) => {
-    const labels: Record<string, string> = {
-      actors: 'Actores',
-      contacts: 'Contactos',
-      projects: 'Proyectos',
-      reports: 'Reportes',
-      team: 'Equipo',
-      admin: 'Administración'
-    };
-    return labels[module] || module;
-  };
-
-  const getActionLabel = (action: string) => {
-    const labels: Record<string, string> = {
-      read: 'Ver',
-      write: 'Editar',
-      delete: 'Eliminar',
-      generate: 'Generar',
-      users: 'Usuarios',
-      permissions: 'Permisos'
-    };
-    return labels[action] || action;
-  };
-
-  const isLoading = createUserMutation.isPending || updateUserMutation.isPending || savePermissionsMutation.isPending;
+  const isLoading = createUserMutation.isPending || updateUserMutation.isPending;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -366,56 +239,16 @@ export function UserFormDialog({ open, onOpenChange, user, onSuccess }: UserForm
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="admin">Administrador (Todos los permisos)</SelectItem>
-                      <SelectItem value="editor">Editor (Lectura y escritura)</SelectItem>
-                      <SelectItem value="viewer">Consulta (Solo lectura)</SelectItem>
-                      <SelectItem value="custom">Personalizado</SelectItem>
+                      <SelectItem value="admin">Administrador</SelectItem>
+                      <SelectItem value="strategic">Gestor Estratégico</SelectItem>
+                      <SelectItem value="operative">Gestor Operativo</SelectItem>
+                      <SelectItem value="auditor">Auditor de Sistema</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
                 </FormItem>
               )}
             />
-
-            {watchedRole === 'custom' && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    Permisos Específicos
-                    <Badge variant="outline">
-                      {selectedPermissions.length} seleccionados
-                    </Badge>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {Object.entries(groupedPermissions || {}).map(([module, modulePermissions]) => (
-                    <div key={module} className="space-y-2">
-                      <h4 className="font-medium text-sm text-primary">
-                        {getModuleLabel(module)}
-                      </h4>
-                      <div className="grid grid-cols-2 gap-2 pl-4">
-                        {modulePermissions.map((permission) => (
-                          <div key={permission.id} className="flex items-center space-x-2">
-                            <Checkbox
-                              id={permission.name}
-                              checked={selectedPermissions.includes(permission.name)}
-                              onCheckedChange={() => togglePermission(permission.name)}
-                            />
-                            <Label
-                              htmlFor={permission.name}
-                              className="text-sm font-normal cursor-pointer"
-                            >
-                              {getActionLabel(permission.action)}
-                            </Label>
-                          </div>
-                        ))}
-                      </div>
-                      {module !== 'admin' && <Separator className="mt-2" />}
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
-            )}
 
             <div className="flex justify-end gap-2">
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
