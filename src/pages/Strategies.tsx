@@ -9,6 +9,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
 import { ImportanceIndexTab } from '@/components/strategies/ImportanceIndexTab';
 import { usePermissions } from '@/hooks/usePermissions';
+import { HeatMap } from '@/components/dashboard/HeatMap';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { useInfluenceInterest } from '@/hooks/useInfluenceInterest';
+import { useActorRelations } from '@/hooks/useActorRelations';
+
+const BAR_COLORS = ['#F59E0B', '#22C55E', '#1E3A5F', '#06B6D4', '#6366F1', '#EC4899', '#8B5CF6'];
 
 
 interface ActorItem {
@@ -107,6 +113,8 @@ export default function Strategies() {
   const [quadrantNotes, setQuadrantNotes] = useState<Record<string, string>>({});
   const [allyNotes, setAllyNotes] = useState<Record<string, string>>({});
   const { canEditActors } = usePermissions();
+  const { data: influenceInterest } = useInfluenceInterest();
+  const { data: relationsData } = useActorRelations();
 
   const defaultTab = location.hash === '#tipos' ? 'tipos' : 'matriz';
 
@@ -248,10 +256,19 @@ export default function Strategies() {
 
 
         {/* Section A: Influence/Interest Quadrants */}
-        <TabsContent value="matriz" className="space-y-4">
+        <TabsContent value="matriz" className="space-y-6">
           <p className="text-sm text-muted-foreground">
             Organización de actores según su nivel de influencia e interés para definir estrategias de relacionamiento.
           </p>
+          
+          <Card className="border border-border">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg">Matriz Influencia–Interés</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <HeatMap data={influenceInterest || []} />
+            </CardContent>
+          </Card>
           <div className="grid gap-4 md:grid-cols-2">
             {quadrants.map((q) => {
               const filtered = actors.filter(q.filter);
@@ -286,10 +303,50 @@ export default function Strategies() {
         </TabsContent>
 
         {/* Section B: Ally Types */}
-        <TabsContent value="tipos" className="space-y-4">
+        <TabsContent value="tipos" className="space-y-6">
           <p className="text-sm text-muted-foreground">
-            Clasificación de organizaciones según el tipo de relación con la Fundacion Luker.
+            Clasificación de organizaciones según el tipo de relación con la Fundación Luker.
           </p>
+
+          <Card className="border border-border">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg">Relaciones de Actores</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {relationsData && relationsData.length > 0 ? (
+                <ResponsiveContainer width="100%" height={320}>
+                  <BarChart data={relationsData} margin={{ top: 20, right: 30, left: 0, bottom: 60 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                    <XAxis 
+                      dataKey="label" 
+                      tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
+                      angle={-35}
+                      textAnchor="end"
+                      interval={0}
+                    />
+                    <YAxis tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: 'hsl(var(--card))',
+                        border: '1px solid hsl(var(--border))',
+                        borderRadius: '8px',
+                        fontSize: '12px',
+                      }}
+                    />
+                    <Bar dataKey="total" radius={[4, 4, 0, 0]} name="Actores">
+                      {relationsData.map((_, index) => (
+                        <Cell key={`cell-${index}`} fill={BAR_COLORS[index % BAR_COLORS.length]} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="h-[320px] flex items-center justify-center text-sm text-muted-foreground">
+                  Cargando datos...
+                </div>
+              )}
+            </CardContent>
+          </Card>
           <div className="grid gap-4 md:grid-cols-2">
             {allyTypes.map((type) => {
               const matched = getActorsByRelation(type.key);

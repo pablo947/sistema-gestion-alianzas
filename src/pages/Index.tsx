@@ -1,13 +1,10 @@
 import { useNavigate } from 'react-router-dom';
-import { useInfluenceInterest } from '@/hooks/useInfluenceInterest';
-import { useActorRelations } from '@/hooks/useActorRelations';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
-import { Building2, Contact, Users, FolderKanban, Search, FileDown, Award } from 'lucide-react';
-import { HeatMap } from '@/components/dashboard/HeatMap';
+import { Building2, Contact, FolderKanban, FileDown, HelpCircle, ArrowRight } from 'lucide-react';
 import { Tooltip as UITooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { Button } from '@/components/ui/button';
 
 const modules = [
   {
@@ -15,45 +12,37 @@ const modules = [
     description: "Gestión de actores y alianzas estratégicas",
     icon: Building2,
     url: "/actors",
+    colorClass: "text-luker-brown",
+    bgClass: "bg-luker-brown/10",
   },
   {
     title: "Información de Contacto",
     description: "Directorio de contactos asociados",
     icon: Contact,
     url: "/contacts",
+    colorClass: "text-luker-green",
+    bgClass: "bg-luker-green/10",
   },
   {
-    title: "Equipo Fundación Luker",
-    description: "Miembros del equipo interno",
-    icon: Users,
-    url: "/team",
-  },
-  {
-    title: "Proyectos e Iniciativas",
-    description: "Seguimiento y estado de proyectos e iniciativas",
+    title: "Programas e iniciativas",
+    description: "Seguimiento y estado de programas e iniciativas",
     icon: FolderKanban,
     url: "/projects",
-  },
-  {
-    title: "Análisis de Redes",
-    description: "Visualización de relaciones y grafos",
-    icon: Search,
-    url: "/grafos",
+    colorClass: "text-luker-orange",
+    bgClass: "bg-luker-orange/10",
   },
   {
     title: "Descarga de Reportes",
     description: "Exportación de datos e informes",
     icon: FileDown,
     url: "/reports",
+    colorClass: "text-luker-teal",
+    bgClass: "bg-luker-teal/10",
   },
 ];
 
-const BAR_COLORS = ['#F59E0B', '#22C55E', '#1E3A5F', '#06B6D4', '#6366F1', '#EC4899', '#8B5CF6'];
-
 const Index = () => {
   const navigate = useNavigate();
-  const { data: influenceInterest } = useInfluenceInterest();
-  const { data: relationsData } = useActorRelations();
 
   const { data: actorCount } = useQuery({
     queryKey: ['actors-count'],
@@ -72,18 +61,23 @@ const Index = () => {
   });
 
   return (
-    <div className="max-w-6xl mx-auto space-y-10">
-      {/* Header */}
-      <div className="text-center pt-4">
-        <h1 className="text-2xl font-bold tracking-tight font-heading text-foreground">
-          Sistema de Gestión de Alianzas y Programas
+    <div className="max-w-6xl mx-auto space-y-12 pb-12">
+      {/* Header Banner */}
+      <div className="text-center pt-8 pb-4 space-y-4">
+        <div className="inline-flex items-center justify-center px-4 py-1.5 rounded-full bg-luker-green text-white text-sm font-semibold mb-4">
+          Plataforma de Gestión Estratégica
+        </div>
+        <h1 className="text-4xl md:text-5xl font-bold tracking-tight font-heading text-foreground">
+          Transformando vidas a través de la <span className="text-luker-green">educación</span>
         </h1>
-        <p className="text-muted-foreground text-sm mt-1">Vista General</p>
+        <p className="text-muted-foreground text-lg max-w-2xl mx-auto mt-4">
+          Sistema centralizado para la gestión de alianzas, actores y programas estratégicos de la Fundación Luker.
+        </p>
       </div>
 
-      {/* Bento Grid */}
+      {/* Modules Grid */}
       <TooltipProvider delayDuration={200}>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {modules.map((mod) => {
             const tooltipText =
               mod.url === '/actors' && actorCount !== undefined
@@ -95,18 +89,20 @@ const Index = () => {
             const card = (
               <Card
                 key={mod.url}
-                className="group cursor-pointer border border-border hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5"
+                className="group cursor-pointer border-border hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
                 onClick={() => navigate(mod.url)}
               >
-                <CardContent className="p-6 flex items-start gap-4">
-                  <div className="rounded-xl p-3 bg-primary/5 shrink-0">
-                    <mod.icon className="w-6 h-6 text-primary" />
+                <CardContent className="p-8 flex flex-col items-center text-center gap-4">
+                  <div className={`rounded-2xl p-4 ${mod.bgClass} group-hover:scale-110 transition-transform duration-300`}>
+                    <mod.icon className={`w-8 h-8 ${mod.colorClass}`} />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-sm text-foreground group-hover:text-primary transition-colors">
+                    <h3 className="font-bold text-base text-foreground group-hover:text-primary transition-colors">
                       {mod.title}
                     </h3>
-                    <p className="text-xs text-muted-foreground mt-1">{mod.description}</p>
+                    <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
+                      {mod.description}
+                    </p>
                   </div>
                 </CardContent>
               </Card>
@@ -128,58 +124,30 @@ const Index = () => {
         </div>
       </TooltipProvider>
 
-      {/* Analytics Section */}
-      <div className="grid gap-6 lg:grid-cols-2">
-        {/* Influence-Interest Matrix */}
-        <Card className="border border-border cursor-pointer hover:shadow-lg transition-all duration-200" onClick={() => navigate('/strategies')}>
-          <CardContent className="p-6">
-            <div className="mb-4">
-              <h2 className="text-lg font-semibold text-foreground">Matriz Influencia–Interés</h2>
-              <p className="text-xs text-muted-foreground">Distribución de actores por nivel de influencia e interés</p>
+      {/* Help / Guide Section */}
+      <div className="mt-16 pt-8">
+        <Card className="border-border bg-gradient-to-br from-background to-muted/30">
+          <CardContent className="p-8 sm:p-12 text-center flex flex-col items-center justify-center gap-6">
+            <div className="rounded-full bg-luker-orange/10 p-4">
+              <HelpCircle className="w-10 h-10 text-luker-orange" />
             </div>
-            <HeatMap data={influenceInterest || []} />
-          </CardContent>
-        </Card>
-
-        {/* Actor Relations Bar Chart */}
-        <Card className="border border-border cursor-pointer hover:shadow-lg transition-all duration-200" onClick={() => navigate('/strategies#tipos')}>
-          <CardContent className="p-6">
-            <div className="mb-4">
-              <h2 className="text-lg font-semibold text-foreground">Relaciones de Actores</h2>
-              <p className="text-xs text-muted-foreground">Distribución de actores por tipo de relación con la Fundación</p>
+            <div className="space-y-2">
+              <h2 className="text-2xl font-bold font-heading">¿Necesitas ayuda para navegar la plataforma?</h2>
+              <p className="text-muted-foreground max-w-lg mx-auto">
+                Consulta nuestra guía de usuario detallada para aprender a utilizar los módulos, 
+                gestionar actores y visualizar reportes de manera efectiva.
+              </p>
             </div>
-            {relationsData && relationsData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={280}>
-                <BarChart data={relationsData} margin={{ top: 5, right: 10, left: -10, bottom: 60 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                  <XAxis 
-                    dataKey="label" 
-                    tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
-                    angle={-35}
-                    textAnchor="end"
-                    interval={0}
-                  />
-                  <YAxis tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: 'hsl(var(--card))',
-                      border: '1px solid hsl(var(--border))',
-                      borderRadius: '8px',
-                      fontSize: '12px',
-                    }}
-                  />
-                  <Bar dataKey="total" radius={[4, 4, 0, 0]} name="Actores">
-                    {relationsData.map((_, index) => (
-                      <Cell key={`cell-${index}`} fill={BAR_COLORS[index % BAR_COLORS.length]} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="h-[280px] flex items-center justify-center text-sm text-muted-foreground">
-                Cargando datos...
-              </div>
-            )}
+            <div className="flex gap-4 mt-4">
+              <Button 
+                onClick={() => navigate('/guide')}
+                className="bg-white text-foreground hover:bg-muted border border-border shadow-sm group"
+                variant="outline"
+              >
+                Ver Guía de Usuario
+                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>

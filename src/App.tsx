@@ -20,6 +20,7 @@ import NotFound from "./pages/NotFound";
 import Administration from "./pages/Administration";
 import ResetPassword from "./pages/ResetPassword";
 import Strategies from "./pages/Strategies";
+import Guide from "./pages/Guide";
 
 const queryClient = new QueryClient();
 
@@ -41,6 +42,7 @@ const App = () => (
             <Route path="/reports" element={<AuthGuard><Layout><Reports /></Layout></AuthGuard>} />
             <Route path="/grafos" element={<AuthGuard><Layout><Grafos /></Layout></AuthGuard>} />
             <Route path="/strategies" element={<AuthGuard><Layout><Strategies /></Layout></AuthGuard>} />
+            <Route path="/guide" element={<AuthGuard><Layout><Guide /></Layout></AuthGuard>} />
             <Route path="/admin" element={<AdminRoute><Layout><Administration /></Layout></AdminRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
