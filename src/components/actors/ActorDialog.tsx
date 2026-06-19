@@ -286,9 +286,9 @@ export function ActorDialog({ open, onOpenChange, actor, onSuccess }: ActorDialo
                   variant="outline"
                   onClick={() => onOpenChange(false)}
                 >
-                  {canEditActors() ? 'Cancelar' : 'Cerrar'}
+                  {canEditActors() || (userProfile?.role === 'strategic' && !actor) ? 'Cancelar' : 'Cerrar'}
                 </Button>
-                {canEditActors() && (
+                {(canEditActors() || (userProfile?.role === 'strategic' && !actor)) && (
                   <Button
                     type="submit"
                     disabled={mutation.isPending}

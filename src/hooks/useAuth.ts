@@ -7,7 +7,7 @@ export interface UserProfile {
   id: string;
   email: string;
   full_name: string | null;
-  role: 'admin' | 'viewer';
+  role: 'admin' | 'strategic' | 'operative' | 'auditor';
 }
 
 export function useAuth() {
@@ -59,9 +59,7 @@ export function useAuth() {
         .eq('user_id', userId)
         .maybeSingle();
 
-      const computedRole: 'admin' | 'viewer' = (roleData?.role as any) === 'admin'
-        ? 'admin'
-        : 'viewer';
+      const computedRole = (roleData?.role as UserProfile['role']) || 'operative';
 
       if (profile) {
         // Block deactivated users
