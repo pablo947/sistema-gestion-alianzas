@@ -28,6 +28,7 @@ import {
   ACADEMICO_SUBSECTORES,
 } from '@/components/actors/constants';
 import { EJES, normalizeEje } from '@/lib/ejes';
+import { PageHeader } from '@/components/layout/PageHeader';
 
 
 const ESTRATEGIAS_MATRIZ = [
@@ -244,21 +245,20 @@ export default function Actors() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Actores</h1>
-          <p className="text-muted-foreground">
-            Gestiona los actores del ecosistema de la Fundación Luker
-          </p>
-        </div>
-        {canEditActors() && (
-          <Button onClick={handleNewActor} className="btn-animate">
-            <Plus className="mr-2 h-4 w-4" />
-            Nuevo Actor
-            <kbd className="ml-2 kbd-shortcut">N</kbd>
-          </Button>
-        )}
-      </div>
+      <PageHeader 
+        title="Actores"
+        description="Gestiona los actores del ecosistema de la Fundación Luker"
+        icon={Users}
+        action={
+          canEditActors() && (
+            <Button onClick={handleNewActor} className="btn-animate">
+              <Plus className="mr-2 h-4 w-4" />
+              Nuevo Actor
+              <kbd className="ml-2 kbd-shortcut">N</kbd>
+            </Button>
+          )
+        }
+      />
 
       <ModuleStatsPanel
         totalCount={actors?.length ?? 0}

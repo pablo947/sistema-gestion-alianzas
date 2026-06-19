@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { usePermissions } from "@/hooks/usePermissions";
 import { TeamMemberDialog } from "@/components/team/TeamMemberDialog";
 import { TeamOrgChart } from "@/components/team/TeamOrgChart";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 interface TeamMember {
   id: string;
@@ -101,21 +102,21 @@ const Team = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div className="flex items-center gap-2">
-          <Building2 className="h-6 w-6" />
-          <h1 className="text-3xl font-bold">Equipo Fundación Luker</h1>
-        </div>
-        {canEditTeam() && (
-          <Button
-            onClick={() => setIsDialogOpen(true)}
-            className="flex items-center gap-2"
-          >
-            <Plus className="h-4 w-4" />
-            Agregar Funcionario/a
-          </Button>
-        )}
-      </div>
+      <PageHeader 
+        title="Equipo Fundación Luker"
+        icon={Building2}
+        action={
+          canEditTeam() && (
+            <Button
+              onClick={() => setIsDialogOpen(true)}
+              className="flex items-center gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              Agregar Funcionario/a
+            </Button>
+          )
+        }
+      />
 
       {teamMembers.length > 0 && (
         <div className="mb-8">
