@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
-import { Building2, Contact, FolderKanban, FileDown, HelpCircle, ArrowRight } from 'lucide-react';
+import { Building2, Contact, FolderKanban, FileDown, Award, Users, BookOpen, Shield } from 'lucide-react';
 import { Tooltip as UITooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Button } from '@/components/ui/button';
 
@@ -24,20 +24,52 @@ const modules = [
     bgClass: "bg-luker-green/10",
   },
   {
+    title: "Clasificación de aliados",
+    description: "Estrategias de gestión y tipología",
+    icon: Award,
+    url: "/strategies",
+    colorClass: "text-luker-teal",
+    bgClass: "bg-luker-teal/10",
+  },
+  {
     title: "Programas e iniciativas",
-    description: "Seguimiento y estado de programas e iniciativas",
+    description: "Seguimiento y estado de programas",
     icon: FolderKanban,
     url: "/projects",
     colorClass: "text-luker-orange",
     bgClass: "bg-luker-orange/10",
   },
   {
-    title: "Descarga de Reportes",
+    title: "Equipo Fundación Luker",
+    description: "Miembros del equipo interno",
+    icon: Users,
+    url: "/team",
+    colorClass: "text-luker-red",
+    bgClass: "bg-luker-red/10",
+  },
+  {
+    title: "Descarga de reportes",
     description: "Exportación de datos e informes",
     icon: FileDown,
     url: "/reports",
-    colorClass: "text-luker-teal",
-    bgClass: "bg-luker-teal/10",
+    colorClass: "text-luker-brown",
+    bgClass: "bg-luker-brown/10",
+  },
+  {
+    title: "Guía de uso",
+    description: "Instrucciones de usabilidad del sistema",
+    icon: BookOpen,
+    url: "/guide",
+    colorClass: "text-luker-orange",
+    bgClass: "bg-luker-orange/10",
+  },
+  {
+    title: "Administración",
+    description: "Gestión de usuarios y permisos",
+    icon: Shield,
+    url: "/admin",
+    colorClass: "text-luker-green",
+    bgClass: "bg-luker-green/10",
   },
 ];
 
@@ -123,34 +155,6 @@ const Index = () => {
           })}
         </div>
       </TooltipProvider>
-
-      {/* Help / Guide Section */}
-      <div className="mt-16 pt-8">
-        <Card className="border-border bg-gradient-to-br from-background to-muted/30">
-          <CardContent className="p-8 sm:p-12 text-center flex flex-col items-center justify-center gap-6">
-            <div className="rounded-full bg-luker-orange/10 p-4">
-              <HelpCircle className="w-10 h-10 text-luker-orange" />
-            </div>
-            <div className="space-y-2">
-              <h2 className="text-2xl font-bold font-heading">¿Necesitas ayuda para navegar la plataforma?</h2>
-              <p className="text-muted-foreground max-w-lg mx-auto">
-                Consulta nuestra guía de usuario detallada para aprender a utilizar los módulos, 
-                gestionar actores y visualizar reportes de manera efectiva.
-              </p>
-            </div>
-            <div className="flex gap-4 mt-4">
-              <Button 
-                onClick={() => navigate('/guide')}
-                className="bg-white text-foreground hover:bg-muted border border-border shadow-sm group"
-                variant="outline"
-              >
-                Ver Guía de Usuario
-                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
     </div>
   );
 };

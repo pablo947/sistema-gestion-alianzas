@@ -28,19 +28,19 @@ import {
   Moon,
   Sun,
   Award,
+  BookOpen,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useTheme } from 'next-themes';
 
 const menuItems = [
-  { title: "Home", url: "/", icon: Home, moduleId: 'home' },
   { title: "Actores", url: "/actors", icon: Building2, moduleId: 'actors' },
   { title: "Contactos", url: "/contacts", icon: Contact, moduleId: 'contacts' },
   { title: "Clasificación de Aliados", url: "/strategies", icon: Award, moduleId: 'strategies' },
-  { title: "Análisis de Redes y Relaciones", url: "/grafos", icon: Search, moduleId: 'grafos' },
   { title: "Programas e Iniciativas", url: "/projects", icon: FolderKanban, moduleId: 'projects' },
   { title: "Equipo Fundación Luker", url: "/team", icon: Users, moduleId: 'team' },
   { title: "Descarga de Reportes", url: "/reports", icon: FileDown, moduleId: 'reports' },
+  { title: "Guía de uso", url: "/guide", icon: BookOpen, moduleId: 'guide' },
   { title: "Administración", url: "/admin", icon: Shield, moduleId: 'admin', adminOnly: true },
 ];
 

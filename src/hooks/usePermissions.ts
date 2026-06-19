@@ -28,7 +28,8 @@ const DEFAULT_MODULES = {
   projects: { ...DEFAULT_MODULE_ACCESS },
   team: { ...DEFAULT_MODULE_ACCESS },
   reports: { ...DEFAULT_MODULE_ACCESS },
-  admin: { ...DEFAULT_MODULE_ACCESS }
+  admin: { ...DEFAULT_MODULE_ACCESS },
+  guide: { ...DEFAULT_MODULE_ACCESS }
 };
 
 // Global mock state to persist changes across hook unmounts in the same session
