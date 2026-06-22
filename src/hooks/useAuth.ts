@@ -34,6 +34,12 @@ export function useAuth() {
       role: 'admin' as const
     };
 
+    // Force bypass auth
+    setUser(mockUser);
+    setUserProfile(mockProfile);
+    setLoading(false);
+    return;
+
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (session?.user) {

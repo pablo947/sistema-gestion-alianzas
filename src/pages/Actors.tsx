@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { fuzzyMatchAll, findDidYouMean } from '@/lib/textUtils';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
