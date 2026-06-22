@@ -75,7 +75,7 @@ export const TeamMemberDialog = ({ open, onClose, member }: TeamMemberDialogProp
         cargo: member.cargo,
         correo: member.correo || "",
         celular: member.celular || "",
-        red_alumni: member.red_alumni || [],
+        red_alumni: Array.isArray(member.red_alumni) ? member.red_alumni : (typeof member.red_alumni === 'string' ? [member.red_alumni] : []),
       });
     } else {
       setFormData({

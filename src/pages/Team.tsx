@@ -159,7 +159,9 @@ const Team = () => {
               {member.red_alumni && member.red_alumni.length > 0 && (
                 <div>
                   <span className="font-medium text-sm">Red Alumni:</span>
-                  <p className="text-sm text-muted-foreground">{member.red_alumni.join(', ')}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {Array.isArray(member.red_alumni) ? member.red_alumni.join(', ') : member.red_alumni}
+                  </p>
                 </div>
               )}
               <div className="flex gap-2 pt-2">
