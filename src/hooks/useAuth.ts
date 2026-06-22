@@ -17,29 +17,6 @@ export function useAuth() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const mockUser = {
-      id: 'dev-superadmin-id',
-      email: 'jtoro@funluker.org.co',
-      aud: 'authenticated',
-      role: 'authenticated',
-      app_metadata: {},
-      user_metadata: { full_name: 'Dev Superadmin' },
-      created_at: new Date().toISOString()
-    } as any;
-
-    const mockProfile = {
-      id: 'dev-superadmin-id',
-      email: 'jtoro@funluker.org.co',
-      full_name: 'Dev Superadmin',
-      role: 'admin' as const
-    };
-
-    // Force bypass auth
-    setUser(mockUser);
-    setUserProfile(mockProfile);
-    setLoading(false);
-    return;
-
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (session?.user) {
@@ -50,8 +27,8 @@ export function useAuth() {
         }, 0);
       } else {
         setSession(null);
-        setUser(mockUser);
-        setUserProfile(mockProfile);
+        setUser(null);
+        setUserProfile(null);
       }
       setLoading(false);
     });
