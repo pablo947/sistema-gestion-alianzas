@@ -15,12 +15,11 @@ import Contacts from "./pages/Contacts";
 import Projects from "./pages/Projects";
 import Reports from "./pages/Reports";
 import Team from "./pages/Team";
-import Grafos from "./pages/Grafos";
-import NotFound from "./pages/NotFound";
 import Administration from "./pages/Administration";
 import ResetPassword from "./pages/ResetPassword";
 import Strategies from "./pages/Strategies";
 import Guide from "./pages/Guide";
+import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
@@ -40,8 +39,8 @@ const App = () => (
             <Route path="/projects" element={<AuthGuard><Layout><Projects /></Layout></AuthGuard>} />
             <Route path="/team" element={<AuthGuard><Layout><Team /></Layout></AuthGuard>} />
             <Route path="/reports" element={<AuthGuard><Layout><Reports /></Layout></AuthGuard>} />
-            <Route path="/grafos" element={<AuthGuard><Layout><Grafos /></Layout></AuthGuard>} />
-            <Route path="/strategies" element={<AuthGuard><Layout><Strategies /></Layout></AuthGuard>} />
+            <Route path="/clasificacion-aliados/*" element={<AuthGuard><Layout><Strategies /></Layout></AuthGuard>} />
+            <Route path="/strategies/*" element={<AuthGuard><Layout><Strategies /></Layout></AuthGuard>} />
             <Route path="/guide" element={<AuthGuard><Layout><Guide /></Layout></AuthGuard>} />
             <Route path="/admin" element={<AdminRoute><Layout><Administration /></Layout></AdminRoute>} />
             <Route path="*" element={<NotFound />} />

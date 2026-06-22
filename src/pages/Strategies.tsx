@@ -13,6 +13,7 @@ import { HeatMap } from '@/components/dashboard/HeatMap';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { useInfluenceInterest } from '@/hooks/useInfluenceInterest';
 import { useActorRelations } from '@/hooks/useActorRelations';
+import Grafos from './Grafos';
 
 const BAR_COLORS = ['#F59E0B', '#22C55E', '#1E3A5F', '#06B6D4', '#6366F1', '#EC4899', '#8B5CF6'];
 
@@ -116,7 +117,14 @@ export default function Strategies() {
   const { data: influenceInterest } = useInfluenceInterest();
   const { data: relationsData } = useActorRelations();
 
-  const defaultTab = location.hash === '#tipos' ? 'tipos' : 'matriz';
+  const pathParts = location.pathname.split('/');
+  const lastPart = pathParts[pathParts.length - 1];
+  const validTabs = ['matriz', 'tipos', 'analisis-redes', 'importancia'];
+  const activeTab = validTabs.includes(lastPart) ? lastPart : 'matriz';
+
+  const handleTabChange = (value: string) => {
+    navigate(`/clasificacion-aliados/${value}`);
+  };
 
   useEffect(() => {
     const loadData = async () => {
@@ -246,12 +254,12 @@ export default function Strategies() {
       </div>
 
       {/* Tabs */}
-      {/* Tabs */}
-      <Tabs defaultValue={defaultTab} className="space-y-6">
-        <TabsList className="grid w-full max-w-2xl grid-cols-3">
-          <TabsTrigger value="matriz">Matriz Influencia / Interés</TabsTrigger>
-          <TabsTrigger value="tipos">Tipos de Aliado</TabsTrigger>
-          <TabsTrigger value="importancia">Índice de Importancia</TabsTrigger>
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
+        <TabsList className="grid w-full lg:max-w-4xl grid-cols-2 lg:grid-cols-4 mb-10 lg:mb-0">
+          <TabsTrigger value="matriz" className="text-xs lg:text-sm">Matriz Interna</TabsTrigger>
+          <TabsTrigger value="tipos" className="text-xs lg:text-sm">Tipos de Aliado</TabsTrigger>
+          <TabsTrigger value="analisis-redes" className="text-xs lg:text-sm">Análisis de Redes y Relaciones</TabsTrigger>
+          <TabsTrigger value="importancia" className="text-xs lg:text-sm">Índice de Importancia</TabsTrigger>
         </TabsList>
 
 
@@ -390,7 +398,12 @@ export default function Strategies() {
           </div>
         </TabsContent>
 
-        {/* Section C: Composite Importance Index */}
+        {/* Section C: Network Analysis */}
+        <TabsContent value="analisis-redes" className="space-y-4">
+          <Grafos />
+        </TabsContent>
+
+        {/* Section D: Composite Importance Index */}
         <TabsContent value="importancia" className="space-y-4">
           <ImportanceIndexTab />
         </TabsContent>
