@@ -70,7 +70,6 @@ export default function Actors() {
     estrategiaMatriz: '',
     programa: '',
   });
-  });
   const [multiProgramOnly, setMultiProgramOnly] = useState(false);
   const [activeTab, setActiveTab] = useState('active');
   const queryClient = useQueryClient();
