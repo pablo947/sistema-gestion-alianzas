@@ -461,8 +461,8 @@ export default function Contacts() {
             >
               <CardHeader className="pb-3">
                 <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-                    <User className="w-5 h-5 text-primary" />
+                  <div className="w-10 h-10 bg-primary/10 dark:bg-primary/20 rounded-full flex items-center justify-center">
+                    <User className="w-5 h-5 text-primary dark:text-blue-300" />
                   </div>
                   <div className="flex-1">
                     <CardTitle className="text-lg">
@@ -499,7 +499,7 @@ export default function Contacts() {
                         </Badge>
                       )}
                       {ejes.map((eje) => (
-                        <Badge key={eje} variant="default" className="text-xs bg-primary/10 text-primary hover:bg-primary/20 border-primary/20">
+                        <Badge key={eje} variant="default" className="text-xs bg-primary/10 text-primary hover:bg-primary/20 border-primary/20 dark:bg-primary/20 dark:text-primary-foreground dark:hover:bg-primary/30 dark:border-primary/30">
                           {eje}
                         </Badge>
                       ))}

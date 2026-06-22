@@ -73,7 +73,7 @@ export function AppSidebar() {
         {!collapsed && (
           <div className="px-4 py-5 border-b border-sidebar-border">
             <div className="flex items-center gap-3">
-              <img src="/lovable-uploads/bf9d79fe-6f69-4035-bb1f-6067d269f895.png" alt="Fundación Luker" className="w-8 h-8 mix-blend-multiply" />
+              <img src="/lovable-uploads/bf9d79fe-6f69-4035-bb1f-6067d269f895.png" alt="Fundación Luker" className="w-8 h-8 mix-blend-multiply dark:mix-blend-normal dark:bg-white dark:rounded-sm dark:p-0.5" />
               <div>
                 <p className="text-sm font-semibold text-sidebar-foreground">Fundación Luker</p>
                 <p className="text-[10px] text-muted-foreground">Gestión de Alianzas</p>

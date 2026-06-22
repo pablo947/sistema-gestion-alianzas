@@ -473,8 +473,8 @@ export default function Actors() {
             >
               <CardHeader className="pb-3">
                 <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-                    <Users className="w-5 h-5 text-primary" />
+                  <div className="w-10 h-10 bg-primary/10 dark:bg-primary/20 rounded-full flex items-center justify-center">
+                    <Users className="w-5 h-5 text-primary dark:text-blue-300" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <HoverCard openDelay={150} closeDelay={100}>
@@ -485,7 +485,7 @@ export default function Actors() {
                         >
                           {actor.nombre_actor}
                           {programCount > 0 && (
-                            <span className="ml-2 inline-flex items-center justify-center text-[10px] font-medium bg-primary/10 text-primary rounded-full px-1.5 py-0.5 align-middle">
+                            <span className="ml-2 inline-flex items-center justify-center text-[10px] font-medium bg-primary/10 text-primary dark:bg-primary/20 dark:text-blue-200 rounded-full px-1.5 py-0.5 align-middle">
                               {programCount}
                             </span>
                           )}

@@ -128,7 +128,7 @@ export default function Auth() {
         <img 
           src="/assets/logo-funluker.jpg" 
           alt="Fundación Luker" 
-          className="w-40 h-auto object-contain mix-blend-multiply"
+          className="w-40 h-auto object-contain mix-blend-multiply dark:mix-blend-normal dark:bg-white dark:rounded-md dark:p-2"
         />
         <Card className="w-full max-w-md">
           <CardHeader className="space-y-1 text-center">
