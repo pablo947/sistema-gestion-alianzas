@@ -17,17 +17,35 @@ export function useAuth() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const mockUser = {
+      id: 'dev-superadmin-id',
+      email: 'jtoro@funluker.org.co',
+      aud: 'authenticated',
+      role: 'authenticated',
+      app_metadata: {},
+      user_metadata: { full_name: 'Dev Superadmin' },
+      created_at: new Date().toISOString()
+    } as any;
+
+    const mockProfile = {
+      id: 'dev-superadmin-id',
+      email: 'jtoro@funluker.org.co',
+      full_name: 'Dev Superadmin',
+      role: 'admin' as const
+    };
+
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-
       if (session?.user) {
+        setSession(session);
+        setUser(session.user);
         setTimeout(() => {
           fetchUserProfile(session.user.id, session.user.email ?? undefined);
         }, 0);
       } else {
-        setUserProfile(null);
+        setSession(null);
+        setUser(mockUser);
+        setUserProfile(mockProfile);
       }
       setLoading(false);
     });

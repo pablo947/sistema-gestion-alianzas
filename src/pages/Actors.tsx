@@ -545,8 +545,8 @@ export default function Actors() {
                       <span className="font-medium">Actuación:</span>
                       <p className="text-muted-foreground">
                         {[
-                          actor.municipio_actuacion?.join(', '),
-                          actor.departamento_actuacion?.join(', '),
+                          Array.isArray(actor.municipio_actuacion) ? actor.municipio_actuacion.join(', ') : actor.municipio_actuacion,
+                          Array.isArray(actor.departamento_actuacion) ? actor.departamento_actuacion.join(', ') : actor.departamento_actuacion,
                         ]
                           .filter(Boolean)
                           .join(' · ') || 'No especificada'}
@@ -561,10 +561,10 @@ export default function Actors() {
                     <div className="text-sm flex-1">
                       <span className="font-medium">Relaciones:</span>
                       <div className="flex flex-wrap gap-1 mt-1">
-                        {actor.tipo_relacion.slice(0, 2).map((tipo: string) => (
+                        {Array.isArray(actor.tipo_relacion) ? actor.tipo_relacion.slice(0, 2).map((tipo: string) => (
                           <Badge key={tipo} variant="secondary" className="text-xs">{tipo}</Badge>
-                        ))}
-                        {actor.tipo_relacion.length > 2 && (
+                        )) : (actor.tipo_relacion ? <Badge variant="secondary" className="text-xs">{actor.tipo_relacion}</Badge> : null)}
+                        {Array.isArray(actor.tipo_relacion) && actor.tipo_relacion.length > 2 && (
                           <Badge variant="outline" className="text-xs">
                             +{actor.tipo_relacion.length - 2} más
                           </Badge>
