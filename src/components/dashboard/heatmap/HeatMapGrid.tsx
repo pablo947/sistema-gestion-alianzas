@@ -33,9 +33,9 @@ export const HeatMapGrid = ({
             <div 
               key={`${cell.x}-${cell.y}`} 
               className={`
-                relative aspect-square border-2 border-gray-200 rounded-lg cursor-pointer
+                relative aspect-square border-2 border-muted rounded-lg cursor-pointer
                 transition-all duration-[180ms] ease-in-out
-                hover:border-blue-400 hover:scale-105 hover:shadow-lg
+                hover:border-primary hover:scale-105 hover:shadow-lg
                 ${isHighlighted ? 'ring-2 ring-primary ring-offset-2' : ''}
                 ${cell.total === 0 ? 'opacity-60' : ''}
               `} 

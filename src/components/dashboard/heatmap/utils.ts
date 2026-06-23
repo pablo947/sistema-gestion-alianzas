@@ -2,7 +2,7 @@ import { QuadrantLabel } from './types';
 import { quadrantLabels, strategyColors } from './constants';
 
 export const getColorIntensity = (value: number, maxValue: number): string => {
-  if (value === 0) return '#f8f9fa';
+  if (value === 0) return 'transparent';
 
   const intensity = Math.min(value / maxValue, 1);
 
@@ -14,7 +14,7 @@ export const getColorIntensity = (value: number, maxValue: number): string => {
 };
 
 export const getColorByStrategy = (x: number, y: number, value: number): string => {
-  if (value === 0) return '#f8f9fa';
+  if (value === 0) return 'transparent';
 
   const strategy = getStrategyForCell(x, y);
   const baseColor = strategyColors[strategy];
