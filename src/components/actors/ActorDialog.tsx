@@ -50,7 +50,7 @@ export function ActorDialog({ open, onOpenChange, actor, onSuccess }: ActorDialo
   const [showRelatedContacts, setShowRelatedContacts] = React.useState(false);
   const [acknowledgedDuplicateSignature, setAcknowledgedDuplicateSignature] = useState<string | null>(null);
   const { data: allActors = [] } = useActorsList();
-  const { canEditActors, canDeleteActors } = usePermissions();
+  const { canEdit, canEditActors, canDeleteActors, canCreatePendingActors } = usePermissions();
   const { userProfile } = useAuth();
 
   const form = useForm<z.infer<typeof actorSchema>>({
@@ -61,8 +61,8 @@ export function ActorDialog({ open, onOpenChange, actor, onSuccess }: ActorDialo
       ciudad_sede: '',
       alcance_territorial: 'Municipal',
       tipo_relacion: [],
-      nivel_influencia: undefined,
       nivel_interes: undefined,
+      
       proyecto_ids: [],
       responsable_seguimiento: [],
       telefono_entidad: '',
@@ -161,7 +161,7 @@ export function ActorDialog({ open, onOpenChange, actor, onSuccess }: ActorDialo
         // Create new actor
         const newActorData = {
           ...actorData,
-          status: userProfile?.role === 'strategic' ? 'pending_approval' : 'active'
+          status: (!canEdit('actors') && canCreatePendingActors()) ? 'pending_approval' : 'active'
         };
         const { data, error } = await supabase
           .from('actors')
@@ -286,9 +286,9 @@ export function ActorDialog({ open, onOpenChange, actor, onSuccess }: ActorDialo
                   variant="outline"
                   onClick={() => onOpenChange(false)}
                 >
-                  {canEditActors() || (userProfile?.role === 'strategic' && !actor) ? 'Cancelar' : 'Cerrar'}
+                  {canEdit('actors') || (canCreatePendingActors() && !actor) ? 'Cancelar' : 'Cerrar'}
                 </Button>
-                {(canEditActors() || (userProfile?.role === 'strategic' && !actor)) && (
+                {(canEdit('actors') || (canCreatePendingActors() && !actor)) && (
                   <Button
                     type="submit"
                     disabled={mutation.isPending}

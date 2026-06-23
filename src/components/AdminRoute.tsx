@@ -1,5 +1,6 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { usePermissions } from '@/hooks/usePermissions';
 import { Loader2, ShieldAlert } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
@@ -8,7 +9,8 @@ interface AdminRouteProps {
 }
 
 export function AdminRoute({ children }: AdminRouteProps) {
-  const { user, userProfile, loading } = useAuth();
+  const { user, loading } = useAuth();
+  const { hasModuleVisibility } = usePermissions();
   const location = useLocation();
 
   if (loading) {
@@ -23,7 +25,7 @@ export function AdminRoute({ children }: AdminRouteProps) {
     return <Navigate to="/auth" state={{ from: location }} replace />;
   }
 
-  if (userProfile?.role !== 'admin') {
+  if (!hasModuleVisibility('admin')) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
         <Card className="w-full max-w-md">

@@ -54,7 +54,7 @@ const getEstrategiaMatriz = (influencia?: number | null, interes?: number | null
 
 export default function Actors() {
   const { user } = useAuth();
-  const { canEditActors } = usePermissions();
+  const { canEdit, canEditActors, canDeleteActors, canCreatePendingActors, canApproveRejectActors } = usePermissions();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState('');
@@ -211,9 +211,9 @@ export default function Actors() {
   };
 
   const handleEditActor = (actor: any) => {
-    if (!canEditActors()) {
+    if (!canEdit('actors')) {
       // Strategic can create, but not edit
-      if (user?.role === 'strategic') {
+      if (canCreatePendingActors()) {
         toast({ title: 'Acceso denegado', description: 'Los gestores estratégicos solo pueden crear nuevos actores.' });
         return;
       }
@@ -279,7 +279,7 @@ export default function Actors() {
         title="Actores"
         description="Gestiona los actores del ecosistema de la Fundación Luker"
         action={
-          (canEditActors() || user?.role === 'strategic') && (
+          (canEditActors()) && (
             <Button onClick={handleNewActor} className="btn-animate">
               <Plus className="mr-2 h-4 w-4" />
               Nuevo Actor
@@ -296,7 +296,7 @@ export default function Actors() {
         lastUpdatedBy={user?.email ?? null}
       />
 
-      {(user?.role === 'auditor' || user?.role === 'admin') && pendingActors.length > 0 && (
+      {canApproveRejectActors() && pendingActors.length > 0 && (
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="mb-4">
             <TabsTrigger value="active">Actores Activos</TabsTrigger>
@@ -624,7 +624,7 @@ export default function Actors() {
                 )}
 
                 <div className="flex items-center justify-between pt-2 border-t border-border">
-                  {activeTab === 'pending' && (user?.role === 'auditor' || user?.role === 'admin') ? (
+                  {activeTab === 'pending' && canApproveRejectActors() ? (
                     <div className="flex gap-2 w-full">
                       <Button
                         variant="default"
@@ -680,7 +680,7 @@ export default function Actors() {
               ? 'No se encontraron actores con esos criterios.'
               : 'Usa la barra de búsqueda para encontrar actores específicos.'}
           </p>
-          {!hasActiveFilters && (canEditActors() || user?.role === 'strategic') && (
+          {!hasActiveFilters && canEditActors() && (
             <div className="mt-6">
               <Button onClick={handleNewActor} className="btn-animate">
                 <Plus className="mr-2 h-4 w-4" />
