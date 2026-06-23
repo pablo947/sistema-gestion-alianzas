@@ -73,6 +73,13 @@ export type Database = {
           telefono_entidad: string | null
           tipo_relacion: string[] | null
           updated_at: string | null
+          status: string | null
+          directrices_trato: string | null
+          exigencias_contractuales: boolean | null
+          detalles_exigencias: string | null
+          criticidad: string | null
+          fecha_revision: string | null
+          responsable_relacion: string | null
         }
         Insert: {
           actor_id?: string
@@ -96,6 +103,13 @@ export type Database = {
           telefono_entidad?: string | null
           tipo_relacion?: string[] | null
           updated_at?: string | null
+          status?: string | null
+          directrices_trato?: string | null
+          exigencias_contractuales?: boolean | null
+          detalles_exigencias?: string | null
+          criticidad?: string | null
+          fecha_revision?: string | null
+          responsable_relacion?: string | null
         }
         Update: {
           actor_id?: string
@@ -119,8 +133,56 @@ export type Database = {
           telefono_entidad?: string | null
           tipo_relacion?: string[] | null
           updated_at?: string | null
+          status?: string | null
+          directrices_trato?: string | null
+          exigencias_contractuales?: boolean | null
+          detalles_exigencias?: string | null
+          criticidad?: string | null
+          fecha_revision?: string | null
+          responsable_relacion?: string | null
         }
         Relationships: []
+      }
+      actor_change_requests: {
+        Row: {
+          id: string
+          actor_id: string | null
+          requested_by: string | null
+          user_email: string
+          payload: Json
+          justification: string | null
+          status: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          actor_id?: string | null
+          requested_by?: string | null
+          user_email: string
+          payload: Json
+          justification?: string | null
+          status?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          actor_id?: string | null
+          requested_by?: string | null
+          user_email?: string
+          payload?: Json
+          justification?: string | null
+          status?: string | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "actor_change_requests_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "actors"
+            referencedColumns: ["actor_id"]
+          }
+        ]
       }
       audit_logs: {
         Row: {

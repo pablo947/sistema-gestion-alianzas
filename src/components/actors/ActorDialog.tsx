@@ -26,6 +26,9 @@ import { useAuth } from '@/hooks/useAuth';
 import { useDuplicateDetection } from '@/hooks/useDuplicateDetection';
 import { DuplicateWarning } from '@/components/DuplicateWarning';
 import { sanitizeFormData } from '@/lib/textUtils';
+import { ChangeRequestDialog } from './ChangeRequestDialog';
+import { RecommendationsDialog } from './RecommendationsDialog';
+import { useToast } from '@/hooks/use-toast';
 
 const actorSchema = z.object({
   nombre_actor: z.string().min(1, 'El nombre es requerido'),
@@ -52,6 +55,14 @@ export function ActorDialog({ open, onOpenChange, actor, onSuccess }: ActorDialo
   const { data: allActors = [] } = useActorsList();
   const { canEdit, canEditActors, canDeleteActors, canCreatePendingActors } = usePermissions();
   const { userProfile } = useAuth();
+  const { toast } = useToast();
+
+  const [changeRequestPayload, setChangeRequestPayload] = useState<any>(null);
+  const [isChangeRequestOpen, setIsChangeRequestOpen] = useState(false);
+  const [isRecommendationsOpen, setIsRecommendationsOpen] = useState(false);
+
+  const isStrategicEdit = !canEdit('actors') && canCreatePendingActors() && !!actor;
+  const isStrategicCreate = !canEdit('actors') && canCreatePendingActors() && !actor;
 
   const form = useForm<z.infer<typeof actorSchema>>({
     resolver: zodResolver(actorSchema),
@@ -198,6 +209,9 @@ export function ActorDialog({ open, onOpenChange, actor, onSuccess }: ActorDialo
       queryClient.invalidateQueries({ queryKey: ['actor-programs'] });
       onSuccess();
     },
+    onError: (error) => {
+      console.error('Error saving actor:', error);
+    }
   });
 
   const deleteMutation = useMutation({
@@ -215,6 +229,31 @@ export function ActorDialog({ open, onOpenChange, actor, onSuccess }: ActorDialo
   });
 
   const onSubmit = (values: z.infer<typeof actorSchema>) => {
+    if (isStrategicCreate) {
+      const requiredFields = [
+        'ciudad_sede', 'alcance_territorial', 'tipo_relacion', 'nivel_influencia', 'nivel_interes',
+        'proyecto_ids', 'responsable_seguimiento', 'telefono_entidad', 'direccion_entidad', 'correo_entidad', 'anios_alianza'
+      ];
+      let hasError = false;
+      requiredFields.forEach(f => {
+        const v = (values as any)[f];
+        if (Array.isArray(v) ? v.length === 0 : (v === undefined || v === null || v === '')) {
+          form.setError(f as any, { type: 'manual', message: 'Campo obligatorio para tu rol' });
+          hasError = true;
+        }
+      });
+      if (hasError) {
+        toast({ title: 'Campos requeridos', description: 'Debes completar todos los campos del formulario.', variant: 'destructive' });
+        return;
+      }
+    }
+
+    if (isStrategicEdit) {
+      setChangeRequestPayload(values);
+      setIsChangeRequestOpen(true);
+      return;
+    }
+    
     mutation.mutate(values);
   };
 
@@ -280,7 +319,17 @@ export function ActorDialog({ open, onOpenChange, actor, onSuccess }: ActorDialo
                   )}
                 </div>
               )}
-              <div className="flex space-x-2 ml-auto">
+              <div className="flex justify-end gap-3 pt-4 border-t mt-6">
+                {actor && isStrategicEdit && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="mr-auto border-blue-200 text-blue-700 hover:bg-blue-50"
+                    onClick={() => setIsRecommendationsOpen(true)}
+                  >
+                    Agregar Recomendaciones
+                  </Button>
+                )}
                 <Button
                   type="button"
                   variant="outline"
@@ -288,13 +337,13 @@ export function ActorDialog({ open, onOpenChange, actor, onSuccess }: ActorDialo
                 >
                   {canEdit('actors') || (canCreatePendingActors() && !actor) ? 'Cancelar' : 'Cerrar'}
                 </Button>
-                {(canEdit('actors') || (canCreatePendingActors() && !actor)) && (
+                {(canEdit('actors') || canCreatePendingActors()) && (
                   <Button
                     type="submit"
                     disabled={mutation.isPending}
-                    className="btn-animate"
+                    className={isStrategicEdit ? "bg-orange-600 hover:bg-orange-700 text-white" : "btn-animate"}
                   >
-                    {actor ? 'Actualizar' : 'Crear'} Actor
+                    {isStrategicEdit ? 'Solicitar revisión y/o cambios' : actor ? 'Actualizar Actor' : 'Crear Actor'}
                   </Button>
                 )}
               </div>
@@ -308,6 +357,24 @@ export function ActorDialog({ open, onOpenChange, actor, onSuccess }: ActorDialo
           actorId={actor?.actor_id || null}
           actorName={actor?.nombre_actor || ''}
         />
+        
+        {actor && (
+          <ChangeRequestDialog
+            open={isChangeRequestOpen}
+            onOpenChange={setIsChangeRequestOpen}
+            actorId={actor.actor_id}
+            payload={changeRequestPayload}
+            onSuccess={() => onOpenChange(false)}
+          />
+        )}
+        
+        {actor && (
+          <RecommendationsDialog
+            open={isRecommendationsOpen}
+            onOpenChange={setIsRecommendationsOpen}
+            actor={actor}
+          />
+        )}
       </DialogContent>
     </Dialog>
   );

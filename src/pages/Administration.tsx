@@ -7,6 +7,7 @@ import { PermissionsPanel } from '@/components/admin/PermissionsPanel';
 import { SystemSettings } from '@/components/admin/SystemSettings';
 import { UserActivationPanel } from '@/components/admin/UserActivationPanel';
 import { AuditLogPanel } from '@/components/admin/AuditLogPanel';
+import { PendingRequestsPanel } from '@/components/admin/PendingRequestsPanel';
 import { Users, Shield, Settings, UserCheck, ClipboardList } from 'lucide-react';
 import { PageHeader } from '@/components/layout/PageHeader';
 
@@ -65,8 +66,19 @@ export default function Administration() {
             <PermissionsPanel />
           </TabsContent>
 
-          <TabsContent value="audit">
-            <AuditLogPanel />
+          <TabsContent value="audit" className="space-y-4">
+            <Tabs defaultValue="pending" className="w-full">
+              <TabsList className="mb-4">
+                <TabsTrigger value="pending">Solicitudes Pendientes</TabsTrigger>
+                <TabsTrigger value="history">Log de Actividad</TabsTrigger>
+              </TabsList>
+              <TabsContent value="pending">
+                <PendingRequestsPanel />
+              </TabsContent>
+              <TabsContent value="history">
+                <AuditLogPanel />
+              </TabsContent>
+            </Tabs>
           </TabsContent>
 
           <TabsContent value="settings">

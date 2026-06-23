@@ -12,7 +12,11 @@ export function PermissionsPanel() {
           Matriz de Permisos por Rol (RBAC)
         </CardTitle>
         <CardDescription>
-          Los permisos ahora son asignados estrictamente en base al rol de cada usuario. Ya no se configuran por módulo individualmente.
+          Los permisos se asignan por rol. Reglas clave:
+          <ul className="list-disc ml-6 mt-2 space-y-1">
+            <li><strong>Gestor Estratégico</strong>: Crea actores en estado Pendiente. Edita actores como "Solicitudes de Cambio". Gestiona las Recomendaciones directamente.</li>
+            <li><strong>Auditor</strong>: Visualiza la bandeja de "Solicitudes Pendientes" y tiene el poder exclusivo para Aprobar/Rechazar solicitudes de Actores.</li>
+          </ul>
         </CardDescription>
       </CardHeader>
       
@@ -39,7 +43,7 @@ export function PermissionsPanel() {
               <TableRow>
                 <TableCell className="font-medium">Actores</TableCell>
                 <TableCell><Badge variant="default">Control Total</Badge></TableCell>
-                <TableCell><Badge variant="outline">Crear (Pendiente)</Badge></TableCell>
+                <TableCell><Badge variant="outline">Crear/Editar (Pendientes)</Badge></TableCell>
                 <TableCell><Badge variant="secondary">Solo Lectura</Badge></TableCell>
                 <TableCell><Badge variant="default">Aprobar/Rechazar</Badge></TableCell>
               </TableRow>
