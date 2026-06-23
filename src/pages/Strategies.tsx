@@ -13,6 +13,7 @@ import { HeatMap } from '@/components/dashboard/HeatMap';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { useInfluenceInterest } from '@/hooks/useInfluenceInterest';
 import { useActorRelations } from '@/hooks/useActorRelations';
+import { PageHeader } from '@/components/layout/PageHeader';
 import Grafos from './Grafos';
 
 const BAR_COLORS = ['#F59E0B', '#22C55E', '#1E3A5F', '#06B6D4', '#6366F1', '#EC4899', '#8B5CF6'];
@@ -243,15 +244,10 @@ export default function Strategies() {
   return (
     <div className="max-w-6xl mx-auto space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" onClick={() => navigate('/')}>
-          <ArrowLeft className="w-4 h-4" />
-        </Button>
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Clasificación de Aliados</h1>
-          <p className="text-sm text-muted-foreground">Estrategias de gestión y tipología de alianzas</p>
-        </div>
-      </div>
+      <PageHeader 
+        title="Clasificación de Aliados"
+        description="Estrategias de gestión y tipología de alianzas"
+      />
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">

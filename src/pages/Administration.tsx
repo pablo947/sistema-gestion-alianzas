@@ -8,20 +8,16 @@ import { SystemSettings } from '@/components/admin/SystemSettings';
 import { UserActivationPanel } from '@/components/admin/UserActivationPanel';
 import { AuditLogPanel } from '@/components/admin/AuditLogPanel';
 import { Users, Shield, Settings, UserCheck, ClipboardList } from 'lucide-react';
+import { PageHeader } from '@/components/layout/PageHeader';
 
 export default function Administration() {
   return (
     <AdminRoute>
       <div className="space-y-6">
-        <div className="flex items-center gap-3">
-          <Shield className="h-8 w-8 text-primary" />
-          <div>
-            <h1 className="text-3xl font-bold">Administración</h1>
-            <p className="text-muted-foreground">
-              Gestión de usuarios, permisos y configuración del sistema
-            </p>
-          </div>
-        </div>
+        <PageHeader 
+          title="Administración"
+          description="Gestión de usuarios, permisos y configuración del sistema"
+        />
 
         <Tabs defaultValue="users" className="space-y-6">
           <TabsList className="grid w-full grid-cols-5">

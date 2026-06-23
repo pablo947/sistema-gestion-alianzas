@@ -104,7 +104,6 @@ const Team = () => {
     <div className="space-y-6">
       <PageHeader 
         title="Equipo Fundación Luker"
-        icon={Building2}
         action={
           canEditTeam() && (
             <Button

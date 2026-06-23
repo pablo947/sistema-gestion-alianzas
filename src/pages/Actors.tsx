@@ -278,7 +278,6 @@ export default function Actors() {
       <PageHeader 
         title="Actores"
         description="Gestiona los actores del ecosistema de la Fundación Luker"
-        icon={Users}
         action={
           (canEditActors() || user?.role === 'strategic') && (
             <Button onClick={handleNewActor} className="btn-animate">

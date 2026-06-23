@@ -23,6 +23,7 @@ import { useExcelExport } from '@/hooks/useExcelExport';
 import { useDocumentExport } from '@/hooks/useDocumentExport';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from "@/hooks/use-toast";
+import { PageHeader } from '@/components/layout/PageHeader';
 
 export default function Reports() {
   const { toast } = useToast();
@@ -296,12 +297,10 @@ export default function Reports() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Reportes</h1>
-        <p className="text-muted-foreground">
-          Genera reportes globales o individuales sobre proyectos, actores y contactos de la fundación
-        </p>
-      </div>
+      <PageHeader 
+        title="Reportes"
+        description="Genera reportes globales o individuales sobre proyectos, actores y contactos de la fundación"
+      />
       
       <ReportConfiguration 
         reportType={reportType}

@@ -9,7 +9,6 @@ export default function Guide() {
       <PageHeader 
         title="Guía de Uso"
         description="Aprende a utilizar el Sistema de Gestión de Alianzas y Programas"
-        icon={BookOpen}
       />
 
       <div className="grid gap-6">

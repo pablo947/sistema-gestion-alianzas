@@ -18,6 +18,7 @@ import { ProjectDialog } from "@/components/projects/ProjectDialog";
 import { ProjectDetailView } from "@/components/projects/ProjectDetailView";
 import { Project } from "@/components/projects/types";
 import { useSearchParams } from "react-router-dom";
+import { PageHeader } from '@/components/layout/PageHeader';
 
 import { EJES, EJE_BADGE_CLASS, normalizeEje } from "@/lib/ejes";
 
@@ -157,10 +158,10 @@ export default function Projects() {
   if (isLoading) {
     return (
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Programas e Iniciativas</h1>
-          <p className="text-muted-foreground">Gestiona los programas e iniciativas de la fundación</p>
-        </div>
+        <PageHeader 
+          title="Programas e Iniciativas"
+          description="Gestiona los programas e iniciativas de la fundación"
+        />
         <div className="flex items-center justify-center h-32">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         </div>
@@ -170,10 +171,10 @@ export default function Projects() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Programas e Iniciativas</h1>
-        <p className="text-muted-foreground">Gestiona los programas e iniciativas de la fundación</p>
-      </div>
+      <PageHeader 
+        title="Programas e Iniciativas"
+        description="Gestiona los programas e iniciativas de la fundación"
+      />
 
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">

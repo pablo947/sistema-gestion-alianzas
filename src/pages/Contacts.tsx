@@ -285,7 +285,6 @@ export default function Contacts() {
       <PageHeader 
         title="Contactos"
         description="Gestiona los contactos del ecosistema de la Fundación Luker"
-        icon={User}
         action={
           canEditContacts() && (
             <Button onClick={handleNewContact} className="btn-animate">
