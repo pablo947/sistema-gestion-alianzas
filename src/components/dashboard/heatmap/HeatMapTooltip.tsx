@@ -10,7 +10,7 @@ export const HeatMapTooltip = ({ cell, hoveredCell }: HeatMapTooltipProps) => {
   
   return (
     <div 
-      className="fixed z-[999] bg-card border border-border rounded-lg p-3 shadow-lg max-w-xs pointer-events-none"
+      className="fixed z-[999] bg-card/95 backdrop-blur-sm rounded-xl p-3 shadow-md border-none pointer-events-none"
       style={{
         top: '-100px',
         left: '50%',

@@ -9,7 +9,7 @@ interface HeatMapGridProps {
   onCellClick: (cell: { x: number; y: number }) => void;
   onCellHover: (cell: { x: number; y: number } | null) => void;
   getQuadrantForCell: (x: number, y: number) => any;
-  getColorIntensity: (value: number, x: number, y: number) => string;
+  getCellStyles: (value: number, x: number, y: number) => string;
 }
 
 export const HeatMapGrid = ({ 
@@ -20,10 +20,10 @@ export const HeatMapGrid = ({
   onCellClick, 
   onCellHover,
   getQuadrantForCell, 
-  getColorIntensity 
+  getCellStyles 
 }: HeatMapGridProps) => {
   return (
-    <div className="grid grid-cols-5 gap-2 w-full max-w-lg mx-auto">
+    <div className="grid grid-cols-5 gap-3 w-full max-w-lg mx-auto">
       {grid.map((row, rowIndex) => 
         row.map((cell, colIndex) => {
           const quadrant = getQuadrantForCell(cell.x, cell.y);
@@ -33,26 +33,18 @@ export const HeatMapGrid = ({
             <div 
               key={`${cell.x}-${cell.y}`} 
               className={`
-                relative aspect-square border-2 border-muted rounded-lg cursor-pointer
-                transition-all duration-[180ms] ease-in-out
-                hover:border-primary hover:scale-105 hover:shadow-lg
+                relative aspect-square rounded-xl cursor-pointer
+                transition-all duration-200 ease-in-out
+                hover:shadow-md hover:-translate-y-1
                 ${isHighlighted ? 'ring-2 ring-primary ring-offset-2' : ''}
-                ${cell.total === 0 ? 'opacity-60' : ''}
+                ${getCellStyles(cell.total, cell.x, cell.y)}
               `} 
-              style={{
-                backgroundColor: getColorIntensity(cell.total, cell.x, cell.y)
-              }} 
               onClick={() => onCellClick(cell)} 
               onMouseEnter={() => onCellHover({ x: cell.x, y: cell.y })} 
               onMouseLeave={() => onCellHover(null)}
             >
               <div className="absolute inset-0 flex items-center justify-center">
-                <span 
-                  className="text-sm font-bold drop-shadow-sm" 
-                  style={{
-                    color: cell.total === 0 ? '#9ca3af' : cell.total < maxValue * 0.4 ? '#1f2937' : '#ffffff'
-                  }}
-                >
+                <span className="text-base font-bold drop-shadow-sm">
                   {cell.total > 0 ? cell.total : ''}
                 </span>
               </div>

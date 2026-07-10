@@ -1,30 +1,26 @@
 import { QuadrantLabel } from './types';
 import { quadrantLabels, strategyColors } from './constants';
 
-export const getColorIntensity = (value: number, maxValue: number): string => {
-  if (value === 0) return 'transparent';
-
-  const intensity = Math.min(value / maxValue, 1);
-
-  if (intensity < 0.2) return '#E3F2FD';
-  if (intensity < 0.4) return '#BBDEFB';
-  if (intensity < 0.6) return '#64B5F6';
-  if (intensity < 0.8) return '#2196F3';
-  return '#1565C0';
-};
-
-export const getColorByStrategy = (x: number, y: number, value: number): string => {
-  if (value === 0) return 'transparent';
+export const getCellStyles = (value: number, x: number, y: number): string => {
+  if (value === 0) return 'bg-white border border-gray-100 text-gray-400 opacity-60';
 
   const strategy = getStrategyForCell(x, y);
-  const baseColor = strategyColors[strategy];
   
-  // Para celdas en transición (valores x=3 o y=3), mezclar colores
-  if (x === 3 || y === 3) {
-    return mixTransitionColors(x, y, baseColor);
+  if (strategy === 'Gestionar de cerca') {
+    return 'bg-green-50 text-green-600 border border-green-100/50';
+  }
+  if (strategy === 'Mantener satisfechos') {
+    return 'bg-blue-50 text-blue-600 border border-blue-100/50';
+  }
+  if (strategy === 'Mantener informados') {
+    return 'bg-orange-50 text-orange-600 border border-orange-100/50';
+  }
+  if (strategy === 'Monitorear') {
+    return 'bg-gray-50 text-gray-600 border border-gray-200/50';
   }
   
-  return baseColor;
+  // Transitions (x=3 or y=3)
+  return 'bg-slate-50 text-slate-500 border border-slate-100';
 };
 
 const getStrategyForCell = (x: number, y: number): string => {
@@ -32,13 +28,6 @@ const getStrategyForCell = (x: number, y: number): string => {
   if (y <= 2 && x >= 4) return 'Mantener satisfechos';
   if (y >= 4 && x <= 2) return 'Mantener informados';
   return 'Monitorear';
-};
-
-const mixTransitionColors = (x: number, y: number, baseColor: string): string => {
-  // Para simplificar, retornamos una versión más clara del color base en transiciones
-  const alpha = '80'; // Más transparente en transiciones
-  const hex = baseColor.replace('#', '');
-  return `${baseColor}${alpha}`;
 };
 
 export const getQuadrantForCell = (x: number, y: number): QuadrantLabel | null => {

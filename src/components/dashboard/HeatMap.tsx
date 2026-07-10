@@ -6,7 +6,7 @@ import { quadrantLabels } from './heatmap/constants';
 import { QuadrantOverlays } from './heatmap/QuadrantOverlays';
 import { HeatMapGrid } from './heatmap/HeatMapGrid';
 import { HeatMapAxis } from './heatmap/HeatMapAxis';
-import { getColorIntensity, getColorByStrategy, getQuadrantForCell } from './heatmap/utils';
+import { getCellStyles, getQuadrantForCell } from './heatmap/utils';
 
 export function HeatMap({ data }: HeatMapProps) {
   console.log('HeatMap data received:', data);
@@ -86,7 +86,7 @@ export function HeatMap({ data }: HeatMapProps) {
           onCellClick={handleCellClick}
           onCellHover={setHoveredCell}
           getQuadrantForCell={getQuadrantForCell}
-          getColorIntensity={(value, x, y) => getColorByStrategy(x, y, value)}
+          getCellStyles={(value, x, y) => getCellStyles(value, x, y)}
         />
 
         <HeatMapAxis gridSize={gridSize} />

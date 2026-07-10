@@ -16,17 +16,15 @@ export const QuadrantOverlays = ({ gridSize }: QuadrantOverlaysProps) => {
         return (
           <div 
             key={index} 
-            className="absolute pointer-events-none text-muted-foreground/40 font-bold" 
+            className="absolute pointer-events-none text-muted-foreground/40 font-bold w-[130px]" 
             style={{
               left: `${Math.max(5, Math.min(95, centerX))}%`,
               top: `${Math.max(5, Math.min(95, centerY))}%`,
               transform: 'translate(-50%, -50%)',
-              fontSize: '0.9rem',
+              fontSize: '1rem',
               lineHeight: '1.2',
               textAlign: 'center',
-              maxWidth: '80px',
               zIndex: 0,
-              wordBreak: 'break-word'
             }}
           >
             {quadrant.label}
