@@ -12,7 +12,7 @@ import { Label } from '@/components/ui/label';
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { MultiSelectFilter } from '@/components/ui/multi-select-filter';
-import { Plus, Search, Users, MapPin, Target, FolderOpen, X } from 'lucide-react';
+import { Plus, Search, Users, MapPin, Target, FolderOpen, X, CheckCircle, XCircle, Contact as ContactIcon } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { ActorDialog } from '@/components/actors/ActorDialog';
 import { ActorDetailDialog } from '@/components/actors/ActorDetailDialog';
@@ -569,7 +569,7 @@ export default function Actors() {
                       onClick={e => handleShowContacts(e, actor.actor_id, actor.nombre_actor)}
                       className="text-xs ml-auto"
                     >
-                      <Contact className="mr-1 h-3 w-3" />
+                      <ContactIcon className="mr-1 h-3 w-3" />
                       Contactos Relacionados
                     </Button>
                   )}
