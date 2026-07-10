@@ -6,15 +6,16 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup, SelectLabel } from '@/components/ui/select';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuCheckboxItem, DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, Search, Users, MapPin, Target, FolderOpen, X, Contact, CheckCircle, XCircle } from 'lucide-react';
+import { MultiSelectFilter } from '@/components/ui/multi-select-filter';
+import { Plus, Search, Users, MapPin, Target, FolderOpen, X } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { ActorDialog } from '@/components/actors/ActorDialog';
+import { ActorDetailDialog } from '@/components/actors/ActorDetailDialog';
 import { DidYouMean } from '@/components/DidYouMean';
 import { RelatedContactsDialog } from '@/components/actors/RelatedContactsDialog';
 import { Actor } from '@/components/actors/types';
@@ -59,17 +60,18 @@ export default function Actors() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState('');
-  const [showDialog, setShowDialog] = useState(false);
-  const [selectedActor, setSelectedActor] = useState<Actor | null>(null);
+  const [showActorDialog, setShowActorDialog] = useState(false);
+  const [showActorDetailDialog, setShowActorDetailDialog] = useState(false);
+  const [selectedActor, setSelectedActor] = useState<any>(null);
   const [showContactsDialog, setShowContactsDialog] = useState(false);
   const [selectedActorForContacts, setSelectedActorForContacts] = useState<{ id: string; name: string } | null>(null);
   const [filters, setFilters] = useState({
-    sector: '',
-    tipoRelacion: searchParams.get('tipoRelacion') || '',
+    sector: [] as string[],
+    tipoRelacion: [] as string[],
     sinContactos: '',
     ejeEstrategico: [] as string[],
-    estrategiaMatriz: '',
-    programa: '',
+    estrategiaMatriz: [] as string[],
+    programa: [] as string[],
   });
   const [multiProgramOnly, setMultiProgramOnly] = useState(false);
   const [activeTab, setActiveTab] = useState('active');
@@ -78,7 +80,7 @@ export default function Actors() {
   // Sync URL params (tipoRelacion) with internal state
   React.useEffect(() => {
     const tipoRelacion = searchParams.get('tipoRelacion');
-    if (tipoRelacion) setFilters(prev => ({ ...prev, tipoRelacion }));
+    if (tipoRelacion) setFilters(prev => ({ ...prev, tipoRelacion: [tipoRelacion] }));
   }, [searchParams]);
 
   const { data: actors, isLoading } = useQuery({
@@ -111,7 +113,6 @@ export default function Actors() {
     },
   });
 
-  // Lista única de programas existentes (para selector predictivo)
   const uniquePrograms = useMemo(() => {
     if (!actors) return [];
     const set = new Set<string>();
@@ -124,14 +125,13 @@ export default function Actors() {
     return Array.from(set).sort();
   }, [actors]);
 
-  // Abrir ficha de actor desde otro módulo
   React.useEffect(() => {
     const actorIdParam = searchParams.get('actorId');
     if (!actorIdParam || !actors) return;
     const target = actors.find((a: any) => a.actor_id === actorIdParam);
     if (target) {
-      setSelectedActor({ ...target, lugares_actuacion: (target as any).lugares_actuacion || [] } as any);
-      setShowDialog(true);
+      setSelectedActor(target);
+      setShowActorDetailDialog(true);
       const next = new URLSearchParams(searchParams);
       next.delete('actorId');
       setSearchParams(next, { replace: true });
@@ -149,12 +149,12 @@ export default function Actors() {
 
   const clearAllFilters = () => {
     setFilters({
-      sector: '',
-      tipoRelacion: '',
+      sector: [],
+      tipoRelacion: [],
       sinContactos: '',
       ejeEstrategico: [],
-      estrategiaMatriz: '',
-      programa: '',
+      estrategiaMatriz: [],
+      programa: [],
     });
     setSearchTerm('');
     setMultiProgramOnly(false);
@@ -168,63 +168,32 @@ export default function Actors() {
   const pendingActors = (actors || []).filter(actor => actor.status === 'pending_approval');
 
   const filteredActors = (activeTab === 'active' ? activeActors : pendingActors).filter(actor => {
-    // Búsqueda flexible (acentos / mayúsculas / múltiples palabras)
     const matchesSearch = fuzzyMatchAll([actor.nombre_actor], searchTerm);
-
-    const matchesSector = filters.sector === '' || actor.sector_actor === filters.sector;
-
-    const matchesTipoRelacion =
-      filters.tipoRelacion === '' ||
-      (actor.tipo_relacion && actor.tipo_relacion.includes(filters.tipoRelacion));
-
-    const matchesSinContactos =
-      filters.sinContactos === '' ||
-      (filters.sinContactos === 'sin_contactos' && actor.contact_count === 0) ||
-      (filters.sinContactos === 'con_contactos' && actor.contact_count > 0);
-
+    const matchesSector = filters.sector.length === 0 || filters.sector.includes(actor.sector_actor);
+    const matchesTipoRelacion = filters.tipoRelacion.length === 0 || (actor.tipo_relacion && (Array.isArray(actor.tipo_relacion) ? actor.tipo_relacion.some(r => filters.tipoRelacion.includes(r)) : filters.tipoRelacion.includes(actor.tipo_relacion)));
+    const matchesSinContactos = filters.sinContactos === '' || (filters.sinContactos === 'sin_contactos' && actor.contact_count === 0) || (filters.sinContactos === 'con_contactos' && actor.contact_count > 0);
     const programs = (actor.actor_programs || []).map((ap: any) => ap.programs).filter(Boolean);
-
-    const matchesEstrategia =
-      filters.estrategiaMatriz === '' ||
-      getEstrategiaMatriz(actor.nivel_influencia, actor.nivel_interes) === filters.estrategiaMatriz;
-
-    const matchesEje =
-      filters.ejeEstrategico.length === 0 ||
-      programs.some((p: any) => {
-        const eje = normalizeEje(p.eje_estrategico);
-        return eje && filters.ejeEstrategico.includes(eje);
-      });
-
+    const matchesEstrategia = filters.estrategiaMatriz.length === 0 || filters.estrategiaMatriz.includes(getEstrategiaMatriz(actor.nivel_influencia, actor.nivel_interes) || '');
+    const matchesEje = filters.ejeEstrategico.length === 0 || programs.some((p: any) => { const eje = normalizeEje(p.eje_estrategico); return eje && filters.ejeEstrategico.includes(eje); });
+    const matchesPrograma = filters.programa.length === 0 || programs.some((p: any) => filters.programa.includes(p.nombre));
     const matchesMultiProgram = !multiProgramOnly || programs.length > 1;
 
-    return (
-      matchesSearch &&
-      matchesSector &&
-      matchesTipoRelacion &&
-      matchesSinContactos &&
-      matchesEje &&
-      matchesEstrategia &&
-      matchesMultiProgram
-    );
+    return matchesSearch && matchesSector && matchesTipoRelacion && matchesSinContactos && matchesEstrategia && matchesEje && matchesPrograma && matchesMultiProgram;
   });
-
 
   const handleNewActor = () => {
     setSelectedActor(null);
-    setShowDialog(true);
+    setShowActorDialog(true);
   };
 
-  const handleEditActor = (actor: any) => {
-    if (!canEdit('actors')) {
-      // Strategic can create, but not edit
-      if (canCreatePendingActors()) {
-        toast({ title: 'Acceso denegado', description: 'Los gestores estratégicos solo pueden crear nuevos actores.' });
-        return;
-      }
-      return;
-    }
-    setSelectedActor({ ...actor, lugares_actuacion: actor.lugares_actuacion || [] });
-    setShowDialog(true);
+  const handleViewActor = (actor: any) => {
+    setSelectedActor(actor);
+    setShowActorDetailDialog(true);
+  };
+
+  const handleEditFromDetail = () => {
+    setShowActorDetailDialog(false);
+    setShowActorDialog(true);
   };
 
   const handleShowContacts = (e: React.MouseEvent, actorId: string, actorName: string) => {
@@ -236,9 +205,20 @@ export default function Actors() {
   const handleSuccess = () => {
     queryClient.invalidateQueries({ queryKey: ['actors'] });
     queryClient.invalidateQueries({ queryKey: ['actor-programs'] });
-    setShowDialog(false);
+    setShowActorDialog(false);
     toast({ title: '¡Actor guardado!', description: '¡A celebrar con un café! ☕' });
   };
+
+  const updateStatusMutation = useMutation({
+    mutationFn: async ({ actorId, status }: { actorId: string, status: string }) => {
+      const { error } = await supabase.from('actors').update({ status }).eq('actor_id', actorId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['actors'] });
+      toast({ title: 'Estado actualizado' });
+    }
+  });
 
   const lastUpdatedActor = useMemo(() => {
     if (!actors || actors.length === 0) return null;
@@ -251,23 +231,6 @@ export default function Actors() {
     if (!searchTerm.trim() || !actors || (filteredActors && filteredActors.length > 0)) return null;
     return findDidYouMean(searchTerm, actors.map(a => a.nombre_actor));
   }, [searchTerm, actors, filteredActors]);
-
-  const updateStatusMutation = useMutation({
-    mutationFn: async ({ actorId, status }: { actorId: string, status: string }) => {
-      const { error } = await supabase
-        .from('actors')
-        .update({ status })
-        .eq('actor_id', actorId);
-      if (error) throw error;
-    },
-    onSuccess: (_, vars) => {
-      queryClient.invalidateQueries({ queryKey: ['actors'] });
-      toast({
-        title: vars.status === 'active' ? 'Actor Aprobado' : 'Actor Rechazado',
-        description: vars.status === 'active' ? 'El actor ahora es público.' : 'La solicitud ha sido rechazada.',
-      });
-    }
-  });
 
   if (isLoading) {
     return (
@@ -287,7 +250,6 @@ export default function Actors() {
             <Button onClick={handleNewActor} className="btn-animate">
               <Plus className="mr-2 h-4 w-4" />
               Nuevo Actor
-              <kbd className="ml-2 kbd-shortcut">N</kbd>
             </Button>
           )
         }
@@ -314,7 +276,6 @@ export default function Actors() {
         </Tabs>
       )}
 
-      {/* Búsqueda y filtros */}
       <div className="space-y-4">
         <div className="flex items-center space-x-2">
           <div className="relative flex-1 max-w-sm">
@@ -337,129 +298,37 @@ export default function Actors() {
           <DidYouMean suggestion={didYouMeanSuggestion} onAccept={term => setSearchTerm(term)} />
         )}
 
-        {/* Fila única horizontal de filtros */}
-        <div className="grid gap-3 grid-cols-2 md:grid-cols-4 lg:grid-cols-7">
-          {/* Sector */}
-          <Select
-            value={filters.sector}
-            onValueChange={value => setFilters(prev => ({ ...prev, sector: value }))}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Sector" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                {SECTORES_BASE.map(s => (
-                  <SelectItem key={s} value={s}>{s}</SelectItem>
-                ))}
-              </SelectGroup>
-              <SelectGroup>
-                {ACADEMICO_SUBSECTORES.map(s => (
-                  <SelectItem key={s} value={s}>{s.replace('Académico — ', '')}</SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-
-          {/* Tipo de Relación */}
-          <Select
-            value={filters.tipoRelacion}
-            onValueChange={value => setFilters(prev => ({ ...prev, tipoRelacion: value }))}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Tipo de Relación" />
-            </SelectTrigger>
-            <SelectContent>
-              {TIPO_RELACION_OPTIONS.map(t => (
-                <SelectItem key={t} value={t}>{t}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          {/* Estrategia (Matriz) */}
-          <Select
-            value={filters.estrategiaMatriz}
-            onValueChange={value => setFilters(prev => ({ ...prev, estrategiaMatriz: value }))}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Estrategia" />
-            </SelectTrigger>
-            <SelectContent>
-              {ESTRATEGIAS_MATRIZ.map(e => (
-                <SelectItem key={e} value={e}>{e}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          {/* Eje */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="w-full justify-between font-normal text-left px-3">
-                {filters.ejeEstrategico.length > 0 ? (
-                  <span className="truncate flex gap-1 items-center">
-                    <span className="bg-primary text-primary-foreground text-[10px] px-1.5 py-0.5 rounded-full font-medium">
-                      {filters.ejeEstrategico.length}
-                    </span>
-                    seleccionados
-                  </span>
-                ) : (
-                  <span className="text-muted-foreground">Eje Estratégico</span>
-                )}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56" align="start">
-              <DropdownMenuLabel>Ejes Estratégicos</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              {EJES.map((eje) => (
-                <DropdownMenuCheckboxItem
-                  key={eje}
-                  checked={filters.ejeEstrategico.includes(eje)}
-                  onSelect={(e) => e.preventDefault()}
-                  onCheckedChange={(checked) => {
-                    setFilters(prev => ({
-                      ...prev,
-                      ejeEstrategico: checked
-                        ? [...prev.ejeEstrategico, eje]
-                        : prev.ejeEstrategico.filter(e => e !== eje)
-                    }));
-                  }}
-                >
-                  {eje}
-                </DropdownMenuCheckboxItem>
-              ))}
-              {filters.ejeEstrategico.length > 0 && (
-                <>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuCheckboxItem
-                    onSelect={(e) => {
-                      e.preventDefault();
-                      setFilters(prev => ({ ...prev, ejeEstrategico: [] }));
-                    }}
-                    className="justify-center text-red-600 font-medium cursor-pointer"
-                  >
-                    Limpiar Ejes
-                  </DropdownMenuCheckboxItem>
-                </>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          {/* Programa / Iniciativa */}
-          <Select
-            value={filters.programa}
-            onValueChange={value => setFilters(prev => ({ ...prev, programa: value }))}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Programa/Iniciativa" />
-            </SelectTrigger>
-            <SelectContent>
-              {uniquePrograms.map(p => (
-                <SelectItem key={p} value={p}>{p}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          {/* Contactos */}
+        <div className="grid gap-3 grid-cols-2 md:grid-cols-4 lg:grid-cols-6">
+          <MultiSelectFilter
+            title="Sector"
+            options={[...SECTORES_BASE, ...ACADEMICO_SUBSECTORES.map(s => s.replace('Académico — ', ''))]}
+            selectedValues={filters.sector}
+            onValuesChange={(vals) => setFilters(prev => ({ ...prev, sector: vals }))}
+          />
+          <MultiSelectFilter
+            title="Relación"
+            options={TIPO_RELACION_OPTIONS as unknown as string[]}
+            selectedValues={filters.tipoRelacion}
+            onValuesChange={(vals) => setFilters(prev => ({ ...prev, tipoRelacion: vals }))}
+          />
+          <MultiSelectFilter
+            title="Estrategia"
+            options={ESTRATEGIAS_MATRIZ as unknown as string[]}
+            selectedValues={filters.estrategiaMatriz}
+            onValuesChange={(vals) => setFilters(prev => ({ ...prev, estrategiaMatriz: vals }))}
+          />
+          <MultiSelectFilter
+            title="Eje"
+            options={EJES as unknown as string[]}
+            selectedValues={filters.ejeEstrategico}
+            onValuesChange={(vals) => setFilters(prev => ({ ...prev, ejeEstrategico: vals }))}
+          />
+          <MultiSelectFilter
+            title="Programa"
+            options={uniquePrograms}
+            selectedValues={filters.programa}
+            onValuesChange={(vals) => setFilters(prev => ({ ...prev, programa: vals }))}
+          />
           <Select
             value={filters.sinContactos}
             onValueChange={value => setFilters(prev => ({ ...prev, sinContactos: value }))}
@@ -509,7 +378,7 @@ export default function Actors() {
             <Card
               key={actor.actor_id}
               className="btn-animate cursor-pointer hover:shadow-md"
-              onClick={() => handleEditActor(actor)}
+              onClick={() => handleViewActor(actor)}
             >
               <CardHeader className="pb-3">
                 <div className="flex items-center space-x-3">
@@ -733,9 +602,16 @@ export default function Actors() {
         </div>
       )}
 
+      <ActorDetailDialog
+        open={showActorDetailDialog}
+        onOpenChange={setShowActorDetailDialog}
+        actor={selectedActor}
+        onEdit={handleEditFromDetail}
+      />
+
       <ActorDialog
-        open={showDialog}
-        onOpenChange={setShowDialog}
+        open={showActorDialog}
+        onOpenChange={setShowActorDialog}
         actor={selectedActor}
         onSuccess={handleSuccess}
       />

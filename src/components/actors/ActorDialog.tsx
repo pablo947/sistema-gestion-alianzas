@@ -33,11 +33,11 @@ import { useToast } from '@/hooks/use-toast';
 const actorSchema = z.object({
   nombre_actor: z.string().min(1, 'El nombre es requerido'),
   sector_actor: z.string().min(1, 'El sector es requerido'),
-  ciudad_sede: z.string().default(''),
-  alcance_territorial: z.string().default('Municipal'),
-  tipo_relacion: z.array(z.string()).default([]),
-  nivel_influencia: z.number().min(1).max(5).optional(),
-  nivel_interes: z.number().min(1).max(5).optional(),
+  ciudad_sede: z.string().min(1, 'La ciudad sede es requerida'),
+  alcance_territorial: z.string().min(1, 'El alcance es requerido'),
+  tipo_relacion: z.array(z.string()).min(1, 'Debe seleccionar al menos un tipo'),
+  nivel_influencia: z.number({ required_error: 'Requerido' }).min(1).max(5),
+  nivel_interes: z.number({ required_error: 'Requerido' }).min(1).max(5),
   
   proyecto_ids: z.array(z.string()).default([]),
   responsable_seguimiento: z.array(z.string()).default([]),
@@ -172,7 +172,7 @@ export function ActorDialog({ open, onOpenChange, actor, onSuccess }: ActorDialo
         // Create new actor
         const newActorData = {
           ...actorData,
-          status: (!canEdit('actors') && canCreatePendingActors()) ? 'pending_approval' : 'active'
+          status: 'pending_approval' // Todas las creaciones van a aprobación primero
         };
         const { data, error } = await supabase
           .from('actors')
@@ -229,26 +229,7 @@ export function ActorDialog({ open, onOpenChange, actor, onSuccess }: ActorDialo
   });
 
   const onSubmit = (values: z.infer<typeof actorSchema>) => {
-    if (isStrategicCreate) {
-      const requiredFields = [
-        'ciudad_sede', 'alcance_territorial', 'tipo_relacion', 'nivel_influencia', 'nivel_interes',
-        'proyecto_ids', 'responsable_seguimiento', 'telefono_entidad', 'direccion_entidad', 'correo_entidad', 'anios_alianza'
-      ];
-      let hasError = false;
-      requiredFields.forEach(f => {
-        const v = (values as any)[f];
-        if (Array.isArray(v) ? v.length === 0 : (v === undefined || v === null || v === '')) {
-          form.setError(f as any, { type: 'manual', message: 'Campo obligatorio para tu rol' });
-          hasError = true;
-        }
-      });
-      if (hasError) {
-        toast({ title: 'Campos requeridos', description: 'Debes completar todos los campos del formulario.', variant: 'destructive' });
-        return;
-      }
-    }
-
-    if (isStrategicEdit) {
+    if (actor) {
       setChangeRequestPayload(values);
       setIsChangeRequestOpen(true);
       return;
@@ -341,9 +322,9 @@ export function ActorDialog({ open, onOpenChange, actor, onSuccess }: ActorDialo
                   <Button
                     type="submit"
                     disabled={mutation.isPending}
-                    className={isStrategicEdit ? "bg-orange-600 hover:bg-orange-700 text-white" : "btn-animate"}
+                    className={actor ? "bg-orange-600 hover:bg-orange-700 text-white" : "btn-animate"}
                   >
-                    {isStrategicEdit ? 'Solicitar revisión y/o cambios' : actor ? 'Actualizar Actor' : 'Crear Actor'}
+                    {actor ? 'Actualizar Actor' : 'Crear Actor'}
                   </Button>
                 )}
               </div>
