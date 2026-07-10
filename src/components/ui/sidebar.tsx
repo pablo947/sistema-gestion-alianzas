@@ -32,6 +32,8 @@ type SidebarContext = {
   setOpenMobile: (open: boolean) => void
   isMobile: boolean
   toggleSidebar: () => void
+  isPinned: boolean
+  togglePin: () => void
 }
 
 const SidebarContext = React.createContext<SidebarContext | null>(null)
@@ -72,6 +74,37 @@ const SidebarProvider = React.forwardRef<
     // We use openProp and setOpenProp for control from outside the component.
     const [_open, _setOpen] = React.useState(defaultOpen)
     const open = openProp ?? _open
+
+    const [isPinned, setIsPinned] = React.useState<boolean>(() => {
+      if (typeof window !== 'undefined') {
+        const stored = localStorage.getItem("sidebar:pinned")
+        return stored !== null ? stored === "true" : true
+      }
+      return true
+    })
+
+    const togglePin = React.useCallback(() => {
+      setIsPinned((prev) => {
+        const newState = !prev
+        localStorage.setItem("sidebar:pinned", String(newState))
+        // If unpinning, we also want to collapse the sidebar immediately.
+        if (!newState) {
+          if (setOpenProp) {
+            setOpenProp(false)
+          } else {
+            _setOpen(false)
+          }
+        } else {
+          if (setOpenProp) {
+            setOpenProp(true)
+          } else {
+            _setOpen(true)
+          }
+        }
+        return newState
+      })
+    }, [setOpenProp])
+
     const setOpen = React.useCallback(
       (value: boolean | ((value: boolean) => boolean)) => {
         const openState = typeof value === "function" ? value(open) : value
@@ -123,8 +156,10 @@ const SidebarProvider = React.forwardRef<
         openMobile,
         setOpenMobile,
         toggleSidebar,
+        isPinned,
+        togglePin,
       }),
-      [state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar]
+      [state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar, isPinned, togglePin]
     )
 
     return (
@@ -173,7 +208,25 @@ const Sidebar = React.forwardRef<
     },
     ref
   ) => {
-    const { isMobile, state, openMobile, setOpenMobile } = useSidebar()
+    const { isMobile, state, openMobile, setOpenMobile, isPinned, setOpen } = useSidebar()
+    
+    // We want to delay the collapse slightly to prevent flickering if moving between menu items
+    const timeoutRef = React.useRef<NodeJS.Timeout | null>(null)
+
+    const handleMouseEnter = () => {
+      if (!isPinned && !isMobile) {
+        if (timeoutRef.current) clearTimeout(timeoutRef.current)
+        setOpen(true)
+      }
+    }
+
+    const handleMouseLeave = () => {
+      if (!isPinned && !isMobile) {
+        timeoutRef.current = setTimeout(() => {
+          setOpen(false)
+        }, 150) // Small delay
+      }
+    }
 
     if (collapsible === "none") {
       return (
@@ -218,6 +271,9 @@ const Sidebar = React.forwardRef<
         data-collapsible={state === "collapsed" ? collapsible : ""}
         data-variant={variant}
         data-side={side}
+        data-pinned={isPinned ? "true" : "false"}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
       >
         {/* This is what handles the sidebar gap on desktop */}
         <div
@@ -226,8 +282,8 @@ const Sidebar = React.forwardRef<
             "group-data-[collapsible=offcanvas]:w-0",
             "group-data-[side=right]:rotate-180",
             variant === "floating" || variant === "inset"
-              ? "group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)_+_theme(spacing.4))]"
-              : "group-data-[collapsible=icon]:w-[--sidebar-width-icon]"
+              ? "group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)_+_theme(spacing.4))] group-data-[pinned=false]:w-[calc(var(--sidebar-width-icon)_+_theme(spacing.4))]"
+              : "group-data-[collapsible=icon]:w-[--sidebar-width-icon] group-data-[pinned=false]:w-[--sidebar-width-icon]"
           )}
         />
         <div

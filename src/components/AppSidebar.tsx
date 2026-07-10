@@ -29,9 +29,11 @@ import {
   Sun,
   Award,
   BookOpen,
+  Pin,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useTheme } from 'next-themes';
+import { cn } from '@/lib/utils';
 
 const menuItems = [
   { title: "Inicio", url: "/", icon: Home, moduleId: 'home' },
@@ -46,7 +48,7 @@ const menuItems = [
 ];
 
 export function AppSidebar() {
-  const { state } = useSidebar();
+  const { state, isPinned, togglePin } = useSidebar();
   const location = useLocation();
   const { user, userProfile, isAdmin, signOut } = useAuth();
   const { toast } = useToast();
@@ -67,11 +69,11 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar collapsible="offcanvas">
+    <Sidebar collapsible="icon">
       <SidebarContent className="flex flex-col h-full">
         {/* Logo area */}
-        {!collapsed && (
-          <div className="px-4 py-5 border-b border-sidebar-border">
+        <div className={cn("px-4 py-5 border-b border-sidebar-border flex items-center justify-between", collapsed ? "px-2 justify-center" : "")}>
+          {!collapsed && (
             <div className="flex items-center gap-3">
               <img src="/lovable-uploads/bf9d79fe-6f69-4035-bb1f-6067d269f895.png" alt="Fundación Luker" className="w-8 h-8 mix-blend-multiply dark:mix-blend-normal dark:bg-white dark:rounded-sm dark:p-0.5" />
               <div>
@@ -79,8 +81,20 @@ export function AppSidebar() {
                 <p className="text-[10px] text-muted-foreground">Gestión de Alianzas</p>
               </div>
             </div>
-          </div>
-        )}
+          )}
+          {/* Pin Button */}
+          {!collapsed && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6 text-muted-foreground hover:text-foreground shrink-0"
+              onClick={togglePin}
+              title={isPinned ? "Desfijar barra lateral" : "Fijar barra lateral"}
+            >
+              <Pin className={cn("h-4 w-4 transition-transform", !isPinned && "-rotate-45 text-muted-foreground")} fill={isPinned ? "currentColor" : "none"} />
+            </Button>
+          )}
+        </div>
 
         {/* Navigation */}
         <SidebarGroup className="flex-1">
@@ -91,7 +105,7 @@ export function AppSidebar() {
                 .filter(item => hasModuleVisibility(item.moduleId))
                 .map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
+                  <SidebarMenuButton asChild tooltip={item.title}>
                     <NavLink
                       to={item.url}
                       className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors ${
