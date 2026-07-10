@@ -15,8 +15,19 @@ import { useInfluenceInterest } from '@/hooks/useInfluenceInterest';
 import { useActorRelations } from '@/hooks/useActorRelations';
 import { PageHeader } from '@/components/layout/PageHeader';
 import Grafos from './Grafos';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Lightbulb, StickyNote } from 'lucide-react';
+import { StrategicActionDialog } from '@/components/strategies/StrategicActionDialog';
 
 const BAR_COLORS = ['#F59E0B', '#22C55E', '#1E3A5F', '#06B6D4', '#6366F1', '#EC4899', '#8B5CF6'];
+
+interface StrategicAction {
+  id: string;
+  scope: 'quadrant' | 'actor';
+  quadrant_key: string;
+  actor_id: string | null;
+  action_text: string;
+}
 
 
 interface ActorItem {
@@ -35,36 +46,36 @@ interface ProgramInfo {
 
 const quadrants = [
   {
-    key: 'close',
-    title: 'Gestionar de Cerca',
-    description: 'Alta influencia, alto interés',
-    filter: (a: ActorItem) => (a.nivel_influencia || 0) >= 4 && (a.nivel_interes || 0) >= 4,
-    color: 'border-l-4 border-l-red-400',
-    bg: 'bg-red-50 dark:bg-red-950/20',
-  },
-  {
     key: 'satisfied',
     title: 'Mantener Satisfechos',
     description: 'Alta influencia, bajo interés',
     filter: (a: ActorItem) => (a.nivel_influencia || 0) >= 4 && (a.nivel_interes || 0) < 4,
-    color: 'border-l-4 border-l-amber-400',
-    bg: 'bg-amber-50 dark:bg-amber-950/20',
+    color: 'border-l-4 border-l-blue-400',
+    bg: 'bg-blue-50/60 dark:bg-blue-950/20',
   },
   {
-    key: 'informed',
-    title: 'Mantener Informados',
-    description: 'Baja influencia, alto interés',
-    filter: (a: ActorItem) => (a.nivel_influencia || 0) < 4 && (a.nivel_interes || 0) >= 4,
-    color: 'border-l-4 border-l-blue-400',
-    bg: 'bg-blue-50 dark:bg-blue-950/20',
+    key: 'close',
+    title: 'Gestionar de Cerca',
+    description: 'Alta influencia, alto interés',
+    filter: (a: ActorItem) => (a.nivel_influencia || 0) >= 4 && (a.nivel_interes || 0) >= 4,
+    color: 'border-l-4 border-l-green-400',
+    bg: 'bg-green-50/60 dark:bg-green-950/20',
   },
   {
     key: 'monitor',
     title: 'Monitorear',
     description: 'Baja influencia, bajo interés',
     filter: (a: ActorItem) => (a.nivel_influencia || 0) < 4 && (a.nivel_interes || 0) < 4,
-    color: 'border-l-4 border-l-emerald-400',
-    bg: 'bg-emerald-50 dark:bg-emerald-950/20',
+    color: 'border-l-4 border-l-gray-400',
+    bg: 'bg-gray-50/80 dark:bg-gray-950/20',
+  },
+  {
+    key: 'informed',
+    title: 'Mantener Informados',
+    description: 'Baja influencia, alto interés',
+    filter: (a: ActorItem) => (a.nivel_influencia || 0) < 4 && (a.nivel_interes || 0) >= 4,
+    color: 'border-l-4 border-l-orange-400',
+    bg: 'bg-orange-50/60 dark:bg-orange-950/20',
   },
 ];
 
@@ -112,8 +123,8 @@ export default function Strategies() {
   const location = useLocation();
   const [actors, setActors] = useState<ActorItem[]>([]);
   const [programsByActor, setProgramsByActor] = useState<Record<string, ProgramInfo[]>>({});
-  const [quadrantNotes, setQuadrantNotes] = useState<Record<string, string>>({});
   const [allyNotes, setAllyNotes] = useState<Record<string, string>>({});
+  const [approvedActions, setApprovedActions] = useState<StrategicAction[]>([]);
   const { canEdit, canEditRecommendations } = usePermissions();
   const { data: influenceInterest } = useInfluenceInterest();
   const { data: relationsData } = useActorRelations();
@@ -128,16 +139,18 @@ export default function Strategies() {
   };
 
   useEffect(() => {
-    const loadData = async () => {
-      const [{ data: actorsData }, { data: linksData }, { data: programsData }] = await Promise.all([
-        supabase
-          .from('actors')
-          .select('actor_id, nombre_actor, nivel_influencia, nivel_interes, tipo_relacion'),
-        supabase.from('actor_programs').select('actor_id, program_id'),
-        supabase.from('programs').select('programa_id, nombre, eje_estrategico'),
-      ]);
+  const loadData = async () => {
+    const [{ data: actorsData }, { data: linksData }, { data: programsData }, { data: actionsData }] = await Promise.all([
+      supabase
+        .from('actors')
+        .select('actor_id, nombre_actor, nivel_influencia, nivel_interes, tipo_relacion'),
+      supabase.from('actor_programs').select('actor_id, program_id'),
+      supabase.from('programs').select('programa_id, nombre, eje_estrategico'),
+      supabase.from('strategic_actions').select('*').eq('status', 'approved'),
+    ]);
 
-      if (actorsData) setActors(actorsData);
+    if (actorsData) setActors(actorsData);
+    if (actionsData) setApprovedActions(actionsData as StrategicAction[]);
 
       if (linksData && programsData) {
         const programMap = new Map<string, ProgramInfo>(
@@ -170,7 +183,7 @@ export default function Strategies() {
     navigate(`/projects?id=${programaId}`);
   };
 
-  const renderActorWithHover = (actor: ActorItem, showLevels: boolean) => {
+  const renderActorWithHover = (actor: ActorItem, showLevels: boolean, actorActions: StrategicAction[] = []) => {
     const programs = programsByActor[actor.actor_id] || [];
     const count = programs.length;
 
@@ -180,6 +193,22 @@ export default function Strategies() {
           <div className="flex items-center justify-between text-xs py-1.5 px-2 rounded bg-muted/50 cursor-pointer hover:bg-muted transition-colors">
             <div className="flex items-center gap-1.5 min-w-0">
               <span className="font-medium truncate">{actor.nombre_actor}</span>
+              {actorActions.length > 0 && (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button onClick={(e) => e.stopPropagation()} className="text-primary hover:text-primary/80 transition-colors shrink-0">
+                        <Lightbulb className="h-3.5 w-3.5" />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="max-w-[200px] text-xs">
+                      {actorActions.map((act, i) => (
+                        <p key={i} className="mb-1 last:mb-0 text-white">{act.action_text}</p>
+                      ))}
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
               {count > 0 && (
                 <span className="shrink-0 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-semibold rounded-full bg-primary/10 text-primary">
                   {count}
@@ -276,8 +305,12 @@ export default function Strategies() {
           <div className="grid gap-4 md:grid-cols-2">
             {quadrants.map((q) => {
               const filtered = actors.filter(q.filter);
+              const quadrantActions = approvedActions.filter(a => a.quadrant_key === q.key);
+              const generalActions = quadrantActions.filter(a => a.scope === 'quadrant');
+              const actorActions = quadrantActions.filter(a => a.scope === 'actor');
+
               return (
-                <Card key={q.key} className={`${q.color}`}>
+                <Card key={q.key} className={`${q.color} ${q.bg}`}>
                   <CardHeader className="pb-2">
                     <CardTitle className="text-base">{q.title}</CardTitle>
                     <p className="text-xs text-muted-foreground">{q.description}</p>
@@ -287,18 +320,40 @@ export default function Strategies() {
                       {filtered.length === 0 && (
                         <p className="text-xs text-muted-foreground italic">Sin actores en este cuadrante</p>
                       )}
-                      {filtered.map((a) => renderActorWithHover(a, true))}
+                      {filtered.map((a) => {
+                        const specificActions = actorActions.filter(act => act.actor_id === a.actor_id);
+                        return renderActorWithHover(a, true, specificActions);
+                      })}
                     </div>
-                    <div>
-                      <p className="text-xs font-medium mb-1 text-muted-foreground">Acciones Estratégicas</p>
-                      <Textarea
-                        placeholder="Escriba las acciones estratégicas para este grupo..."
-                        value={quadrantNotes[q.key] || ''}
-                        onChange={(e) => setQuadrantNotes({ ...quadrantNotes, [q.key]: e.target.value })}
-                        className="text-xs min-h-[60px] resize-none"
-                        disabled={!canEditRecommendations()}
-                      />
-                    </div>
+                    
+                    {generalActions.length > 0 && (
+                      <div className="mt-4 pt-3 border-t border-border/50">
+                        <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+                          Acciones del Cuadrante
+                        </p>
+                        <ul className="space-y-1.5">
+                          {generalActions.map((action) => (
+                            <li key={action.id} className="text-xs text-foreground bg-background/50 p-2 rounded-md border border-border/30 flex items-start gap-2">
+                              <StickyNote className="h-3.5 w-3.5 text-primary shrink-0 mt-0.5" />
+                              <span className="leading-tight">{action.action_text}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    {canEditRecommendations() && (
+                      <div className="pt-2">
+                        <StrategicActionDialog 
+                          quadrantKey={q.key} 
+                          quadrantTitle={q.title} 
+                          actors={filtered} 
+                          onSuccess={() => {
+                            // En la vida real, se recargaría pero como está pending_approval no aparecerá inmediatamente.
+                          }} 
+                        />
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               );

@@ -537,6 +537,50 @@ export type Database = {
           },
         ]
       }
+      strategic_actions: {
+        Row: {
+          id: string
+          scope: string
+          quadrant_key: string
+          actor_id: string | null
+          action_text: string
+          status: string
+          created_by: string | null
+          user_email: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          scope: string
+          quadrant_key: string
+          actor_id?: string | null
+          action_text: string
+          status?: string
+          created_by?: string | null
+          user_email: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          scope?: string
+          quadrant_key?: string
+          actor_id?: string | null
+          action_text?: string
+          status?: string
+          created_by?: string | null
+          user_email?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "strategic_actions_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "actors"
+            referencedColumns: ["actor_id"]
+          }
+        ]
+      }
       scoring_config: {
         Row: {
           id: string

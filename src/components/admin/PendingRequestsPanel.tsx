@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
-import { CheckCircle, XCircle, FileEdit, UserPlus } from 'lucide-react';
+import { CheckCircle, XCircle, FileEdit, UserPlus, Lightbulb } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useToast } from '@/hooks/use-toast';
@@ -67,6 +67,21 @@ export function PendingRequestsPanel() {
         .select('*')
         .eq('status', 'pending_approval')
         .order('updated_at', { ascending: false });
+
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Fetch pending strategic actions
+  const { data: pendingStrategicActions = [], isLoading: isLoadingStrategicActions } = useQuery({
+    queryKey: ['pending-strategic-actions'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('strategic_actions')
+        .select(`*, actors(nombre_actor)`)
+        .eq('status', 'pending_approval')
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
       return data;
@@ -203,8 +218,36 @@ export function PendingRequestsPanel() {
     },
   });
 
-  const isLoading = isLoadingChanges || isLoadingNew || isLoadingContactChanges || isLoadingNewContacts;
-  const totalPending = changeRequests.length + newActors.length + contactChangeRequests.length + newContacts.length;
+  const approveStrategicActionMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from('strategic_actions')
+        .update({ status: 'approved' })
+        .eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast({ title: 'Sugerencia Aprobada', description: 'La sugerencia estratégica ha sido publicada.' });
+      queryClient.invalidateQueries({ queryKey: ['pending-strategic-actions'] });
+    },
+  });
+
+  const rejectStrategicActionMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from('strategic_actions')
+        .update({ status: 'rejected' })
+        .eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast({ title: 'Sugerencia Rechazada', description: 'La sugerencia ha sido descartada.' });
+      queryClient.invalidateQueries({ queryKey: ['pending-strategic-actions'] });
+    },
+  });
+
+  const isLoading = isLoadingChanges || isLoadingNew || isLoadingContactChanges || isLoadingNewContacts || isLoadingStrategicActions;
+  const totalPending = changeRequests.length + newActors.length + contactChangeRequests.length + newContacts.length + pendingStrategicActions.length;
 
   if (isLoading) {
     return <div className="flex items-center justify-center p-8 text-muted-foreground">Cargando solicitudes...</div>;
@@ -406,6 +449,52 @@ export function PendingRequestsPanel() {
                         variant="destructive"
                         onClick={() => rejectContactChangeMutation.mutate(req.id)}
                         disabled={rejectContactChangeMutation.isPending}
+                      >
+                        <XCircle className="mr-1 h-4 w-4" /> Rechazar
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+
+              {/* Rendering Pending Strategic Actions */}
+              {pendingStrategicActions.map((req: any) => (
+                <div key={req.id} className="flex items-start gap-3 p-4 rounded-lg border bg-card shadow-sm">
+                  <div className="mt-0.5 rounded-full p-2 bg-emerald-100 dark:bg-emerald-900/30">
+                    <Lightbulb className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                  </div>
+                  <div className="flex-1 min-w-0 space-y-2">
+                    <div className="flex items-center justify-between gap-2 flex-wrap">
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline" className="bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400">
+                          Sugerencia Estratégica
+                        </Badge>
+                        <span className="text-base font-semibold">
+                          {req.scope === 'quadrant' ? `Para todo el cuadrante (${req.quadrant_key})` : `Actor: ${req.actors?.nombre_actor || 'Desconocido'}`}
+                        </span>
+                      </div>
+                      <span className="text-xs text-muted-foreground">
+                        por {req.user_email} · {format(new Date(req.created_at), "d MMM yyyy, HH:mm", { locale: es })}
+                      </span>
+                    </div>
+                    <div className="bg-muted/50 p-2 text-sm rounded border border-muted mt-2 whitespace-pre-wrap">
+                      {req.action_text}
+                    </div>
+                    <div className="flex gap-2 justify-end mt-2">
+                      <Button
+                        size="sm"
+                        variant="default"
+                        className="bg-green-600 hover:bg-green-700"
+                        onClick={() => approveStrategicActionMutation.mutate(req.id)}
+                        disabled={approveStrategicActionMutation.isPending}
+                      >
+                        <CheckCircle className="mr-1 h-4 w-4" /> Aprobar
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => rejectStrategicActionMutation.mutate(req.id)}
+                        disabled={rejectStrategicActionMutation.isPending}
                       >
                         <XCircle className="mr-1 h-4 w-4" /> Rechazar
                       </Button>
