@@ -22,6 +22,7 @@ import { useDuplicateDetection } from '@/hooks/useDuplicateDetection';
 import { DuplicateWarning } from '@/components/DuplicateWarning';
 import { sanitizeFormData } from '@/lib/textUtils';
 import { usePermissions } from '@/hooks/usePermissions';
+import { ContactChangeRequestDialog } from './ContactChangeRequestDialog';
 
 const contactSchema = z.object({
   nombre: z.string().min(1, 'El nombre es requerido'),
@@ -39,6 +40,8 @@ const contactSchema = z.object({
 
 export function ContactDialog({ open, onOpenChange, contact, onSuccess, preselectedActorId }: ContactDialogProps) {
   const [acknowledgedDuplicateSignature, setAcknowledgedDuplicateSignature] = useState<string | null>(null);
+  const [changeRequestPayload, setChangeRequestPayload] = useState<any>(null);
+  const [isChangeRequestOpen, setIsChangeRequestOpen] = useState(false);
   const duplicateWarningRef = useRef<HTMLDivElement>(null);
   const { canEditContacts, canDeleteContacts } = usePermissions();
   const { data: allContacts = [] } = useQuery({
@@ -138,6 +141,7 @@ export function ContactDialog({ open, onOpenChange, contact, onSuccess, preselec
       };
 
       if (contact) {
+        // This is never reached directly if we intercept in onSubmit, but keeping it for safety
         const { error } = await supabase
           .from('contacts')
           .update(contactData)
@@ -146,7 +150,10 @@ export function ContactDialog({ open, onOpenChange, contact, onSuccess, preselec
       } else {
         const { error } = await supabase
           .from('contacts')
-          .insert(contactData);
+          .insert({
+            ...contactData,
+            status: 'pending_approval'
+          });
         if (error) throw error;
       }
     },
@@ -181,6 +188,12 @@ export function ContactDialog({ open, onOpenChange, contact, onSuccess, preselec
         title: 'Revisa la coincidencia detectada',
         description: 'Puedes continuar con la creación de todos modos desde la alerta del formulario.',
       });
+      return;
+    }
+
+    if (contact) {
+      setChangeRequestPayload(values);
+      setIsChangeRequestOpen(true);
       return;
     }
 
@@ -251,15 +264,24 @@ export function ContactDialog({ open, onOpenChange, contact, onSuccess, preselec
                   <Button
                     type="submit"
                     disabled={mutation.isPending}
-                    className="min-h-10 btn-animate"
+                    className={contact ? "bg-orange-600 hover:bg-orange-700 text-white min-h-10" : "min-h-10 btn-animate"}
                   >
-                    {contact ? 'Actualizar' : 'Crear'} Contacto
+                    {contact ? 'Enviar solicitud de actualización' : 'Crear Contacto'}
                   </Button>
                 )}
               </div>
             </div>
           </form>
         </Form>
+        {contact && (
+          <ContactChangeRequestDialog
+            open={isChangeRequestOpen}
+            onOpenChange={setIsChangeRequestOpen}
+            contactId={contact.contact_id}
+            payload={changeRequestPayload}
+            onSuccess={() => onOpenChange(false)}
+          />
+        )}
       </DialogContent>
     </Dialog>
   );

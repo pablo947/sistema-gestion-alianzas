@@ -253,6 +253,47 @@ export type Database = {
         }
         Relationships: []
       }
+      contact_change_requests: {
+        Row: {
+          id: string
+          contact_id: string | null
+          requested_by: string | null
+          user_email: string
+          payload: Json
+          justification: string | null
+          status: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          contact_id?: string | null
+          requested_by?: string | null
+          user_email: string
+          payload: Json
+          justification?: string | null
+          status?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          contact_id?: string | null
+          requested_by?: string | null
+          user_email?: string
+          payload?: Json
+          justification?: string | null
+          status?: string | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contact_change_requests_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["contact_id"]
+          }
+        ]
+      }
       contacts: {
         Row: {
           actor_id: string | null
@@ -269,6 +310,7 @@ export type Database = {
           telefono: string | null
           tipo_contacto: string[] | null
           updated_at: string | null
+          status: string | null
         }
         Insert: {
           actor_id?: string | null
@@ -287,6 +329,7 @@ export type Database = {
           telefono?: string | null
           tipo_contacto?: string[] | null
           updated_at?: string | null
+          status?: string | null
         }
         Update: {
           actor_id?: string | null
@@ -305,6 +348,7 @@ export type Database = {
           telefono?: string | null
           tipo_contacto?: string[] | null
           updated_at?: string | null
+          status?: string | null
         }
         Relationships: [
           {

@@ -17,6 +17,7 @@ import { EJES } from '@/lib/ejes';
 import { Plus, Search, Filter, User, Mail, Phone, Users, X } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { ContactDialog } from '@/components/contacts/ContactDialog';
+import { ContactDetailDialog } from '@/components/contacts/ContactDetailDialog';
 import { DidYouMean } from '@/components/DidYouMean';
 import { Contact } from '@/components/contacts/types';
 import { useAuth } from '@/hooks/useAuth';
@@ -52,6 +53,7 @@ export default function Contacts() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState('');
   const [showDialog, setShowDialog] = useState(false);
+  const [showDetailDialog, setShowDetailDialog] = useState(false);
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
   const [filters, setFilters] = useState({
     proyecto: '',
@@ -166,7 +168,7 @@ export default function Contacts() {
     const target = contacts.find((c: any) => c.contact_id === contactIdParam);
     if (target) {
       setSelectedContact(target as Contact);
-      setShowDialog(true);
+      setShowDetailDialog(true);
       const next = new URLSearchParams(searchParams);
       next.delete('contactId');
       setSearchParams(next, { replace: true });
@@ -244,8 +246,13 @@ export default function Contacts() {
     setShowDialog(true);
   };
 
-  const handleEditContact = (contact: Contact) => {
-    setSelectedContact(contact);
+  const handleSelectContact = (contact: Contact) => {
+      setSelectedContact(contact);
+      setShowDetailDialog(true);
+  };
+
+  const handleEditClick = () => {
+    setShowDetailDialog(false);
     setShowDialog(true);
   };
 
@@ -491,7 +498,7 @@ export default function Contacts() {
             <Card
               key={contact.contact_id}
               className="btn-animate cursor-pointer hover:shadow-md"
-              onClick={() => !isInternal && handleEditContact(contact)}
+              onClick={() => !isInternal && handleSelectContact(contact)}
             >
               <CardHeader className="pb-3">
                 <div className="flex items-center space-x-3">
@@ -610,6 +617,14 @@ export default function Contacts() {
           )}
         </div>
       )}
+
+      <ContactDetailDialog
+        open={showDetailDialog}
+        onOpenChange={setShowDetailDialog}
+        contact={selectedContact}
+        actorName={(selectedContact as any)?.actors?.nombre_actor}
+        onEdit={handleEditClick}
+      />
 
       <ContactDialog
         open={showDialog}
