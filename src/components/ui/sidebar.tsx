@@ -266,14 +266,7 @@ const Sidebar = React.forwardRef<
     return (
       <div
         ref={ref}
-        className={cn(
-          "group peer hidden md:flex flex-col shrink-0 text-sidebar-foreground transition-[width] duration-300 ease-in-out h-svh z-10 bg-sidebar",
-          side === "left" ? "border-r border-sidebar-border" : "border-l border-sidebar-border",
-          variant === "floating" || variant === "inset"
-            ? "p-2 w-[calc(var(--sidebar-width)_+_theme(spacing.4)_+2px)] group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)_+_theme(spacing.4)_+2px)]"
-            : "w-[--sidebar-width] group-data-[collapsible=icon]:w-[--sidebar-width-icon]",
-          className
-        )}
+        className="group peer hidden md:block text-sidebar-foreground"
         data-state={state}
         data-collapsible={state === "collapsed" ? collapsible : ""}
         data-variant={variant}
@@ -281,13 +274,31 @@ const Sidebar = React.forwardRef<
         data-pinned={isPinned ? "true" : "false"}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
-        {...props}
       >
+        {/* Gap div: Pushes the layout content. Depends strictly on isPinned. */}
         <div
-          data-sidebar="sidebar"
-          className="flex h-full w-full flex-col overflow-hidden bg-sidebar group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:border-sidebar-border group-data-[variant=floating]:shadow"
+          className="duration-300 relative h-svh bg-transparent transition-[width] ease-in-out shrink-0"
+          style={{ width: isPinned ? 'var(--sidebar-width)' : 'var(--sidebar-width-icon)' }}
+        />
+        
+        {/* Fixed div: The actual visual sidebar. Expands if pinned OR hovered (expanded). */}
+        <div
+          className={cn(
+            "duration-300 fixed inset-y-0 z-50 hidden h-svh transition-[width] ease-in-out md:flex",
+            side === "left"
+              ? "left-0 border-r border-sidebar-border"
+              : "right-0 border-l border-sidebar-border",
+            className
+          )}
+          style={{ width: (isPinned || state === "expanded") ? 'var(--sidebar-width)' : 'var(--sidebar-width-icon)' }}
+          {...props}
         >
-          {children}
+          <div
+            data-sidebar="sidebar"
+            className="flex h-full w-full flex-col overflow-hidden bg-sidebar shadow-md"
+          >
+            {children}
+          </div>
         </div>
       </div>
     )
