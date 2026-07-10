@@ -12,6 +12,8 @@ import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup, SelectLabel } from '@/components/ui/select';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuCheckboxItem, DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
+import { EJES } from '@/lib/ejes';
 import { Plus, Search, Filter, User, Mail, Phone, Users, X } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { ContactDialog } from '@/components/contacts/ContactDialog';
@@ -23,15 +25,7 @@ import { useSearchParams } from 'react-router-dom';
 import { ModuleStatsPanel } from '@/components/ModuleStatsPanel';
 import { PageHeader } from '@/components/layout/PageHeader';
 
-// Ejes Estratégicos oficiales Fundación Luker (sin tilde en "Luker")
-const EJES_ESTRATEGICOS_OFICIALES = [
-  'Primera infancia',
-  'Educación en el aula',
-  'Jóvenes y dinámicas más allá del aula',
-  'Vida productiva',
-  'Organizaciones e Iniciativas del Legado',
-  'Conocimiento e Incidencia',
-] as const;
+// Removing local array in favor of EJES from lib/ejes.ts
 
 const ESTRATEGIAS_MATRIZ = [
   'Gestionar de cerca',
@@ -61,7 +55,7 @@ export default function Contacts() {
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
   const [filters, setFilters] = useState({
     proyecto: '',
-    ejeEstrategico: '',
+    ejeEstrategico: [] as string[],
     redAlumni: '',
     estrategiaMatriz: '',
     responsable: '',
@@ -197,9 +191,9 @@ export default function Contacts() {
         ap.programs?.nombre === filters.proyecto
       );
 
-    const matchesEje = !filters.ejeEstrategico ||
+    const matchesEje = filters.ejeEstrategico.length === 0 ||
       contact.actors?.actor_programs?.some((ap: any) =>
-        ap.programs?.eje_estrategico === filters.ejeEstrategico
+        ap.programs?.eje_estrategico && filters.ejeEstrategico.includes(ap.programs.eje_estrategico)
       );
 
     const matchesRedAlumni = !filters.redAlumni ||
@@ -230,7 +224,7 @@ export default function Contacts() {
       matchesEstrategia && matchesResponsable && matchesSector && matchesNivelDireccion && matchesMultiProgram;
   });
 
-  const hasActiveFilters = searchTerm || filters.proyecto || filters.ejeEstrategico ||
+  const hasActiveFilters = searchTerm || filters.proyecto || filters.ejeEstrategico.length > 0 ||
     filters.redAlumni || filters.estrategiaMatriz || filters.responsable || filters.sector || filters.nivelDireccion || multiProgramOnly;
 
   const didYouMeanSuggestion = useMemo(() => {
@@ -241,7 +235,7 @@ export default function Contacts() {
 
   const clearAllFilters = () => {
     setSearchTerm('');
-    setFilters({ proyecto: '', ejeEstrategico: '', redAlumni: '', estrategiaMatriz: '', responsable: '', sector: '', nivelDireccion: '' });
+    setFilters({ proyecto: '', ejeEstrategico: [], redAlumni: '', estrategiaMatriz: '', responsable: '', sector: '', nivelDireccion: '' });
     setMultiProgramOnly(false);
   };
 
@@ -344,16 +338,57 @@ export default function Contacts() {
           </Select>
 
           {/* Eje Estratégico */}
-          <Select value={filters.ejeEstrategico} onValueChange={(value) => setFilters(prev => ({ ...prev, ejeEstrategico: value }))}>
-            <SelectTrigger>
-              <SelectValue placeholder="Filtrar por Eje Estratégico" />
-            </SelectTrigger>
-            <SelectContent>
-              {EJES_ESTRATEGICOS_OFICIALES.map((eje) => (
-                <SelectItem key={eje} value={eje}>{eje}</SelectItem>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="w-full justify-between font-normal text-left px-3">
+                {filters.ejeEstrategico.length > 0 ? (
+                  <span className="truncate flex gap-1 items-center">
+                    <span className="bg-primary text-primary-foreground text-[10px] px-1.5 py-0.5 rounded-full font-medium">
+                      {filters.ejeEstrategico.length}
+                    </span>
+                    seleccionados
+                  </span>
+                ) : (
+                  <span className="text-muted-foreground">Eje Estratégico</span>
+                )}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56" align="start">
+              <DropdownMenuLabel>Ejes Estratégicos</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {EJES.map((eje) => (
+                <DropdownMenuCheckboxItem
+                  key={eje}
+                  checked={filters.ejeEstrategico.includes(eje)}
+                  onSelect={(e) => e.preventDefault()}
+                  onCheckedChange={(checked) => {
+                    setFilters(prev => ({
+                      ...prev,
+                      ejeEstrategico: checked
+                        ? [...prev.ejeEstrategico, eje]
+                        : prev.ejeEstrategico.filter(e => e !== eje)
+                    }));
+                  }}
+                >
+                  {eje}
+                </DropdownMenuCheckboxItem>
               ))}
-            </SelectContent>
-          </Select>
+              {filters.ejeEstrategico.length > 0 && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuCheckboxItem
+                    onSelect={(e) => {
+                      e.preventDefault();
+                      setFilters(prev => ({ ...prev, ejeEstrategico: [] }));
+                    }}
+                    className="justify-center text-red-600 font-medium cursor-pointer"
+                  >
+                    Limpiar Ejes
+                  </DropdownMenuCheckboxItem>
+                </>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
 
           {/* Red Alumni */}
           <Select value={filters.redAlumni} onValueChange={(value) => setFilters(prev => ({ ...prev, redAlumni: value }))}>

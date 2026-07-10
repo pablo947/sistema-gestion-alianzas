@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup, SelectLabel } from '@/components/ui/select';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuCheckboxItem, DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
@@ -66,7 +67,7 @@ export default function Actors() {
     sector: '',
     tipoRelacion: searchParams.get('tipoRelacion') || '',
     sinContactos: '',
-    ejeEstrategico: '',
+    ejeEstrategico: [] as string[],
     estrategiaMatriz: '',
     programa: '',
   });
@@ -151,7 +152,7 @@ export default function Actors() {
       sector: '',
       tipoRelacion: '',
       sinContactos: '',
-      ejeEstrategico: '',
+      ejeEstrategico: [],
       estrategiaMatriz: '',
       programa: '',
     });
@@ -161,7 +162,7 @@ export default function Actors() {
   };
 
   const hasActiveFilters =
-    Object.values(filters).some(v => v !== '') || searchTerm.trim() !== '' || multiProgramOnly;
+    Object.values(filters).some(v => (Array.isArray(v) ? v.length > 0 : v !== '')) || searchTerm.trim() !== '' || multiProgramOnly;
 
   const activeActors = (actors || []).filter(actor => actor.status !== 'pending_approval');
   const pendingActors = (actors || []).filter(actor => actor.status === 'pending_approval');
@@ -188,8 +189,11 @@ export default function Actors() {
       getEstrategiaMatriz(actor.nivel_influencia, actor.nivel_interes) === filters.estrategiaMatriz;
 
     const matchesEje =
-      filters.ejeEstrategico === '' ||
-      programs.some((p: any) => normalizeEje(p.eje_estrategico) === normalizeEje(filters.ejeEstrategico));
+      filters.ejeEstrategico.length === 0 ||
+      programs.some((p: any) => {
+        const eje = normalizeEje(p.eje_estrategico);
+        return eje && filters.ejeEstrategico.includes(eje);
+      });
 
     const matchesMultiProgram = !multiProgramOnly || programs.length > 1;
 
@@ -388,19 +392,57 @@ export default function Actors() {
           </Select>
 
           {/* Eje */}
-          <Select
-            value={filters.ejeEstrategico}
-            onValueChange={value => setFilters(prev => ({ ...prev, ejeEstrategico: value }))}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Eje" />
-            </SelectTrigger>
-            <SelectContent>
-              {EJES.map(e => (
-                <SelectItem key={e} value={e}>{e}</SelectItem>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="w-full justify-between font-normal text-left px-3">
+                {filters.ejeEstrategico.length > 0 ? (
+                  <span className="truncate flex gap-1 items-center">
+                    <span className="bg-primary text-primary-foreground text-[10px] px-1.5 py-0.5 rounded-full font-medium">
+                      {filters.ejeEstrategico.length}
+                    </span>
+                    seleccionados
+                  </span>
+                ) : (
+                  <span className="text-muted-foreground">Eje Estratégico</span>
+                )}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56" align="start">
+              <DropdownMenuLabel>Ejes Estratégicos</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {EJES.map((eje) => (
+                <DropdownMenuCheckboxItem
+                  key={eje}
+                  checked={filters.ejeEstrategico.includes(eje)}
+                  onSelect={(e) => e.preventDefault()}
+                  onCheckedChange={(checked) => {
+                    setFilters(prev => ({
+                      ...prev,
+                      ejeEstrategico: checked
+                        ? [...prev.ejeEstrategico, eje]
+                        : prev.ejeEstrategico.filter(e => e !== eje)
+                    }));
+                  }}
+                >
+                  {eje}
+                </DropdownMenuCheckboxItem>
               ))}
-            </SelectContent>
-          </Select>
+              {filters.ejeEstrategico.length > 0 && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuCheckboxItem
+                    onSelect={(e) => {
+                      e.preventDefault();
+                      setFilters(prev => ({ ...prev, ejeEstrategico: [] }));
+                    }}
+                    className="justify-center text-red-600 font-medium cursor-pointer"
+                  >
+                    Limpiar Ejes
+                  </DropdownMenuCheckboxItem>
+                </>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
 
           {/* Programa / Iniciativa */}
           <Select
