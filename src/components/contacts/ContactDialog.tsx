@@ -22,12 +22,14 @@ import { useDuplicateDetection } from '@/hooks/useDuplicateDetection';
 import { DuplicateWarning } from '@/components/DuplicateWarning';
 import { sanitizeFormData } from '@/lib/textUtils';
 import { usePermissions } from '@/hooks/usePermissions';
+import { useAuth } from '@/hooks/useAuth';
+import { useAuditLog } from '@/hooks/useAuditLog';
 import { ContactChangeRequestDialog } from './ContactChangeRequestDialog';
 
-const contactSchema = z.object({
+const getContactSchema = (isAdmin: boolean) => z.object({
   nombre: z.string().min(1, 'El nombre es requerido'),
   apellidos: z.string().default(''),
-  actor_id: z.string().min(1, 'Debe seleccionar un actor'),
+  actor_id: isAdmin ? z.string().optional() : z.string().min(1, 'Debe seleccionar un actor'),
   cargo: z.string().default(''),
   correo: z.string().email('Email inválido').or(z.literal('')),
   telefono: z.string().default(''),
@@ -44,6 +46,9 @@ export function ContactDialog({ open, onOpenChange, contact, onSuccess, preselec
   const [isChangeRequestOpen, setIsChangeRequestOpen] = useState(false);
   const duplicateWarningRef = useRef<HTMLDivElement>(null);
   const { canEditContacts, canDeleteContacts } = usePermissions();
+  const { userProfile } = useAuth();
+  const { log } = useAuditLog();
+  const isSuperAdmin = userProfile?.role === 'admin' || userProfile?.email === 'jtoro@funluker.org.co' || userProfile?.email === 'jgaviria@funluker.org.co';
   const { data: allContacts = [] } = useQuery({
     queryKey: ['contacts-list'],
     queryFn: async () => {
@@ -55,8 +60,10 @@ export function ContactDialog({ open, onOpenChange, contact, onSuccess, preselec
     }
   });
 
-  const form = useForm<z.infer<typeof contactSchema>>({
-    resolver: zodResolver(contactSchema),
+  const currentSchema = useMemo(() => getContactSchema(isSuperAdmin), [isSuperAdmin]);
+
+  const form = useForm<z.infer<ReturnType<typeof getContactSchema>>>({
+    resolver: zodResolver(currentSchema),
     defaultValues: {
       nombre: '',
       apellidos: '',
@@ -123,7 +130,7 @@ export function ContactDialog({ open, onOpenChange, contact, onSuccess, preselec
   }, [contact, preselectedActorId, open, form]);
 
   const mutation = useMutation({
-    mutationFn: async (values: z.infer<typeof contactSchema>) => {
+    mutationFn: async (values: z.infer<ReturnType<typeof getContactSchema>>) => {
       const sanitized = sanitizeFormData(values);
       const contactData = {
         nombre: sanitized.nombre,
@@ -147,18 +154,40 @@ export function ContactDialog({ open, onOpenChange, contact, onSuccess, preselec
           .update(contactData)
           .eq('contact_id', contact.contact_id);
         if (error) throw error;
+        
+        if (isSuperAdmin) {
+          await log('direct_edit', 'contact', contact.contact_id, `${contactData.nombre} ${contactData.apellidos}`, {
+            direct_update_by_admin: true,
+            payload: contactData
+          });
+        }
       } else {
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from('contacts')
           .insert({
             ...contactData,
-            status: 'pending_approval'
-          });
+            status: isSuperAdmin ? 'active' : 'pending_approval'
+          })
+          .select('contact_id')
+          .single();
         if (error) throw error;
+        
+        if (isSuperAdmin && data) {
+          await log('direct_create', 'contact', data.contact_id, `${contactData.nombre} ${contactData.apellidos}`, {
+            direct_create_by_admin: true,
+            payload: contactData
+          });
+        }
       }
     },
     onSuccess: () => {
       form.reset();
+      if (isSuperAdmin) {
+        toast({
+          title: "Éxito",
+          description: "Cambios guardados e implementados directamente",
+        });
+      }
       onSuccess();
     },
   });
@@ -181,7 +210,7 @@ export function ContactDialog({ open, onOpenChange, contact, onSuccess, preselec
     },
   });
 
-  const onSubmit = (values: z.infer<typeof contactSchema>) => {
+  const onSubmit = (values: z.infer<ReturnType<typeof getContactSchema>>) => {
     if (hasDuplicates) {
       duplicateWarningRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       toast({
@@ -191,7 +220,7 @@ export function ContactDialog({ open, onOpenChange, contact, onSuccess, preselec
       return;
     }
 
-    if (contact) {
+    if (contact && !isSuperAdmin) {
       setChangeRequestPayload(values);
       setIsChangeRequestOpen(true);
       return;
@@ -260,13 +289,13 @@ export function ContactDialog({ open, onOpenChange, contact, onSuccess, preselec
                 >
                   {canEditContacts() ? 'Cancelar' : 'Cerrar'}
                 </Button>
-                {canEditContacts() && (
+                {(canEditContacts() || isSuperAdmin) && (
                   <Button
                     type="submit"
                     disabled={mutation.isPending}
                     className={contact ? "bg-orange-600 hover:bg-orange-700 text-white min-h-10" : "min-h-10 btn-animate"}
                   >
-                    {contact ? 'Enviar solicitud de actualización' : 'Crear Contacto'}
+                    {mutation.isPending ? 'Procesando...' : (contact ? (isSuperAdmin ? 'Guardar y Aplicar' : 'Enviar solicitud de actualización') : (isSuperAdmin ? 'Crear y Aplicar' : 'Crear Contacto'))}
                   </Button>
                 )}
               </div>

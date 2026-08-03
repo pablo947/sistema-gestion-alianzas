@@ -6,9 +6,11 @@ type AuditAction =
   | 'permissions_updated'
   | 'user_created'
   | 'user_activated'
-  | 'user_edited';
+  | 'user_edited'
+  | 'direct_edit'
+  | 'direct_create';
 
-type TargetType = 'user' | 'permission' | 'role';
+type TargetType = 'user' | 'permission' | 'role' | 'actor' | 'contact';
 
 export function useAuditLog() {
   const { user, userProfile } = useAuth();

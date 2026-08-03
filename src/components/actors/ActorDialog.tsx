@@ -29,15 +29,16 @@ import { sanitizeFormData } from '@/lib/textUtils';
 import { ChangeRequestDialog } from './ChangeRequestDialog';
 import { RecommendationsDialog } from './RecommendationsDialog';
 import { useToast } from '@/hooks/use-toast';
+import { useAuditLog } from '@/hooks/useAuditLog';
 
-const actorSchema = z.object({
+const getActorSchema = (isAdmin: boolean) => z.object({
   nombre_actor: z.string().min(1, 'El nombre es requerido'),
-  sector_actor: z.string().min(1, 'El sector es requerido'),
-  ciudad_sede: z.string().min(1, 'La ciudad sede es requerida'),
-  alcance_territorial: z.string().min(1, 'El alcance es requerido'),
-  tipo_relacion: z.array(z.string()).min(1, 'Debe seleccionar al menos un tipo'),
-  nivel_influencia: z.number({ required_error: 'Requerido' }).min(1).max(5),
-  nivel_interes: z.number({ required_error: 'Requerido' }).min(1).max(5),
+  sector_actor: isAdmin ? z.string().optional() : z.string().min(1, 'El sector es requerido'),
+  ciudad_sede: isAdmin ? z.string().optional() : z.string().min(1, 'La ciudad sede es requerida'),
+  alcance_territorial: isAdmin ? z.string().optional() : z.string().min(1, 'El alcance es requerido'),
+  tipo_relacion: isAdmin ? z.array(z.string()).optional() : z.array(z.string()).min(1, 'Debe seleccionar al menos un tipo'),
+  nivel_influencia: isAdmin ? z.number().optional() : z.number({ required_error: 'Requerido' }).min(1).max(5),
+  nivel_interes: isAdmin ? z.number().optional() : z.number({ required_error: 'Requerido' }).min(1).max(5),
   
   proyecto_ids: z.array(z.string()).default([]),
   responsable_seguimiento: z.array(z.string()).default([]),
@@ -64,8 +65,12 @@ export function ActorDialog({ open, onOpenChange, actor, onSuccess }: ActorDialo
   const isStrategicEdit = !canEdit('actors') && canCreatePendingActors() && !!actor;
   const isStrategicCreate = !canEdit('actors') && canCreatePendingActors() && !actor;
 
-  const form = useForm<z.infer<typeof actorSchema>>({
-    resolver: zodResolver(actorSchema),
+  const isSuperAdmin = userProfile?.role === 'admin' || userProfile?.email === 'jtoro@funluker.org.co' || userProfile?.email === 'jgaviria@funluker.org.co';
+  const { log } = useAuditLog();
+  const currentSchema = React.useMemo(() => getActorSchema(isSuperAdmin), [isSuperAdmin]);
+
+  const form = useForm<z.infer<ReturnType<typeof getActorSchema>>>({
+    resolver: zodResolver(currentSchema),
     defaultValues: {
       nombre_actor: '',
       sector_actor: '',
@@ -138,7 +143,7 @@ export function ActorDialog({ open, onOpenChange, actor, onSuccess }: ActorDialo
   }, [actor, actorProjects, form]);
 
   const mutation = useMutation({
-    mutationFn: async (values: z.infer<typeof actorSchema>) => {
+    mutationFn: async (values: z.infer<ReturnType<typeof getActorSchema>>) => {
       const sanitized = sanitizeFormData(values);
       const actorData = {
         nombre_actor: sanitized.nombre_actor,
@@ -168,11 +173,18 @@ export function ActorDialog({ open, onOpenChange, actor, onSuccess }: ActorDialo
           .update(actorData)
           .eq('actor_id', actor.actor_id);
         if (error) throw error;
+        
+        if (isSuperAdmin) {
+          await log('direct_edit', 'actor', actor.actor_id, actorData.nombre_actor, {
+            direct_update_by_admin: true,
+            payload: actorData
+          });
+        }
       } else {
         // Create new actor
         const newActorData = {
           ...actorData,
-          status: 'pending_approval' // Todas las creaciones van a aprobación primero
+          status: isSuperAdmin ? 'active' : 'pending_approval'
         };
         const { data, error } = await supabase
           .from('actors')
@@ -181,6 +193,13 @@ export function ActorDialog({ open, onOpenChange, actor, onSuccess }: ActorDialo
           .single();
         if (error) throw error;
         actorId = data.actor_id;
+
+        if (isSuperAdmin) {
+          await log('direct_create', 'actor', actorId, actorData.nombre_actor, {
+            direct_create_by_admin: true,
+            payload: actorData
+          });
+        }
       }
 
       // Handle program associations
@@ -207,6 +226,12 @@ export function ActorDialog({ open, onOpenChange, actor, onSuccess }: ActorDialo
       form.reset();
       queryClient.invalidateQueries({ queryKey: ['actors'] });
       queryClient.invalidateQueries({ queryKey: ['actor-programs'] });
+      if (isSuperAdmin) {
+        toast({
+          title: "Éxito",
+          description: "Cambios guardados e implementados directamente",
+        });
+      }
       onSuccess();
     },
     onError: (error) => {
@@ -228,8 +253,8 @@ export function ActorDialog({ open, onOpenChange, actor, onSuccess }: ActorDialo
     },
   });
 
-  const onSubmit = (values: z.infer<typeof actorSchema>) => {
-    if (actor) {
+  const onSubmit = (values: z.infer<ReturnType<typeof getActorSchema>>) => {
+    if (actor && !isSuperAdmin) {
       setChangeRequestPayload(values);
       setIsChangeRequestOpen(true);
       return;
@@ -318,13 +343,13 @@ export function ActorDialog({ open, onOpenChange, actor, onSuccess }: ActorDialo
                 >
                   {canEdit('actors') || (canCreatePendingActors() && !actor) ? 'Cancelar' : 'Cerrar'}
                 </Button>
-                {(canEdit('actors') || canCreatePendingActors()) && (
+                {(canEdit('actors') || canCreatePendingActors() || isSuperAdmin) && (
                   <Button
                     type="submit"
                     disabled={mutation.isPending}
                     className={actor ? "bg-orange-600 hover:bg-orange-700 text-white" : "btn-animate"}
                   >
-                    {actor ? 'Actualizar Actor' : 'Crear Actor'}
+                    {mutation.isPending ? 'Procesando...' : (actor ? (isSuperAdmin ? 'Guardar y Aplicar' : 'Actualizar Actor') : (isSuperAdmin ? 'Crear y Aplicar' : 'Crear Actor'))}
                   </Button>
                 )}
               </div>
