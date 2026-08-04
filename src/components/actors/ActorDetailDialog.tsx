@@ -29,7 +29,6 @@ interface ActorDetailDialogProps {
 
 export function ActorDetailDialog({ open, onOpenChange, actor, onEdit }: ActorDetailDialogProps) {
   const [showRelatedContacts, setShowRelatedContacts] = React.useState(false);
-  const { data: actorPrograms } = useActorPrograms(actor?.actor_id);
   const { canEditActors, canCreatePendingActors } = usePermissions();
   
   const { data: teamMembers = [] } = useQuery({
@@ -121,10 +120,10 @@ export function ActorDetailDialog({ open, onOpenChange, actor, onEdit }: ActorDe
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
              <div>
                <h3 className="font-semibold text-sm mb-3 text-muted-foreground uppercase tracking-wider">Programas Vinculados</h3>
-               {actorPrograms && actorPrograms.length > 0 ? (
+               {actor.programas && actor.programas.length > 0 ? (
                  <ul className="list-disc pl-5 text-sm space-y-1">
-                   {actorPrograms.map((p: any) => (
-                     <li key={p.programa_id}>{p.nombre}</li>
+                   {actor.programas.map((p: any) => (
+                     <li key={p.id}>{p.nombre}</li>
                    ))}
                  </ul>
                ) : (
