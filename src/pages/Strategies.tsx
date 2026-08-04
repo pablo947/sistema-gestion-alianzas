@@ -10,7 +10,7 @@ import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/h
 import { ImportanceIndexTab } from '@/components/strategies/ImportanceIndexTab';
 import { usePermissions } from '@/hooks/usePermissions';
 import { HeatMap } from '@/components/dashboard/HeatMap';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Cell } from 'recharts';
 import { useInfluenceInterest } from '@/hooks/useInfluenceInterest';
 import { useActorRelations } from '@/hooks/useActorRelations';
 import { PageHeader } from '@/components/layout/PageHeader';
@@ -384,7 +384,7 @@ export default function Strategies() {
                       interval={0}
                     />
                     <YAxis tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} />
-                    <Tooltip
+                    <RechartsTooltip
                       contentStyle={{
                         backgroundColor: 'hsl(var(--card))',
                         border: '1px solid hsl(var(--border))',
