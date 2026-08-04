@@ -59,7 +59,7 @@ export function PermissionManagement() {
     const labels: Record<string, string> = {
       actors: 'Actores',
       contacts: 'Contactos', 
-      projects: 'Proyectos',
+      programs: 'Programas',
       reports: 'Reportes',
       team: 'Equipo',
       admin: 'Administración'

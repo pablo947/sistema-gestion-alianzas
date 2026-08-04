@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 interface ReportFilters {
   municipio?: string[];
   tipoRelacion?: string[];
-  proyecto?: string[];
+  programa?: string[];
   actor?: string[];
   eje?: string[];
   sector?: string[];
@@ -51,10 +51,10 @@ export const useFilteredReports = (filters: ReportFilters) => {
       }
 
       let filteredActors: any[] = actors || [];
-      if (filters.proyecto && filters.proyecto.length > 0) {
+      if (filters.programa && filters.programa.length > 0) {
         filteredActors = (actors as any[])?.filter(actor =>
           actor.actor_programs?.some((ap: any) =>
-            filters.proyecto?.includes(ap.programs?.programa_id)
+            filters.programa?.includes(ap.programs?.programa_id)
           )
         ) || [];
       }

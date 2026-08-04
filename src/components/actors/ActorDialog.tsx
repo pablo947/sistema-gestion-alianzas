@@ -113,7 +113,7 @@ export function ActorDialog({ open, onOpenChange, actor, onSuccess }: ActorDialo
         nivel_influencia: actor.nivel_influencia || undefined,
         nivel_interes: actor.nivel_interes || undefined,
         
-        programa_ids: actor.proyectos?.map((p: any) => p.id) || [],
+        programa_ids: actor.programas?.map((p: any) => p.id) || [],
         responsable_seguimiento: Array.isArray(actor.responsable_seguimiento) ? actor.responsable_seguimiento : [],
         telefono_entidad: (actor as any).telefono_entidad || '',
         direccion_entidad: (actor as any).direccion_entidad || '',

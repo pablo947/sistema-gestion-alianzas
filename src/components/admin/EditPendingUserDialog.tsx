@@ -69,7 +69,7 @@ type FormData = z.infer<typeof schema>;
 const moduleLabels: Record<string, string> = {
   actors: 'Actores',
   contacts: 'Contactos',
-  projects: 'Proyectos',
+  programs: 'Programas',
   reports: 'Reportes',
   team: 'Equipo',
   admin: 'Administración',

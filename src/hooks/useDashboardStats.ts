@@ -26,12 +26,12 @@ export const useDashboardStats = () => {
       return {
         totalActors: actors?.length || 0,
         totalContacts: contacts?.length || 0,
-        activeProjects: activePrograms,
-        plannedProjects: plannedPrograms,
-        completedProjects: completedPrograms,
-        totalProjects: totalPrograms,
+        activePrograms: activePrograms,
+        plannedPrograms: plannedPrograms,
+        completedPrograms: completedPrograms,
+        totalPrograms: totalPrograms,
         completionRate,
-        projects: programs || []
+        programs: programs || []
       };
     },
     staleTime: 0,

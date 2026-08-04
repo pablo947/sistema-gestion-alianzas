@@ -20,7 +20,7 @@ const AREAS_DISPONIBLES = [
   "Educación",
   "Emprendimiento",
   "Desarrollo Rural",
-  "Proyectos Especiales",
+  "Programas Especiales",
   "Innovación",
   "Comunicaciones"
 ];

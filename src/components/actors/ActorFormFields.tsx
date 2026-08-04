@@ -27,13 +27,13 @@ import {
   SECTORES_BASE,
   ACADEMICO_SUBSECTORES,
   ALCANCE_TERRITORIAL_OPTIONS,
-  PROYECTOS_OPTIONS,
+  PROGRAMAS_OPTIONS,
   TIPO_RELACION_OPTIONS,
   NIVEL_OPTIONS,
   NIVEL_INTERES_OPCIONES,
   NIVEL_INFLUENCIA_PODER_OPCIONES,
 } from './constants';
-import { useProjects } from '@/hooks/useProjects';
+import { usePrograms } from '@/hooks/usePrograms';
 
 const actorSchema = z.object({
   nombre_actor: z.string().min(1, 'El nombre es requerido'),
@@ -61,7 +61,7 @@ interface ActorFormFieldsProps {
 }
 
 export function ActorFormFields({ control, setValue, duplicateWarning }: ActorFormFieldsProps) {
-  const { data: projects, isLoading: isLoadingProjects } = useProjects();
+  const { data: programs, isLoading: isLoadingPrograms } = usePrograms();
   
   const { data: teamMembers = [], isLoading: isLoadingTeam } = useQuery({
     queryKey: ['team-members'],
@@ -382,28 +382,28 @@ export function ActorFormFields({ control, setValue, duplicateWarning }: ActorFo
             <FormLabel>Programas Involucrados</FormLabel>
             <FormControl>
               <div className="space-y-2 max-h-48 overflow-y-auto border rounded-md p-3">
-                {isLoadingProjects ? (
+                {isLoadingPrograms ? (
                   <div className="text-sm text-muted-foreground">Cargando programas...</div>
-                ) : projects && projects.length > 0 ? (
-                  projects.map((project: any) => (
-                    <div key={project.programa_id} className="flex items-center space-x-2">
+                ) : programs && programs.length > 0 ? (
+                  programs.map((program: any) => (
+                    <div key={program.programa_id} className="flex items-center space-x-2">
                       <Checkbox
-                        id={project.programa_id}
-                        checked={field.value?.includes(project.programa_id) || false}
+                        id={program.programa_id}
+                        checked={field.value?.includes(program.programa_id) || false}
                         onCheckedChange={(checked) => {
                           const currentValue = field.value || [];
                           if (checked) {
-                            field.onChange([...currentValue, project.programa_id]);
+                            field.onChange([...currentValue, program.programa_id]);
                           } else {
-                            field.onChange(currentValue.filter(id => id !== project.programa_id));
+                            field.onChange(currentValue.filter(id => id !== program.programa_id));
                           }
                         }}
                       />
                       <label
-                        htmlFor={project.programa_id}
+                        htmlFor={program.programa_id}
                         className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
                       >
-                        {project.nombre}
+                        {program.nombre}
                       </label>
                     </div>
                   ))

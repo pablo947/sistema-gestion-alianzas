@@ -12,7 +12,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Actors from "./pages/Actors";
 import Contacts from "./pages/Contacts";
-import Projects from "./pages/Projects";
+import Programs from "./pages/Programs";
 import Reports from "./pages/Reports";
 import Team from "./pages/Team";
 import Administration from "./pages/Administration";
@@ -36,7 +36,7 @@ const App = () => (
             <Route path="/" element={<AuthGuard><Layout><Index /></Layout></AuthGuard>} />
             <Route path="/actors" element={<AuthGuard><Layout><Actors /></Layout></AuthGuard>} />
             <Route path="/contacts" element={<AuthGuard><Layout><Contacts /></Layout></AuthGuard>} />
-            <Route path="/projects" element={<AuthGuard><Layout><Projects /></Layout></AuthGuard>} />
+            <Route path="/programs" element={<AuthGuard><Layout><Programs /></Layout></AuthGuard>} />
             <Route path="/team" element={<AuthGuard><Layout><Team /></Layout></AuthGuard>} />
             <Route path="/reports" element={<AuthGuard><Layout><Reports /></Layout></AuthGuard>} />
             <Route path="/clasificacion-aliados/*" element={<AuthGuard><Layout><Strategies /></Layout></AuthGuard>} />

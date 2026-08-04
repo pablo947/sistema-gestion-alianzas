@@ -4,19 +4,19 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { IndicadorTecnico } from "./types";
 
-interface ProjectIndicatorsModalProps {
+interface ProgramIndicatorsModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  projectName: string;
+  programName: string;
   indicators: IndicadorTecnico[];
 }
 
-export function ProjectIndicatorsModal({ 
+export function ProgramIndicatorsModal({ 
   open, 
   onOpenChange, 
-  projectName, 
+  programName, 
   indicators 
-}: ProjectIndicatorsModalProps) {
+}: ProgramIndicatorsModalProps) {
   const getComplianceColor = (percentage: number) => {
     if (percentage >= 90) return 'bg-green-500/10 text-green-700 border-green-200';
     if (percentage >= 70) return 'bg-yellow-500/10 text-yellow-700 border-yellow-200';
@@ -48,13 +48,13 @@ export function ProjectIndicatorsModal({
       <DialogContent className="max-w-6xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            Indicadores Técnicos - {projectName}
+            Indicadores Técnicos - {programName}
           </DialogTitle>
         </DialogHeader>
 
         {indicators.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
-            No hay indicadores técnicos configurados para este proyecto.
+            No hay indicadores técnicos configurados para este programa.
           </div>
         ) : (
           <div className="space-y-4">

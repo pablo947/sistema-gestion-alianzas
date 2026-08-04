@@ -2,24 +2,24 @@
 import { Users, MessageSquare } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { KPICard } from '@/components/dashboard/KPICard';
-import { ProjectsStatusCard } from '@/components/dashboard/ProjectsStatusCard';
+import { ProgramsStatusCard } from '@/components/dashboard/ProgramsStatusCard';
 
 interface DashboardKPIsProps {
   totalActors: number;
-  activeProjects: number;
-  plannedProjects: number;
-  completedProjects: number;
-  totalProjects: number;
+  activePrograms: number;
+  plannedPrograms: number;
+  completedPrograms: number;
+  totalPrograms: number;
   completionRate: number;
   totalContacts: number;
 }
 
 export const DashboardKPIs = ({ 
   totalActors, 
-  activeProjects,
-  plannedProjects,
-  completedProjects,
-  totalProjects,
+  activePrograms,
+  plannedPrograms,
+  completedPrograms,
+  totalPrograms,
   completionRate, 
   totalContacts 
 }: DashboardKPIsProps) => {
@@ -35,12 +35,12 @@ export const DashboardKPIs = ({
         trend={+12}
         onClick={() => navigate('/actors')}
       />
-      <ProjectsStatusCard
-        plannedProjects={plannedProjects}
-        activeProjects={activeProjects}
-        completedProjects={completedProjects}
-        totalProjects={totalProjects}
-        onClick={() => navigate('/projects')}
+      <ProgramsStatusCard
+        plannedPrograms={plannedPrograms}
+        activePrograms={activePrograms}
+        completedPrograms={completedPrograms}
+        totalPrograms={totalPrograms}
+        onClick={() => navigate('/programs')}
       />
       <KPICard
         title="Total Contactos"

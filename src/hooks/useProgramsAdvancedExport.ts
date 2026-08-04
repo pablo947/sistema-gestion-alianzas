@@ -25,13 +25,13 @@ const buildInfoSheet = (
   const now = new Date();
   const filterEntries: string[] = [];
   if (filters.ejeEstrategico?.length) filterEntries.push(`Ejes: ${filters.ejeEstrategico.join(', ')}`);
-  if (filters.proyecto?.length) filterEntries.push(`Proyectos: ${filters.proyecto.length} seleccionados`);
+  if (filters.programa?.length) filterEntries.push(`Programas: ${filters.programa.length} seleccionados`);
   if (filters.actor?.length) filterEntries.push(`Actores: ${filters.actor.length} seleccionados`);
   if (filters.anio?.length) filterEntries.push(`Años: ${filters.anio.join(', ')}`);
 
   return XLSX.utils.json_to_sheet([
     { Campo: 'Reporte', Valor: reportName },
-    { Campo: 'Plataforma', Valor: 'Sistema de Gestión de Alianzas y Proyectos - Fundación Luker' },
+    { Campo: 'Plataforma', Valor: 'Sistema de Gestión de Alianzas y Programas - Fundación Luker' },
     { Campo: 'Fecha de generación', Valor: now.toLocaleDateString('es-CO') },
     { Campo: 'Hora de generación', Valor: now.toLocaleTimeString('es-CO') },
     { Campo: 'Usuario', Valor: userEmail || 'N/A' },
@@ -40,22 +40,22 @@ const buildInfoSheet = (
   ]);
 };
 
-export const useProjectsAdvancedExport = () => {
+export const useProgramsAdvancedExport = () => {
   const { toast } = useToast();
 
   const downloadWorkbook = (workbook: XLSX.WorkBook, filename: string) => {
     XLSX.writeFile(workbook, filename);
   };
 
-  // 1. Indicadores por Proyecto
-  const exportIndicators = (projects: any[], filters: any, userEmail: string | null) => {
+  // 1. Indicadores por Programa
+  const exportIndicators = (programs: any[], filters: any, userEmail: string | null) => {
     try {
       const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, buildInfoSheet('Indicadores por Proyecto', filters, projects.length, userEmail), 'Info');
+      XLSX.utils.book_append_sheet(wb, buildInfoSheet('Indicadores por Programa', filters, programs.length, userEmail), 'Info');
 
       const groupByCategory = (categoria: string) => {
         const rows: any[] = [];
-        projects.forEach(p => {
+        programs.forEach(p => {
           const metas = Array.isArray(p.metas) ? p.metas : [];
           metas
             .filter((m: any) => (m.categoria || m.tipo || '').toLowerCase() === categoria.toLowerCase())
@@ -65,7 +65,7 @@ export const useProjectsAdvancedExport = () => {
               const cumplimiento = meta > 0 ? Math.round((avance / meta) * 100) : 0;
               rows.push({
                 'Eje Estratégico': p.eje_estrategico || 'N/A',
-                'Proyecto': p.nombre,
+                'Programa': p.nombre,
                 'Categoría': categoria,
                 'Indicador': m.indicador || '',
                 'Meta': m.meta || '',
@@ -88,8 +88,8 @@ export const useProjectsAdvancedExport = () => {
         }
       });
 
-      downloadWorkbook(wb, `Indicadores_Proyectos_Luker_${new Date().toISOString().split('T')[0]}.xlsx`);
-      toast({ title: 'Reporte generado', description: 'Indicadores por proyecto descargados.' });
+      downloadWorkbook(wb, `Indicadores_Programas_Luker_${new Date().toISOString().split('T')[0]}.xlsx`);
+      toast({ title: 'Reporte generado', description: 'Indicadores por programa descargados.' });
     } catch (e) {
       console.error(e);
       toast({ title: 'Error', description: 'No se pudo generar el reporte de indicadores.', variant: 'destructive' });
@@ -97,18 +97,18 @@ export const useProjectsAdvancedExport = () => {
   };
 
   // 2. Ejecución Presupuestal
-  const exportBudget = (projects: any[], filters: any, userEmail: string | null) => {
+  const exportBudget = (programs: any[], filters: any, userEmail: string | null) => {
     try {
       const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, buildInfoSheet('Ejecución Presupuestal', filters, projects.length, userEmail), 'Info');
+      XLSX.utils.book_append_sheet(wb, buildInfoSheet('Ejecución Presupuestal', filters, programs.length, userEmail), 'Info');
 
-      const rows = projects.map(p => {
+      const rows = programs.map(p => {
         const total = Number(p.presupuesto_total) || 0;
         const ejecutado = Number(p.presupuesto_ejecutado) || 0;
         const ejecucion = total > 0 ? Math.round((ejecutado / total) * 100) : 0;
         return {
           'Eje Estratégico': p.eje_estrategico || 'N/A',
-          'Proyecto': p.nombre,
+          'Programa': p.nombre,
           
           'Estado': p.estado,
           'Fecha Inicio': p.fecha_inicio || '',
@@ -130,20 +130,20 @@ export const useProjectsAdvancedExport = () => {
     }
   };
 
-  // 3. Actores Atados a Proyectos (por cuadrante)
-  const exportActorsByProject = (projects: any[], filters: any, userEmail: string | null) => {
+  // 3. Actores Atados a Programas (por cuadrante)
+  const exportActorsByProgram = (programs: any[], filters: any, userEmail: string | null) => {
     try {
       const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, buildInfoSheet('Actores por Proyecto (cuadrantes)', filters, projects.length, userEmail), 'Info');
+      XLSX.utils.book_append_sheet(wb, buildInfoSheet('Actores por Programa (cuadrantes)', filters, programs.length, userEmail), 'Info');
 
       const rows: any[] = [];
-      projects.forEach(p => {
-        (p.actor_projects || []).forEach((ap: any) => {
+      programs.forEach(p => {
+        (p.actor_programs || []).forEach((ap: any) => {
           const actor = ap.actors;
           if (!actor) return;
           rows.push({
             'Eje Estratégico': p.eje_estrategico || 'N/A',
-            'Proyecto': p.nombre,
+            'Programa': p.nombre,
             'Estrategia (Cuadrante)': getStrategy(actor.nivel_influencia, actor.nivel_interes),
             'Actor': actor.nombre_actor,
             'Sector': actor.sector_actor || '',
@@ -153,13 +153,13 @@ export const useProjectsAdvancedExport = () => {
         });
       });
 
-      // Sort by quadrant order then by project
+      // Sort by quadrant order then by program
       const order = new Map(STRATEGY_QUADRANTS.map((q, i) => [q, i]));
       rows.sort((a, b) => {
         const oa = order.get(a['Estrategia (Cuadrante)']) ?? 99;
         const ob = order.get(b['Estrategia (Cuadrante)']) ?? 99;
         if (oa !== ob) return oa - ob;
-        return String(a.Proyecto).localeCompare(String(b.Proyecto));
+        return String(a.Programa).localeCompare(String(b.Programa));
       });
 
       XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), 'Actores por Cuadrante');
@@ -172,57 +172,57 @@ export const useProjectsAdvancedExport = () => {
         }
       });
 
-      downloadWorkbook(wb, `Actores_Proyectos_Luker_${new Date().toISOString().split('T')[0]}.xlsx`);
-      toast({ title: 'Reporte generado', description: 'Actores por proyecto descargados.' });
+      downloadWorkbook(wb, `Actores_Programas_Luker_${new Date().toISOString().split('T')[0]}.xlsx`);
+      toast({ title: 'Reporte generado', description: 'Actores por programa descargados.' });
     } catch (e) {
       console.error(e);
-      toast({ title: 'Error', description: 'No se pudo generar el reporte de actores por proyecto.', variant: 'destructive' });
+      toast({ title: 'Error', description: 'No se pudo generar el reporte de actores por programa.', variant: 'destructive' });
     }
   };
 
   // 4. Sinergia de Actores
-  const exportSynergy = (projects: any[], filters: any, userEmail: string | null) => {
+  const exportSynergy = (programs: any[], filters: any, userEmail: string | null) => {
     try {
       const wb = XLSX.utils.book_new();
 
-      const actorMap = new Map<string, { actor: any; projects: string[]; ejes: Set<string> }>();
-      projects.forEach(p => {
-        (p.actor_projects || []).forEach((ap: any) => {
+      const actorMap = new Map<string, { actor: any; programs: string[]; ejes: Set<string> }>();
+      programs.forEach(p => {
+        (p.actor_programs || []).forEach((ap: any) => {
           const a = ap.actors;
           if (!a) return;
           if (!actorMap.has(a.actor_id)) {
-            actorMap.set(a.actor_id, { actor: a, projects: [], ejes: new Set() });
+            actorMap.set(a.actor_id, { actor: a, programs: [], ejes: new Set() });
           }
           const entry = actorMap.get(a.actor_id)!;
-          entry.projects.push(p.nombre);
+          entry.programs.push(p.nombre);
           if (p.eje_estrategico) entry.ejes.add(p.eje_estrategico);
         });
       });
 
       const synergyRows = Array.from(actorMap.values())
-        .filter(e => e.projects.length > 1)
-        .sort((a, b) => b.projects.length - a.projects.length)
+        .filter(e => e.programs.length > 1)
+        .sort((a, b) => b.programs.length - a.programs.length)
         .map(e => ({
           'Actor': e.actor.nombre_actor,
           'Sector': e.actor.sector_actor || '',
           'Estrategia': getStrategy(e.actor.nivel_influencia, e.actor.nivel_interes),
-          'N° Proyectos': e.projects.length,
+          'N° Programas': e.programs.length,
           'N° Ejes Estratégicos': e.ejes.size,
           'Ejes Cubiertos': Array.from(e.ejes).join(', '),
-          'Proyectos': e.projects.join(' | '),
-          'Nivel de Vinculación': e.projects.length >= 4 ? 'Alto' : e.projects.length >= 2 ? 'Medio' : 'Bajo',
+          'Programas': e.programs.join(' | '),
+          'Nivel de Vinculación': e.programs.length >= 4 ? 'Alto' : e.programs.length >= 2 ? 'Medio' : 'Bajo',
         }));
 
       XLSX.utils.book_append_sheet(wb, buildInfoSheet('Sinergia de Actores', filters, synergyRows.length, userEmail), 'Info');
       XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(synergyRows), 'Sinergia');
 
       downloadWorkbook(wb, `Sinergia_Actores_Luker_${new Date().toISOString().split('T')[0]}.xlsx`);
-      toast({ title: 'Reporte generado', description: `Sinergia: ${synergyRows.length} actores en múltiples proyectos.` });
+      toast({ title: 'Reporte generado', description: `Sinergia: ${synergyRows.length} actores en múltiples programas.` });
     } catch (e) {
       console.error(e);
       toast({ title: 'Error', description: 'No se pudo generar el reporte de sinergia.', variant: 'destructive' });
     }
   };
 
-  return { exportIndicators, exportBudget, exportActorsByProject, exportSynergy };
+  return { exportIndicators, exportBudget, exportActorsByProgram, exportSynergy };
 };

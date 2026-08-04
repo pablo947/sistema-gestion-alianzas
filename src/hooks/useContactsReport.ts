@@ -54,7 +54,7 @@ export const useContactsReport = () => {
         const actor = contact.actors as any;
         const programs = actor?.actor_programs?.map((ap: any) => ap.programs).filter(Boolean) || [];
         const uniqueEjes = [...new Set(programs.map((p: any) => p?.eje_estrategico).filter(Boolean))] as string[];
-        const uniqueProyectos = [...new Set(programs.map((p: any) => p?.nombre).filter(Boolean))] as string[];
+        const uniqueProgramas = [...new Set(programs.map((p: any) => p?.nombre).filter(Boolean))] as string[];
 
         return {
           ...contact,
@@ -71,7 +71,7 @@ export const useContactsReport = () => {
           actorCorreo: actor?.correo_entidad || '',
           actorAniosAlianza: Array.isArray(actor?.anios_alianza) ? actor.anios_alianza.join(', ') : '',
           ejes: uniqueEjes.join(', '),
-          proyectos: uniqueProyectos.join(', '),
+          programas: uniqueProgramas.join(', '),
         };
       }) || [];
 
@@ -111,7 +111,7 @@ export const useContactsReport = () => {
           actorCorreo: '',
           actorAniosAlianza: '',
           ejes: '',
-          proyectos: '',
+          programas: '',
 
         }));
 

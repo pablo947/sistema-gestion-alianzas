@@ -35,7 +35,7 @@ const modules = [
     title: "Programas e iniciativas",
     description: "Seguimiento y estado de programas",
     icon: FolderKanban,
-    url: "/projects",
+    url: "/programs",
     colorClass: "text-luker-orange",
     bgClass: "bg-luker-orange/10",
   },

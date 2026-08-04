@@ -4,12 +4,12 @@ import { useToast } from "@/hooks/use-toast";
 export const useDocumentExport = () => {
   const { toast } = useToast();
 
-  const exportProjectAsDocx = async (projectData: any) => {
+  const exportProgramAsDocx = async (programData: any) => {
     try {
-      console.log('Exporting project as DOCX:', projectData);
+      console.log('Exporting program as DOCX:', programData);
       
-      if (!projectData) {
-        throw new Error('No hay datos del proyecto para exportar');
+      if (!programData) {
+        throw new Error('No hay datos del programa para exportar');
       }
 
       const doc = new Document({
@@ -17,15 +17,15 @@ export const useDocumentExport = () => {
           properties: {},
           children: [
             new Paragraph({
-              text: `Reporte Individual - ${projectData.nombre || 'Sin nombre'}`,
+              text: `Reporte Individual - ${programData.nombre || 'Sin nombre'}`,
               heading: HeadingLevel.TITLE,
             }),
             new Paragraph({
-              text: `Eje: ${projectData.eje_estrategico || 'No especificada'}`,
+              text: `Eje: ${programData.eje_estrategico || 'No especificada'}`,
               spacing: { after: 200 },
             }),
             new Paragraph({
-              text: `Estado: ${projectData.estado || 'No especificado'}`,
+              text: `Estado: ${programData.estado || 'No especificado'}`,
               spacing: { after: 200 },
             }),
             
@@ -36,25 +36,25 @@ export const useDocumentExport = () => {
             new Paragraph({
               children: [
                 new TextRun({ text: "Objetivos: ", bold: true }),
-                new TextRun(projectData.objetivos || 'No especificados'),
+                new TextRun(programData.objetivos || 'No especificados'),
               ],
             }),
             new Paragraph({
               children: [
                 new TextRun({ text: "Resultados: ", bold: true }),
-                new TextRun(projectData.resultados || 'No especificados'),
+                new TextRun(programData.resultados || 'No especificados'),
               ],
             }),
             new Paragraph({
               children: [
                 new TextRun({ text: "Fecha de Inicio: ", bold: true }),
-                new TextRun(projectData.fecha_inicio || 'No especificada'),
+                new TextRun(programData.fecha_inicio || 'No especificada'),
               ],
             }),
             new Paragraph({
               children: [
                 new TextRun({ text: "Fecha de Cierre: ", bold: true }),
-                new TextRun(projectData.fecha_cierre || 'No especificada'),
+                new TextRun(programData.fecha_cierre || 'No especificada'),
               ],
             }),
             
@@ -65,19 +65,19 @@ export const useDocumentExport = () => {
             new Paragraph({
               children: [
                 new TextRun({ text: "Presupuesto Total: ", bold: true }),
-                new TextRun(`$${(projectData.presupuesto_total || 0).toLocaleString()}`),
+                new TextRun(`$${(programData.presupuesto_total || 0).toLocaleString()}`),
               ],
             }),
             new Paragraph({
               children: [
                 new TextRun({ text: "Presupuesto Ejecutado: ", bold: true }),
-                new TextRun(`$${(projectData.presupuesto_ejecutado || 0).toLocaleString()}`),
+                new TextRun(`$${(programData.presupuesto_ejecutado || 0).toLocaleString()}`),
               ],
             }),
             new Paragraph({
               children: [
                 new TextRun({ text: "Porcentaje de Ejecución: ", bold: true }),
-                new TextRun(`${projectData.budgetExecution || 0}%`),
+                new TextRun(`${programData.budgetExecution || 0}%`),
               ],
             }),
             
@@ -88,29 +88,29 @@ export const useDocumentExport = () => {
             new Paragraph({
               children: [
                 new TextRun({ text: "Total de Indicadores: ", bold: true }),
-                new TextRun((projectData.totalIndicators || 0).toString()),
+                new TextRun((programData.totalIndicators || 0).toString()),
               ],
             }),
             new Paragraph({
               children: [
                 new TextRun({ text: "Indicadores Completados: ", bold: true }),
-                new TextRun((projectData.completedIndicators || 0).toString()),
+                new TextRun((programData.completedIndicators || 0).toString()),
               ],
             }),
             new Paragraph({
               children: [
                 new TextRun({ text: "Porcentaje de Cumplimiento: ", bold: true }),
-                new TextRun(`${projectData.indicatorCompletion || 0}%`),
+                new TextRun(`${programData.indicatorCompletion || 0}%`),
               ],
             }),
 
             // Agregar sección de actores relacionados si existen
-            ...(projectData.relatedActors && projectData.relatedActors.length > 0 ? [
+            ...(programData.relatedActors && programData.relatedActors.length > 0 ? [
               new Paragraph({
                 text: "ACTORES RELACIONADOS",
                 heading: HeadingLevel.HEADING_1,
               }),
-              ...projectData.relatedActors.map((actor: any) => 
+              ...programData.relatedActors.map((actor: any) => 
                 new Paragraph({
                   children: [
                     new TextRun({ text: `• ${actor.nombre_actor || 'Sin nombre'}`, bold: true }),
@@ -128,7 +128,7 @@ export const useDocumentExport = () => {
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `Reporte_Proyecto_${(projectData.nombre || 'Sin_nombre').replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.docx`;
+      link.download = `Reporte_Programa_${(programData.nombre || 'Sin_nombre').replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.docx`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -138,13 +138,13 @@ export const useDocumentExport = () => {
 
       toast({
         title: "Reporte generado",
-        description: "El reporte del proyecto se ha descargado exitosamente.",
+        description: "El reporte del programa se ha descargado exitosamente.",
       });
     } catch (error) {
-      console.error('Error generating project document:', error);
+      console.error('Error generating program document:', error);
       toast({
         title: "Error",
-        description: `Hubo un error al generar el reporte del proyecto: ${error.message || 'Error desconocido'}`,
+        description: `Hubo un error al generar el reporte del programa: ${error.message || 'Error desconocido'}`,
         variant: "destructive",
       });
     }
@@ -234,17 +234,17 @@ export const useDocumentExport = () => {
               ],
             }),
 
-            // Agregar sección de proyectos relacionados si existen
-            ...(actorData.relatedProjects && actorData.relatedProjects.length > 0 ? [
+            // Agregar sección de programas relacionados si existen
+            ...(actorData.relatedPrograms && actorData.relatedPrograms.length > 0 ? [
               new Paragraph({
-                text: "PROYECTOS RELACIONADOS",
+                text: "PROGRAMAS RELACIONADOS",
                 heading: HeadingLevel.HEADING_1,
               }),
-              ...actorData.relatedProjects.map((project: any) => 
+              ...actorData.relatedPrograms.map((program: any) => 
                 new Paragraph({
                   children: [
-                    new TextRun({ text: `• ${project.nombre || 'Sin nombre'}`, bold: true }),
-                    new TextRun(` - ${project.eje_estrategico || 'Sin eje'} (${project.estado || 'Sin estado'})`),
+                    new TextRun({ text: `• ${program.nombre || 'Sin nombre'}`, bold: true }),
+                    new TextRun(` - ${program.eje_estrategico || 'Sin eje'} (${program.estado || 'Sin estado'})`),
                   ],
                 })
               )
@@ -280,45 +280,45 @@ export const useDocumentExport = () => {
     }
   };
 
-  const exportProjectAsMarkdown = (projectData: any) => {
+  const exportProgramAsMarkdown = (programData: any) => {
     try {
-      console.log('Exporting project as Markdown:', projectData);
+      console.log('Exporting program as Markdown:', programData);
       
-      if (!projectData) {
-        throw new Error('No hay datos del proyecto para exportar');
+      if (!programData) {
+        throw new Error('No hay datos del programa para exportar');
       }
 
-      const markdown = `# Reporte Individual - ${projectData.nombre || 'Sin nombre'}
+      const markdown = `# Reporte Individual - ${programData.nombre || 'Sin nombre'}
 
-**Eje:** ${projectData.eje_estrategico || 'No especificada'}  
-**Estado:** ${projectData.estado || 'No especificado'}
+**Eje:** ${programData.eje_estrategico || 'No especificada'}  
+**Estado:** ${programData.estado || 'No especificado'}
 
 ## INFORMACIÓN GENERAL
 
-**Objetivos:** ${projectData.objetivos || 'No especificados'}
+**Objetivos:** ${programData.objetivos || 'No especificados'}
 
-**Resultados:** ${projectData.resultados || 'No especificados'}
+**Resultados:** ${programData.resultados || 'No especificados'}
 
-**Fecha de Inicio:** ${projectData.fecha_inicio || 'No especificada'}
+**Fecha de Inicio:** ${programData.fecha_inicio || 'No especificada'}
 
-**Fecha de Cierre:** ${projectData.fecha_cierre || 'No especificada'}
+**Fecha de Cierre:** ${programData.fecha_cierre || 'No especificada'}
 
 ## SEGUIMIENTO PRESUPUESTAL
 
-- **Presupuesto Total:** $${(projectData.presupuesto_total || 0).toLocaleString()}
-- **Presupuesto Ejecutado:** $${(projectData.presupuesto_ejecutado || 0).toLocaleString()}
-- **Porcentaje de Ejecución:** ${projectData.budgetExecution || 0}%
+- **Presupuesto Total:** $${(programData.presupuesto_total || 0).toLocaleString()}
+- **Presupuesto Ejecutado:** $${(programData.presupuesto_ejecutado || 0).toLocaleString()}
+- **Porcentaje de Ejecución:** ${programData.budgetExecution || 0}%
 
 ## INDICADORES TÉCNICOS
 
-- **Total de Indicadores:** ${projectData.totalIndicators || 0}
-- **Indicadores Completados:** ${projectData.completedIndicators || 0}
-- **Porcentaje de Cumplimiento:** ${projectData.indicatorCompletion || 0}%
+- **Total de Indicadores:** ${programData.totalIndicators || 0}
+- **Indicadores Completados:** ${programData.completedIndicators || 0}
+- **Porcentaje de Cumplimiento:** ${programData.indicatorCompletion || 0}%
 
-${projectData.relatedActors && projectData.relatedActors.length > 0 ? `
+${programData.relatedActors && programData.relatedActors.length > 0 ? `
 ## ACTORES RELACIONADOS
 
-${projectData.relatedActors.map((actor: any) => 
+${programData.relatedActors.map((actor: any) => 
   `- **${actor.nombre_actor || 'Sin nombre'}** - ${actor.sector_actor || 'Sin sector'} (${actor.ciudad_sede || 'Sin ciudad'})`
 ).join('\n')}
 ` : ''}
@@ -331,7 +331,7 @@ ${projectData.relatedActors.map((actor: any) =>
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `Reporte_Proyecto_${(projectData.nombre || 'Sin_nombre').replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.md`;
+      link.download = `Reporte_Programa_${(programData.nombre || 'Sin_nombre').replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.md`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -341,13 +341,13 @@ ${projectData.relatedActors.map((actor: any) =>
 
       toast({
         title: "Reporte generado",
-        description: "El reporte del proyecto se ha descargado exitosamente.",
+        description: "El reporte del programa se ha descargado exitosamente.",
       });
     } catch (error) {
-      console.error('Error generating project markdown:', error);
+      console.error('Error generating program markdown:', error);
       toast({
         title: "Error",
-        description: `Hubo un error al generar el reporte del proyecto: ${error.message || 'Error desconocido'}`,
+        description: `Hubo un error al generar el reporte del programa: ${error.message || 'Error desconocido'}`,
         variant: "destructive",
       });
     }
@@ -383,11 +383,11 @@ ${projectData.relatedActors.map((actor: any) =>
 
 - **Responsables de Seguimiento:** ${actorData.responsables || 'No especificados'}
 
-${actorData.relatedProjects && actorData.relatedProjects.length > 0 ? `
-## PROYECTOS RELACIONADOS
+${actorData.relatedPrograms && actorData.relatedPrograms.length > 0 ? `
+## PROGRAMAS RELACIONADOS
 
-${actorData.relatedProjects.map((project: any) => 
-  `- **${project.nombre || 'Sin nombre'}** - ${project.eje_estrategico || 'Sin eje'} (${project.estado || 'Sin estado'})`
+${actorData.relatedPrograms.map((program: any) => 
+  `- **${program.nombre || 'Sin nombre'}** - ${program.eje_estrategico || 'Sin eje'} (${program.estado || 'Sin estado'})`
 ).join('\n')}
 ` : ''}
 
@@ -422,9 +422,9 @@ ${actorData.relatedProjects.map((project: any) =>
   };
 
   return {
-    exportProjectAsDocx,
+    exportProgramAsDocx,
     exportActorAsDocx,
-    exportProjectAsMarkdown,
+    exportProgramAsMarkdown,
     exportActorAsMarkdown
   };
 };

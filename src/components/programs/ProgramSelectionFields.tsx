@@ -7,12 +7,12 @@ import { supabase } from "@/integrations/supabase/client";
 
 import { EJES } from "@/lib/ejes";
 
-interface ProjectSelectionFieldsProps {
+interface ProgramSelectionFieldsProps {
   form: UseFormReturn<any>;
 }
 
 
-export function ProjectSelectionFields({ form }: ProjectSelectionFieldsProps) {
+export function ProgramSelectionFields({ form }: ProgramSelectionFieldsProps) {
   const { data: actors = [], isLoading: isLoadingActors } = useQuery({
     queryKey: ['actors'],
     queryFn: async () => {
@@ -100,7 +100,7 @@ export function ProjectSelectionFields({ form }: ProjectSelectionFieldsProps) {
         name="estado"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Estado del Proyecto</FormLabel>
+            <FormLabel>Estado del Programa</FormLabel>
             <Select onValueChange={field.onChange} defaultValue={field.value}>
               <FormControl>
                 <SelectTrigger>

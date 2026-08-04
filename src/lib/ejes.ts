@@ -44,7 +44,7 @@ export function normalizeEje(value?: string | null): Eje | null {
   return EJE_ALIASES[key] ?? (EJES.includes(value as Eje) ? (value as Eje) : null);
 }
 
-// Extrae los ejes únicos de los proyectos asociados a un actor.
+// Extrae los ejes únicos de los programas asociados a un actor.
 // Espera la forma { actor_programs: [{ programs: { eje_estrategico } }] } o { programs: [...] }.
 export function getEjesFromActor(actor: any): Eje[] {
   if (!actor) return [];
@@ -59,8 +59,8 @@ export function getEjesFromActor(actor: any): Eje[] {
   return Array.from(set);
 }
 
-// Extrae los proyectos (nombres) de un actor.
-export function getProjectsFromActor(actor: any): string[] {
+// Extrae los programas (nombres) de un actor.
+export function getProgramsFromActor(actor: any): string[] {
   if (!actor) return [];
   const programs: any[] = actor.actor_programs?.map((ap: any) => ap.programs).filter(Boolean)
     || actor.programs

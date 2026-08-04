@@ -74,7 +74,7 @@ export const useIndividualActorReport = (actorId: string | null) => {
       return {
         ...data,
         strategy,
-        relatedProjects: programs,
+        relatedPrograms: programs,
         municipalities,
         departments,
         relationTypes,

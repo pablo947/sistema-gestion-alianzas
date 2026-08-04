@@ -4,24 +4,24 @@ import { StackedBarChart } from '@/components/dashboard/StackedBarChart';
 import { HeatMap } from '@/components/dashboard/HeatMap';
 import { AreaDistribution } from '@/components/dashboard/AreaDistribution';
 import { CitiesBarChart } from '@/components/dashboard/CitiesBarChart';
-import { ProjectAreaChart } from '@/components/dashboard/ProjectAreaChart';
-import { useProjectAreaDistribution } from '@/hooks/useProjectAreaDistribution';
+import { ProgramAreaChart } from '@/components/dashboard/ProgramAreaChart';
+import { useProgramAreaDistribution } from '@/hooks/useProgramAreaDistribution';
 import { useActorCitiesData } from '@/hooks/useActorCitiesData';
 
 interface DashboardChartsProps {
   actorRelations: any[];
   influenceInterest: any[];
-  projects: any[];
+  programs: any[];
 }
 
 export const DashboardCharts = ({
   actorRelations,
   influenceInterest,
-  projects
+  programs
 }: DashboardChartsProps) => {
   const {
-    data: projectAreaData = []
-  } = useProjectAreaDistribution();
+    data: programAreaData = []
+  } = useProgramAreaDistribution();
   
   const {
     data: citiesData = []
@@ -71,10 +71,10 @@ export const DashboardCharts = ({
 
         <Card>
           <CardHeader>
-            <CardTitle>Distribución de Proyectos por Eje</CardTitle>
+            <CardTitle>Distribución de Programas por Eje</CardTitle>
           </CardHeader>
           <CardContent>
-            <ProjectAreaChart data={projectAreaData} />
+            <ProgramAreaChart data={programAreaData} />
           </CardContent>
         </Card>
       </div>

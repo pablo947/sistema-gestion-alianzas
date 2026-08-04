@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
-export const useProjects = () => {
+export const usePrograms = () => {
   return useQuery({
     queryKey: ['programs'],
     queryFn: async () => {
@@ -20,7 +20,7 @@ export const useProjects = () => {
   });
 };
 
-export const useActorProjects = (actorId?: string) => {
+export const useActorPrograms = (actorId?: string) => {
   return useQuery({
     queryKey: ['actor-programs', actorId],
     queryFn: async () => {
@@ -50,11 +50,11 @@ export const useActorProjects = (actorId?: string) => {
   });
 };
 
-export const useProjectActors = (projectId?: string) => {
+export const useProgramActors = (programId?: string) => {
   return useQuery({
-    queryKey: ['program-actors', projectId],
+    queryKey: ['program-actors', programId],
     queryFn: async () => {
-      if (!projectId) return [];
+      if (!programId) return [];
       
       const { data, error } = await supabase
         .from('actor_programs')
@@ -67,7 +67,7 @@ export const useProjectActors = (projectId?: string) => {
             tipo_relacion
           )
         `)
-        .eq('program_id', projectId);
+        .eq('program_id', programId);
       
       if (error) {
         console.error('Error fetching program actors:', error);
@@ -76,6 +76,6 @@ export const useProjectActors = (projectId?: string) => {
       
       return data?.map(item => item.actors).filter(Boolean) || [];
     },
-    enabled: !!projectId,
+    enabled: !!programId,
   });
 };

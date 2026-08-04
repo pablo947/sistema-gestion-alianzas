@@ -6,11 +6,11 @@ import { Plus, Trash2 } from "lucide-react";
 import { UseFormReturn } from "react-hook-form";
 import { Meta } from "./types";
 
-interface ProjectGoalsTableProps {
+interface ProgramGoalsTableProps {
   form: UseFormReturn<any>;
 }
 
-export function ProjectGoalsTable({ form }: ProjectGoalsTableProps) {
+export function ProgramGoalsTable({ form }: ProgramGoalsTableProps) {
   const metas: Meta[] = form.watch('metas') || [];
 
   const addMeta = () => {

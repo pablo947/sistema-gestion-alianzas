@@ -37,10 +37,10 @@ function getStrategyForActor(actor: any): StrategyKey {
   return "Monitorear";
 }
 
-interface ProjectDetailViewProps {
+interface ProgramDetailViewProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  project: any;
+  program: any;
   isAdmin: boolean;
   canEdit: boolean;
   onEdit: () => void;
@@ -55,12 +55,12 @@ const STATUS_COLORS: Record<string, string> = {
   "Planificado": "bg-yellow-500/10 text-yellow-700 border-yellow-200",
 };
 
-export function ProjectDetailView({ open, onOpenChange, project, isAdmin, canEdit, onEdit }: ProjectDetailViewProps) {
+export function ProgramDetailView({ open, onOpenChange, program, isAdmin, canEdit, onEdit }: ProgramDetailViewProps) {
   const navigate = useNavigate();
-  if (!project) return null;
+  if (!program) return null;
 
-  const indicators: IndicadorTecnico[] = Array.isArray(project.metas) ? project.metas : [];
-  const projectActors = project.actor_projects?.map((ap: any) => ap.actors).filter(Boolean) || [];
+  const indicators: IndicadorTecnico[] = Array.isArray(program.metas) ? program.metas : [];
+  const programActors = program.actor_programs?.map((ap: any) => ap.actors).filter(Boolean) || [];
 
   // Cruce con matriz Influencia–Interés: agrupar actores por estrategia
   const actorsByStrategy: Record<StrategyKey, any[]> = {
@@ -69,7 +69,7 @@ export function ProjectDetailView({ open, onOpenChange, project, isAdmin, canEdi
     "Mantener informados": [],
     "Monitorear": [],
   };
-  projectActors.forEach((a: any) => {
+  programActors.forEach((a: any) => {
     actorsByStrategy[getStrategyForActor(a)].push(a);
   });
   Object.values(actorsByStrategy).forEach(list =>
@@ -80,8 +80,8 @@ export function ProjectDetailView({ open, onOpenChange, project, isAdmin, canEdi
     onOpenChange(false);
     navigate(`/actors?actorId=${actorId}`);
   };
-  const budgetPct = project.presupuesto_total > 0
-    ? Math.round((project.presupuesto_ejecutado / project.presupuesto_total) * 100)
+  const budgetPct = program.presupuesto_total > 0
+    ? Math.round((program.presupuesto_ejecutado / program.presupuesto_total) * 100)
     : 0;
 
   const overallProgress = indicators.length > 0
@@ -98,7 +98,7 @@ export function ProjectDetailView({ open, onOpenChange, project, isAdmin, canEdi
   const resultadoIndicators = indicators.filter(i => i.tipo === "resultado");
   const impactoIndicators = indicators.filter(i => i.tipo === "impacto");
 
-  const ejeEstrategico = normalizeEje(project.eje_estrategico) || "Sin clasificar";
+  const ejeEstrategico = normalizeEje(program.eje_estrategico) || "Sin clasificar";
 
 
   const getComplianceColor = (pct: number) => {
@@ -167,12 +167,12 @@ export function ProjectDetailView({ open, onOpenChange, project, isAdmin, canEdi
             <div className="flex-1 min-w-0">
               <DialogHeader>
                 <DialogTitle className="text-2xl font-bold tracking-tight">
-                  {project.nombre}
+                  {program.nombre}
                 </DialogTitle>
               </DialogHeader>
               <div className="flex gap-2 flex-wrap mt-3">
-                <Badge className={STATUS_COLORS[project.estado] || "bg-muted text-muted-foreground"}>
-                  {project.estado || "Planificado"}
+                <Badge className={STATUS_COLORS[program.estado] || "bg-muted text-muted-foreground"}>
+                  {program.estado || "Planificado"}
                 </Badge>
                 <Badge className={EJE_COLORS[ejeEstrategico] || "bg-muted text-muted-foreground"}>
                   {ejeEstrategico}
@@ -189,10 +189,10 @@ export function ProjectDetailView({ open, onOpenChange, project, isAdmin, canEdi
         </div>
 
         <div className="px-8 py-6 space-y-8">
-          {project.objetivos && (
+          {program.objetivos && (
             <div>
               <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-2">Objetivos</h3>
-              <p className="text-sm text-foreground leading-relaxed">{project.objetivos}</p>
+              <p className="text-sm text-foreground leading-relaxed">{program.objetivos}</p>
             </div>
           )}
 
@@ -205,9 +205,9 @@ export function ProjectDetailView({ open, onOpenChange, project, isAdmin, canEdi
                   <span className="text-xs font-medium uppercase tracking-wider">Periodo</span>
                 </div>
                 <p className="text-sm font-medium">
-                  {project.fecha_inicio ? new Date(project.fecha_inicio).toLocaleDateString('es-ES') : "Sin definir"}
+                  {program.fecha_inicio ? new Date(program.fecha_inicio).toLocaleDateString('es-ES') : "Sin definir"}
                   {" — "}
-                  {project.fecha_cierre ? new Date(project.fecha_cierre).toLocaleDateString('es-ES') : "Sin definir"}
+                  {program.fecha_cierre ? new Date(program.fecha_cierre).toLocaleDateString('es-ES') : "Sin definir"}
                 </p>
               </CardContent>
             </Card>
@@ -219,7 +219,7 @@ export function ProjectDetailView({ open, onOpenChange, project, isAdmin, canEdi
                   <span className="text-xs font-medium uppercase tracking-wider">Presupuesto</span>
                 </div>
                 <p className="text-sm font-medium">
-                  ${(project.presupuesto_ejecutado || 0).toLocaleString('es-ES')} / ${(project.presupuesto_total || 0).toLocaleString('es-ES')}
+                  ${(program.presupuesto_ejecutado || 0).toLocaleString('es-ES')} / ${(program.presupuesto_total || 0).toLocaleString('es-ES')}
                 </p>
                 <Progress value={Math.min(budgetPct, 100)} className="h-2 mt-2" />
                 <p className="text-xs text-muted-foreground mt-1">{budgetPct}% ejecutado</p>
@@ -249,13 +249,13 @@ export function ProjectDetailView({ open, onOpenChange, project, isAdmin, canEdi
                 </h3>
               </div>
               <span className="text-xs text-muted-foreground">
-                {projectActors.length} {projectActors.length === 1 ? "actor" : "actores"}
+                {programActors.length} {programActors.length === 1 ? "actor" : "actores"}
               </span>
             </div>
 
-            {projectActors.length === 0 ? (
+            {programActors.length === 0 ? (
               <p className="text-sm text-muted-foreground italic">
-                Este proyecto aún no tiene actores asociados.
+                Este programa aún no tiene actores asociados.
               </p>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -278,7 +278,7 @@ export function ProjectDetailView({ open, onOpenChange, project, isAdmin, canEdi
                       </div>
                       {list.length === 0 ? (
                         <p className="text-xs text-muted-foreground italic">
-                          No hay actores en esta categoría para este proyecto.
+                          No hay actores en esta categoría para este programa.
                         </p>
                       ) : (
                         <ul className="space-y-1.5">

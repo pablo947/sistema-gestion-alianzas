@@ -180,7 +180,7 @@ export default function Strategies() {
   };
 
   const handleProgramClick = (programaId: string) => {
-    navigate(`/projects?id=${programaId}`);
+    navigate(`/programs?id=${programaId}`);
   };
 
   const renderActorWithHover = (actor: ActorItem, showLevels: boolean, actorActions: StrategicAction[] = []) => {

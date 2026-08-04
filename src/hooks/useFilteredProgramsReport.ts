@@ -1,14 +1,14 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
-export interface ProjectsFilterState {
+export interface ProgramsFilterState {
   ejeEstrategico: string[];
-  proyecto: string[];
+  programa: string[];
   actor: string[];
   anio: number[];
 }
 
-export const useFilteredProjectsReport = (filters: ProjectsFilterState) => {
+export const useFilteredProgramsReport = (filters: ProgramsFilterState) => {
   return useQuery({
     queryKey: ['filtered-programs-report', filters],
     queryFn: async () => {
@@ -33,8 +33,8 @@ export const useFilteredProjectsReport = (filters: ProjectsFilterState) => {
         query = query.in('eje_estrategico', filters.ejeEstrategico);
       }
 
-      if (filters.proyecto && filters.proyecto.length > 0) {
-        query = query.in('programa_id', filters.proyecto);
+      if (filters.programa && filters.programa.length > 0) {
+        query = query.in('programa_id', filters.programa);
       }
 
       const { data, error } = await query;

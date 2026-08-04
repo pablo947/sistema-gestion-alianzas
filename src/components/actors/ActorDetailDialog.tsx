@@ -11,7 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Actor } from './types';
-import { useActorProjects } from '@/hooks/useProjects';
+import { useActorPrograms } from '@/hooks/usePrograms';
 import { usePermissions } from '@/hooks/usePermissions';
 import { Edit2, Users, MapPin, Mail, Phone, ExternalLink } from 'lucide-react';
 import { RelatedContactsDialog } from './RelatedContactsDialog';
@@ -29,7 +29,7 @@ interface ActorDetailDialogProps {
 
 export function ActorDetailDialog({ open, onOpenChange, actor, onEdit }: ActorDetailDialogProps) {
   const [showRelatedContacts, setShowRelatedContacts] = React.useState(false);
-  const { data: actorProjects } = useActorProjects(actor?.actor_id);
+  const { data: actorPrograms } = useActorPrograms(actor?.actor_id);
   const { canEditActors, canCreatePendingActors } = usePermissions();
   
   const { data: teamMembers = [] } = useQuery({
@@ -117,18 +117,18 @@ export function ActorDetailDialog({ open, onOpenChange, actor, onEdit }: ActorDe
             </div>
           </div>
 
-          {/* Proyectos y Años */}
+          {/* Programas y Años */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
              <div>
-               <h3 className="font-semibold text-sm mb-3 text-muted-foreground uppercase tracking-wider">Proyectos Vinculados</h3>
-               {actorProjects && actorProjects.length > 0 ? (
+               <h3 className="font-semibold text-sm mb-3 text-muted-foreground uppercase tracking-wider">Programas Vinculados</h3>
+               {actorPrograms && actorPrograms.length > 0 ? (
                  <ul className="list-disc pl-5 text-sm space-y-1">
-                   {actorProjects.map((p: any) => (
+                   {actorPrograms.map((p: any) => (
                      <li key={p.programa_id}>{p.nombre}</li>
                    ))}
                  </ul>
                ) : (
-                 <span className="text-muted-foreground text-sm italic">Ningún proyecto vinculado.</span>
+                 <span className="text-muted-foreground text-sm italic">Ningún programa vinculado.</span>
                )}
              </div>
 

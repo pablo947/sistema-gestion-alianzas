@@ -113,7 +113,7 @@ const LAYER_EXPLANATIONS = {
   relacionamiento: {
     title: "Red de Relacionamiento",
     content:
-      "Analiza las relaciones de colaboración entre organizaciones: intercambio de información, proyectos conjuntos y labores de incidencia.",
+      "Analiza las relaciones de colaboración entre organizaciones: intercambio de información, programas conjuntos y labores de incidencia.",
   },
   reconocimiento: {
     title: "Red de Reconocimiento",
@@ -443,7 +443,7 @@ export default function Grafos2() {
 
   const REC_OPTIONS = [
     { id: 1, label: "Obtener e intercambiar información" },
-    { id: 2, label: "Desarrollar proyectos conjuntamente" },
+    { id: 2, label: "Desarrollar programas conjuntamente" },
     { id: 3, label: "Realizar labores de incidencia" },
   ];
 
@@ -529,7 +529,7 @@ export default function Grafos2() {
 
   const DEFAULT_TYPES_META = {
     1: "Intercambio de información",
-    2: "Realizan proyectos conjuntamente",
+    2: "Realizan programas conjuntamente",
     3: "Realizan labores de incidencia",
   };
 
@@ -2331,7 +2331,7 @@ export default function Grafos2() {
                 <SelectContent>
                   <SelectItem value="all">Todos</SelectItem>
                   <SelectItem value="1">Intercambio de información</SelectItem>
-                  <SelectItem value="2">Realizan proyectos conjuntamente</SelectItem>
+                  <SelectItem value="2">Realizan programas conjuntamente</SelectItem>
                   <SelectItem value="3">Realizan labores de incidencia</SelectItem>
                 </SelectContent>
               </Select>
@@ -2768,7 +2768,7 @@ export default function Grafos2() {
                       <SelectContent>
                         <SelectItem value="all">Todos</SelectItem>
                         <SelectItem value="1">Intercambio de información</SelectItem>
-                        <SelectItem value="2">Realizan proyectos conjuntamente</SelectItem>
+                        <SelectItem value="2">Realizan programas conjuntamente</SelectItem>
                         <SelectItem value="3">Realizan labores de incidencia</SelectItem>
                       </SelectContent>
                     </Select>
@@ -3141,7 +3141,7 @@ export default function Grafos2() {
                     {(
                       [
                         ["1", "Intercambio de Información", "border-t-blue-500", "text-blue-700"],
-                        ["2", "Proyectos Conjuntos", "border-t-green-500", "text-green-700"],
+                        ["2", "Programas Conjuntos", "border-t-green-500", "text-green-700"],
                         ["3", "Labores de Incidencia", "border-t-orange-500", "text-orange-700"],
                       ] as const
                     ).map(([k, title, borderClass, textClass]) => (

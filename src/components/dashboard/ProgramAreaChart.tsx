@@ -11,18 +11,18 @@ import {
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-interface ProjectAreaData {
+interface ProgramAreaData {
   eje?: string;
   area?: string;
   count: number;
-  projects: string[];
+  programs: string[];
 }
 
-interface ProjectAreaChartProps {
-  data: ProjectAreaData[];
+interface ProgramAreaChartProps {
+  data: ProgramAreaData[];
 }
 
-export const ProjectAreaChart = ({ data }: ProjectAreaChartProps) => {
+export const ProgramAreaChart = ({ data }: ProgramAreaChartProps) => {
   const navigate = useNavigate();
 
   // Generate different colors for each area
@@ -47,7 +47,7 @@ export const ProjectAreaChart = ({ data }: ProjectAreaChartProps) => {
     labels: data.map(item => item.eje || item.area || ''),
     datasets: [
       {
-        label: 'Número de Proyectos',
+        label: 'Número de Programas',
         data: data.map(item => item.count),
         backgroundColor: colors.map(c => c.background),
         borderColor: colors.map(c => c.border),
@@ -63,10 +63,10 @@ export const ProjectAreaChart = ({ data }: ProjectAreaChartProps) => {
       if (elements.length > 0) {
         const index = elements[0].index;
         const ejeName = data[index].eje || data[index].area || '';
-        navigate(`/projects?eje=${encodeURIComponent(ejeName)}`);
+        navigate(`/programs?eje=${encodeURIComponent(ejeName)}`);
         toast({
           title: "Filtro aplicado",
-          description: `Mostrando proyectos del eje: ${ejeName}`,
+          description: `Mostrando programas del eje: ${ejeName}`,
         });
       }
     },
@@ -85,9 +85,9 @@ export const ProjectAreaChart = ({ data }: ProjectAreaChartProps) => {
         callbacks: {
           afterLabel: (context: any) => {
             const item = data[context.dataIndex];
-            return item.projects.length > 3
-              ? item.projects.slice(0, 3).concat(['...'])
-              : item.projects;
+            return item.programs.length > 3
+              ? item.programs.slice(0, 3).concat(['...'])
+              : item.programs;
           },
         },
       },

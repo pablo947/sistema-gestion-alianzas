@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { normalizeEje } from '@/lib/ejes';
 
-export const useProjectAreaDistribution = () => {
+export const useProgramAreaDistribution = () => {
   return useQuery({
     queryKey: ['program-eje-distribution'],
     queryFn: async () => {
@@ -13,14 +13,14 @@ export const useProjectAreaDistribution = () => {
 
       if (!programs) return [];
 
-      const ejeData = programs.reduce((acc: Record<string, { count: number; projects: string[] }>, program: any) => {
+      const ejeData = programs.reduce((acc: Record<string, { count: number; programs: string[] }>, program: any) => {
         const eje = normalizeEje(program.eje_estrategico) || program.eje_estrategico;
         if (!eje) return acc;
         if (!acc[eje]) {
-          acc[eje] = { count: 0, projects: [] };
+          acc[eje] = { count: 0, programs: [] };
         }
         acc[eje].count++;
-        acc[eje].projects.push(program.nombre);
+        acc[eje].programs.push(program.nombre);
         return acc;
       }, {});
 
@@ -28,7 +28,7 @@ export const useProjectAreaDistribution = () => {
         eje,
         area: eje, // backward compat
         count: data.count,
-        projects: data.projects,
+        programs: data.programs,
       })).sort((a, b) => b.count - a.count);
     },
     staleTime: 0,

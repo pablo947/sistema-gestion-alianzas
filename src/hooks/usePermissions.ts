@@ -30,7 +30,7 @@ const ROLE_PERMISSIONS: Record<string, Record<string, ModuleAccess>> = {
     contacts: FULL_ACCESS,
     strategies: FULL_ACCESS,
     grafos: FULL_ACCESS,
-    projects: FULL_ACCESS,
+    programs: FULL_ACCESS,
     team: FULL_ACCESS,
     reports: VIEW_ONLY, // Visualización/Descarga
     admin: FULL_ACCESS,
@@ -42,7 +42,7 @@ const ROLE_PERMISSIONS: Record<string, Record<string, ModuleAccess>> = {
     contacts: EDIT_ACCESS,
     strategies: { visible: true, level: 'RECOMMENDATIONS_ONLY' },
     grafos: VIEW_ONLY,
-    projects: VIEW_ONLY,
+    programs: VIEW_ONLY,
     team: VIEW_ONLY,
     reports: VIEW_ONLY,
     admin: DEFAULT_MODULE_ACCESS,
@@ -54,7 +54,7 @@ const ROLE_PERMISSIONS: Record<string, Record<string, ModuleAccess>> = {
     contacts: EDIT_ACCESS,
     strategies: VIEW_ONLY,
     grafos: VIEW_ONLY,
-    projects: VIEW_ONLY,
+    programs: VIEW_ONLY,
     team: VIEW_ONLY,
     reports: VIEW_ONLY,
     admin: DEFAULT_MODULE_ACCESS,
@@ -66,7 +66,7 @@ const ROLE_PERMISSIONS: Record<string, Record<string, ModuleAccess>> = {
     contacts: VIEW_ONLY,
     strategies: VIEW_ONLY,
     grafos: VIEW_ONLY,
-    projects: VIEW_ONLY,
+    programs: VIEW_ONLY,
     team: VIEW_ONLY,
     reports: VIEW_ONLY,
     admin: DEFAULT_MODULE_ACCESS,
@@ -159,9 +159,9 @@ export function usePermissions() {
   const canEditContacts = () => canEdit('contacts');
   const canDeleteContacts = () => canDelete('contacts');
 
-  const canViewProjects = () => hasModuleVisibility('projects');
-  const canEditProjects = () => canEdit('projects');
-  const canDeleteProjects = () => canDelete('projects');
+  const canViewPrograms = () => hasModuleVisibility('programs');
+  const canEditPrograms = () => canEdit('programs');
+  const canDeletePrograms = () => canDelete('programs');
 
   const canViewReports = () => hasModuleVisibility('reports');
   const canGenerateReports = () => hasModuleVisibility('reports');
@@ -195,9 +195,9 @@ export function usePermissions() {
     canViewContacts,
     canEditContacts,
     canDeleteContacts,
-    canViewProjects,
-    canEditProjects,
-    canDeleteProjects,
+    canViewPrograms,
+    canEditPrograms,
+    canDeletePrograms,
     canViewReports,
     canGenerateReports,
     canViewTeam,

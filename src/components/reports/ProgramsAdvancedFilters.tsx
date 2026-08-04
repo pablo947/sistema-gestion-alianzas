@@ -7,22 +7,22 @@ import { Label } from '@/components/ui/label';
 import { Filter, X, Loader2, Download, FileBarChart, DollarSign, Users, Network } from 'lucide-react';
 import { ModuleStatsPanel } from '@/components/ModuleStatsPanel';
 
-export interface ProjectsFiltersState {
+export interface ProgramsFiltersState {
   ejeEstrategico: string[];
-  proyecto: string[];
+  programa: string[];
   actor: string[];
   anio: number[];
 }
 
 interface Props {
-  filters: ProjectsFiltersState;
-  onFilterChange: (type: keyof ProjectsFiltersState, value: string | number) => void;
-  onFilterRemove: (type: keyof ProjectsFiltersState, value: string | number) => void;
+  filters: ProgramsFiltersState;
+  onFilterChange: (type: keyof ProgramsFiltersState, value: string | number) => void;
+  onFilterRemove: (type: keyof ProgramsFiltersState, value: string | number) => void;
   ejes: string[];
-  projects: Array<{ programa_id: string; nombre: string }>;
+  programs: Array<{ programa_id: string; nombre: string }>;
   actors: Array<{ actor_id: string; nombre_actor: string }>;
   filteredCount: number;
-  totalProjects: number;
+  totalPrograms: number;
   isLoading: boolean;
   hasError: boolean;
   lastUpdatedAt?: string | null;
@@ -35,15 +35,15 @@ interface Props {
 
 const YEARS = Array.from({ length: 2026 - 2018 + 1 }, (_, i) => 2018 + i);
 
-export const ProjectsAdvancedFilters: React.FC<Props> = ({
+export const ProgramsAdvancedFilters: React.FC<Props> = ({
   filters,
   onFilterChange,
   onFilterRemove,
   ejes,
-  projects,
+  programs,
   actors,
   filteredCount,
-  totalProjects,
+  totalPrograms,
   isLoading,
   hasError,
   lastUpdatedAt,
@@ -55,7 +55,7 @@ export const ProjectsAdvancedFilters: React.FC<Props> = ({
 }) => {
   const hasActiveFilters =
     filters.ejeEstrategico.length > 0 ||
-    filters.proyecto.length > 0 ||
+    filters.programa.length > 0 ||
     filters.actor.length > 0 ||
     filters.anio.length > 0;
 
@@ -66,7 +66,7 @@ export const ProjectsAdvancedFilters: React.FC<Props> = ({
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Filter className="h-5 w-5" />
-          Filtros Avanzados de Proyectos e Iniciativas
+          Filtros Avanzados de Programas e Iniciativas
           {hasActiveFilters && (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               {isLoading ? (
@@ -78,7 +78,7 @@ export const ProjectsAdvancedFilters: React.FC<Props> = ({
                 <span className="text-destructive">Error al cargar datos</span>
               ) : (
                 <span className="text-green-600">
-                  {filteredCount} proyecto{filteredCount !== 1 ? 's' : ''} encontrado{filteredCount !== 1 ? 's' : ''}
+                  {filteredCount} programa{filteredCount !== 1 ? 's' : ''} encontrado{filteredCount !== 1 ? 's' : ''}
                 </span>
               )}
             </div>
@@ -87,8 +87,8 @@ export const ProjectsAdvancedFilters: React.FC<Props> = ({
       </CardHeader>
       <CardContent className="space-y-6">
         <ModuleStatsPanel
-          totalCount={totalProjects}
-          label="proyectos registrados"
+          totalCount={totalPrograms}
+          label="programas registrados"
           lastUpdatedAt={lastUpdatedAt}
           lastUpdatedBy={lastUpdatedBy}
         />
@@ -121,26 +121,26 @@ export const ProjectsAdvancedFilters: React.FC<Props> = ({
             </div>
           </div>
 
-          {/* Proyecto */}
+          {/* Programa */}
           <div className="space-y-2">
-            <Label>Proyecto / Iniciativa</Label>
-            <Select onValueChange={(v) => !filters.proyecto.includes(v) && onFilterChange('proyecto', v)}>
+            <Label>Programa / Iniciativa</Label>
+            <Select onValueChange={(v) => !filters.programa.includes(v) && onFilterChange('programa', v)}>
               <SelectTrigger>
-                <SelectValue placeholder="Buscar proyecto" />
+                <SelectValue placeholder="Buscar programa" />
               </SelectTrigger>
               <SelectContent>
-                {projects.map(p => (
+                {programs.map(p => (
                   <SelectItem key={p.programa_id} value={p.programa_id}>{p.nombre}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
             <div className="flex flex-wrap gap-1">
-              {filters.proyecto.map(id => {
-                const p = projects.find(pp => pp.programa_id === id);
+              {filters.programa.map(id => {
+                const p = programs.find(pp => pp.programa_id === id);
                 return (
                   <Badge key={id} variant="secondary" className="text-xs">
                     {p?.nombre || id}
-                    <X className="ml-1 h-3 w-3 cursor-pointer" onClick={() => onFilterRemove('proyecto', id)} />
+                    <X className="ml-1 h-3 w-3 cursor-pointer" onClick={() => onFilterRemove('programa', id)} />
                   </Badge>
                 );
               })}
@@ -208,7 +208,7 @@ export const ProjectsAdvancedFilters: React.FC<Props> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <Button variant="outline" disabled={exportsDisabled} onClick={onExportIndicators} className="justify-start">
               <FileBarChart className="mr-2 h-4 w-4" />
-              Indicadores por Proyecto
+              Indicadores por Programa
             </Button>
             <Button variant="outline" disabled={exportsDisabled} onClick={onExportBudget} className="justify-start">
               <DollarSign className="mr-2 h-4 w-4" />
@@ -216,7 +216,7 @@ export const ProjectsAdvancedFilters: React.FC<Props> = ({
             </Button>
             <Button variant="outline" disabled={exportsDisabled} onClick={onExportActors} className="justify-start">
               <Users className="mr-2 h-4 w-4" />
-              Actores Atados a Proyectos
+              Actores Atados a Programas
             </Button>
             <Button variant="outline" disabled={exportsDisabled} onClick={onExportSynergy} className="justify-start">
               <Network className="mr-2 h-4 w-4" />

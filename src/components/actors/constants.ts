@@ -33,7 +33,7 @@ export const ALCANCE_TERRITORIAL_OPTIONS = [
   'Internacional'
 ] as const;
 
-export const PROYECTOS_OPTIONS = [
+export const PROGRAMAS_OPTIONS = [
   'Aprende',
   'Bilinguismo',
   'Coding Hubs',
@@ -43,7 +43,7 @@ export const PROYECTOS_OPTIONS = [
   'Manizales Campus',
   'Manizales Cómo Vamos',
   'Manizales Más',
-  'Proyectos Especial',
+  'Programas Especial',
   'Sueño de Chocolate',
   'Tercera Edad'
 ] as const;
@@ -69,7 +69,7 @@ export const NIVEL_INTERES_OPCIONES = [
 
 export const NIVEL_INFLUENCIA_PODER_OPCIONES = [
   { value: 1, title: "1. Nulo", description: "No moviliza recursos ni actores relevantes." },
-  { value: 2, title: "2. Bajo", description: "Influencia limitada a su ámbito interno o a proyectos específicos." },
+  { value: 2, title: "2. Bajo", description: "Influencia limitada a su ámbito interno o a programas específicos." },
   { value: 3, title: "3. Medio", description: "Puede movilizar recursos o alianzas de manera puntual." },
   { value: 4, title: "4. Alto", description: "Influye de manera consistente en decisiones, actores o agendas. Moviliza recursos, posiciona temas y conecta actores relevantes." },
   { value: 5, title: "5. Muy alto", description: "Define agendas, moviliza múltiples actores y recursos, y tiene capacidad de transformar decisiones a nivel sistémico." },

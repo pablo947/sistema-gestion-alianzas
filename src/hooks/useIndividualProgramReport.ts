@@ -2,11 +2,11 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
-export const useIndividualProjectReport = (projectId: string | null) => {
+export const useIndividualProgramReport = (programId: string | null) => {
   return useQuery({
-    queryKey: ['individual-program-report', projectId],
+    queryKey: ['individual-program-report', programId],
     queryFn: async () => {
-      if (!projectId) return null;
+      if (!programId) return null;
       
       const { data, error } = await supabase
         .from('programs')
@@ -36,7 +36,7 @@ export const useIndividualProjectReport = (projectId: string | null) => {
             )
           )
         `)
-        .eq('programa_id', projectId)
+        .eq('programa_id', programId)
         .maybeSingle();
       
       if (error) {
@@ -66,7 +66,7 @@ export const useIndividualProjectReport = (projectId: string | null) => {
       
       return {
         ...(data as any),
-        proyecto_id: (data as any).programa_id,
+        programa_id: (data as any).programa_id,
         budgetExecution,
         totalIndicators,
         completedIndicators,
@@ -74,6 +74,6 @@ export const useIndividualProjectReport = (projectId: string | null) => {
         relatedActors: actors
       };
     },
-    enabled: !!projectId,
+    enabled: !!programId,
   });
 };

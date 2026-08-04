@@ -20,7 +20,7 @@ export interface Actor {
   correo_entidad?: string;
   departamento_actuacion?: string[];
   municipio_actuacion?: string[];
-  proyectos?: {
+  programas?: {
     id: string;
     nombre: string;
     eje_estrategico?: string;

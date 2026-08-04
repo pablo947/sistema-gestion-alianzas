@@ -529,7 +529,7 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "projects_actor_id_fkey"
+            foreignKeyName: "programs_actor_id_fkey"
             columns: ["actor_id"]
             isOneToOne: false
             referencedRelation: "actors"
@@ -799,7 +799,7 @@ export type Database = {
         | "Educación"
         | "Emprendimiento"
         | "Desarrollo Rural"
-        | "Proyectos Especiales"
+        | "Programas Especiales"
         | "Innovación"
       nivel_direccion:
         | "Estratégico"
@@ -941,7 +941,7 @@ export const Constants = {
         "Educación",
         "Emprendimiento",
         "Desarrollo Rural",
-        "Proyectos Especiales",
+        "Programas Especiales",
         "Innovación",
       ],
       nivel_direccion: [

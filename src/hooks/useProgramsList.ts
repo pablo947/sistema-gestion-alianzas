@@ -2,7 +2,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
-export const useProjectsList = () => {
+export const useProgramsList = () => {
   return useQuery({
     queryKey: ['programs-list'],
     queryFn: async () => {

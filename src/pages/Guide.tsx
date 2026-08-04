@@ -50,7 +50,7 @@ export default function Guide() {
               </div>
               <div>
                 <CardTitle>Programas e Iniciativas</CardTitle>
-                <CardDescription>Seguimiento de proyectos estratégicos</CardDescription>
+                <CardDescription>Seguimiento de programas estratégicos</CardDescription>
               </div>
             </div>
           </CardHeader>

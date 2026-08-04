@@ -56,7 +56,7 @@ export default function Contacts() {
   const [showDetailDialog, setShowDetailDialog] = useState(false);
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
   const [filters, setFilters] = useState({
-    proyecto: '',
+    programa: '',
     ejeEstrategico: [] as string[],
     redAlumni: '',
     estrategiaMatriz: '',
@@ -106,7 +106,7 @@ export default function Contacts() {
   });
 
   // Unique programs from contacts' actors
-  const uniqueProjects = useMemo(() => {
+  const uniquePrograms = useMemo(() => {
     if (!contacts) return [];
     const set = new Set<string>();
     contacts.forEach((c: any) => {
@@ -188,9 +188,9 @@ export default function Contacts() {
       searchTerm
     );
 
-    const matchesProject = !filters.proyecto ||
+    const matchesProgram = !filters.programa ||
       contact.actors?.actor_programs?.some((ap: any) =>
-        ap.programs?.nombre === filters.proyecto
+        ap.programs?.nombre === filters.programa
       );
 
     const matchesEje = filters.ejeEstrategico.length === 0 ||
@@ -222,11 +222,11 @@ export default function Contacts() {
 
     const matchesMultiProgram = !multiProgramOnly || getContactProgramCount(contact) > 1;
 
-    return matchesSearch && matchesProject && matchesEje && matchesRedAlumni &&
+    return matchesSearch && matchesProgram && matchesEje && matchesRedAlumni &&
       matchesEstrategia && matchesResponsable && matchesSector && matchesNivelDireccion && matchesMultiProgram;
   });
 
-  const hasActiveFilters = searchTerm || filters.proyecto || filters.ejeEstrategico.length > 0 ||
+  const hasActiveFilters = searchTerm || filters.programa || filters.ejeEstrategico.length > 0 ||
     filters.redAlumni || filters.estrategiaMatriz || filters.responsable || filters.sector || filters.nivelDireccion || multiProgramOnly;
 
   const didYouMeanSuggestion = useMemo(() => {
@@ -237,7 +237,7 @@ export default function Contacts() {
 
   const clearAllFilters = () => {
     setSearchTerm('');
-    setFilters({ proyecto: '', ejeEstrategico: [], redAlumni: '', estrategiaMatriz: '', responsable: '', sector: '', nivelDireccion: '' });
+    setFilters({ programa: '', ejeEstrategico: [], redAlumni: '', estrategiaMatriz: '', responsable: '', sector: '', nivelDireccion: '' });
     setMultiProgramOnly(false);
   };
 
@@ -333,13 +333,13 @@ export default function Contacts() {
         {/* Advanced Filters */}
         <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
           {/* Programa/Iniciativa */}
-          <Select value={filters.proyecto} onValueChange={(value) => setFilters(prev => ({ ...prev, proyecto: value }))}>
+          <Select value={filters.programa} onValueChange={(value) => setFilters(prev => ({ ...prev, programa: value }))}>
             <SelectTrigger>
               <SelectValue placeholder="Filtrar por Programa/Iniciativa" />
             </SelectTrigger>
             <SelectContent>
-              {uniqueProjects.map((proyecto) => (
-                <SelectItem key={proyecto} value={proyecto}>{proyecto}</SelectItem>
+              {uniquePrograms.map((programa) => (
+                <SelectItem key={programa} value={programa}>{programa}</SelectItem>
               ))}
             </SelectContent>
           </Select>

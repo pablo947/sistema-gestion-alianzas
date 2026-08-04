@@ -8,14 +8,14 @@ import { z } from "zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { ProjectFormFields } from "./ProjectFormFields";
-import { ProjectDialogProps } from "./types";
+import { ProgramFormFields } from "./ProgramFormFields";
+import { ProgramDialogProps } from "./types";
 import { useEffect } from "react";
 import { usePermissions } from "@/hooks/usePermissions";
 
 import { EJES } from "@/lib/ejes";
 
-const projectSchema = z.object({
+const programSchema = z.object({
   nombre: z.string().min(1, "El título es requerido"),
   objetivos: z.string().optional(),
   eje_estrategico: z.enum(EJES, { errorMap: () => ({ message: "El eje es requerido" }) }),
@@ -53,9 +53,9 @@ const projectSchema = z.object({
   { message: "La fecha de finalización debe ser posterior a la fecha de inicio", path: ["fecha_cierre"] }
 );
 
-type ProjectFormData = z.infer<typeof projectSchema>;
+type ProgramFormData = z.infer<typeof programSchema>;
 
-const defaultProjectValues: Partial<ProjectFormData> = {
+const defaultProgramValues: Partial<ProgramFormData> = {
   nombre: "",
   objetivos: "",
   actor_ids: [],
@@ -68,48 +68,48 @@ const defaultProjectValues: Partial<ProjectFormData> = {
 };
 
 
-export function ProjectDialog({ open, onOpenChange, project, onSuccess }: ProjectDialogProps) {
+export function ProgramDialog({ open, onOpenChange, program, onSuccess }: ProgramDialogProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { canEditProjects, canDeleteProjects } = usePermissions();
+  const { canEditPrograms, canDeletePrograms } = usePermissions();
 
-  const form = useForm<ProjectFormData>({
-    resolver: zodResolver(projectSchema),
-    defaultValues: defaultProjectValues
+  const form = useForm<ProgramFormData>({
+    resolver: zodResolver(programSchema),
+    defaultValues: defaultProgramValues
   });
 
   useEffect(() => {
-    if (project) {
-      const getProjectActors = async () => {
+    if (program) {
+      const getProgramActors = async () => {
         const { data: programActors } = await (supabase as any)
           .from('actor_programs')
           .select('actor_id')
-          .eq('program_id', project.programa_id);
+          .eq('program_id', program.programa_id);
 
         const actorIds = (programActors || []).map((pa: any) => pa.actor_id);
 
         form.reset({
-          nombre: project.nombre || "",
-          objetivos: project.objetivos || "",
-          eje_estrategico: (project as any).eje_estrategico || undefined,
+          nombre: program.nombre || "",
+          objetivos: program.objetivos || "",
+          eje_estrategico: (program as any).eje_estrategico || undefined,
           actor_ids: actorIds,
-          estado: (project.estado as "Planificado" | "Ejecución" | "Finalizado") || "Planificado",
-          fecha_inicio: project.fecha_inicio || "",
-          fecha_cierre: project.fecha_cierre || "",
-          presupuesto_total: project.presupuesto_total || 0,
-          presupuesto_ejecutado: project.presupuesto_ejecutado || 0,
-          metas: Array.isArray(project.metas) ? project.metas : []
+          estado: (program.estado as "Planificado" | "Ejecución" | "Finalizado") || "Planificado",
+          fecha_inicio: program.fecha_inicio || "",
+          fecha_cierre: program.fecha_cierre || "",
+          presupuesto_total: program.presupuesto_total || 0,
+          presupuesto_ejecutado: program.presupuesto_ejecutado || 0,
+          metas: Array.isArray(program.metas) ? program.metas : []
         });
 
       };
-      getProjectActors();
+      getProgramActors();
     } else {
-      form.reset(defaultProjectValues);
+      form.reset(defaultProgramValues);
     }
-  }, [project, form]);
+  }, [program, form]);
 
   const createMutation = useMutation({
-    mutationFn: async (data: ProjectFormData) => {
+    mutationFn: async (data: ProgramFormData) => {
       const { data: newProgram, error } = await (supabase as any)
         .from('programs')
         .insert({
@@ -147,7 +147,7 @@ export function ProjectDialog({ open, onOpenChange, project, onSuccess }: Projec
       toast({ title: "Programa creado", description: "El programa ha sido creado exitosamente." });
       onSuccess();
       onOpenChange(false);
-      form.reset(defaultProjectValues);
+      form.reset(defaultProgramValues);
     },
     onError: (error) => {
       toast({ title: "Error", description: "Hubo un error al crear el programa.", variant: "destructive" });
@@ -156,8 +156,8 @@ export function ProjectDialog({ open, onOpenChange, project, onSuccess }: Projec
   });
 
   const updateMutation = useMutation({
-    mutationFn: async (data: ProjectFormData) => {
-      if (!project) throw new Error("Programa no encontrado");
+    mutationFn: async (data: ProgramFormData) => {
+      if (!program) throw new Error("Programa no encontrado");
 
       const { error } = await (supabase as any)
         .from('programs')
@@ -175,16 +175,16 @@ export function ProjectDialog({ open, onOpenChange, project, onSuccess }: Projec
           metas: data.metas || [],
           updated_at: new Date().toISOString()
         })
-        .eq('programa_id', project.programa_id);
+        .eq('programa_id', program.programa_id);
 
       if (error) throw error;
 
-      await (supabase as any).from('actor_programs').delete().eq('program_id', project.programa_id);
+      await (supabase as any).from('actor_programs').delete().eq('program_id', program.programa_id);
 
       if (data.actor_ids && data.actor_ids.length > 0) {
         const relationships = data.actor_ids.map(actorId => ({
           actor_id: actorId,
-          program_id: project.programa_id
+          program_id: program.programa_id
         }));
         const { error: relationError } = await (supabase as any).from('actor_programs').insert(relationships);
         if (relationError) throw relationError;
@@ -206,8 +206,8 @@ export function ProjectDialog({ open, onOpenChange, project, onSuccess }: Projec
 
   const deleteMutation = useMutation({
     mutationFn: async () => {
-      if (!project) throw new Error("Programa no encontrado");
-      const { error } = await (supabase as any).from('programs').delete().eq('programa_id', project.programa_id);
+      if (!program) throw new Error("Programa no encontrado");
+      const { error } = await (supabase as any).from('programs').delete().eq('programa_id', program.programa_id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -222,8 +222,8 @@ export function ProjectDialog({ open, onOpenChange, project, onSuccess }: Projec
     }
   });
 
-  const onSubmit = (data: ProjectFormData) => {
-    if (project) {
+  const onSubmit = (data: ProgramFormData) => {
+    if (program) {
       updateMutation.mutate(data);
     } else {
       createMutation.mutate(data);
@@ -235,19 +235,19 @@ export function ProjectDialog({ open, onOpenChange, project, onSuccess }: Projec
       <DialogContent className="max-w-5xl gap-0 overflow-hidden p-0 sm:max-h-[92vh]">
         <DialogHeader className="border-b px-6 py-5 pr-12">
           <DialogTitle className="text-xl font-semibold text-foreground">
-            {project ? "Editar Programa / Iniciativa" : "Crear Nuevo Programa / Iniciativa"}
+            {program ? "Editar Programa / Iniciativa" : "Crear Nuevo Programa / Iniciativa"}
           </DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="flex max-h-[calc(92vh-76px)] flex-col">
             <div className="min-h-0 flex-1 overflow-y-auto px-6 py-5">
-              <ProjectFormFields form={form} />
+              <ProgramFormFields form={form} />
             </div>
 
             <div className="flex flex-col gap-3 border-t bg-background px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                {project && canDeleteProjects() && (
+                {program && canDeletePrograms() && (
                   <Button
                     type="button"
                     variant="destructive"
@@ -261,9 +261,9 @@ export function ProjectDialog({ open, onOpenChange, project, onSuccess }: Projec
 
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                 <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-                  {canEditProjects() ? 'Cancelar' : 'Cerrar'}
+                  {canEditPrograms() ? 'Cancelar' : 'Cerrar'}
                 </Button>
-                {canEditProjects() && (
+                {canEditPrograms() && (
                   <Button
                     type="submit"
                     disabled={createMutation.isPending || updateMutation.isPending}
@@ -271,7 +271,7 @@ export function ProjectDialog({ open, onOpenChange, project, onSuccess }: Projec
                   >
                     {createMutation.isPending || updateMutation.isPending
                       ? "Guardando..."
-                      : project ? "Actualizar" : "Crear"
+                      : program ? "Actualizar" : "Crear"
                     }
                   </Button>
                 )}

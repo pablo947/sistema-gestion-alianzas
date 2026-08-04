@@ -75,7 +75,7 @@ export const useActorsReport = () => {
         return {
           ...actor,
           strategy,
-          projectsInvolved: programs.join(', '),
+          programsInvolved: programs.join(', '),
           municipalities,
           departments,
           relationTypes,

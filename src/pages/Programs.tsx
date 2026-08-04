@@ -14,9 +14,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { usePermissions } from "@/hooks/usePermissions";
-import { ProjectDialog } from "@/components/projects/ProjectDialog";
-import { ProjectDetailView } from "@/components/projects/ProjectDetailView";
-import { Project } from "@/components/projects/types";
+import { ProgramDialog } from "@/components/programs/ProgramDialog";
+import { ProgramDetailView } from "@/components/programs/ProgramDetailView";
+import { Program } from "@/components/programs/types";
 import { useSearchParams } from "react-router-dom";
 import { PageHeader } from '@/components/layout/PageHeader';
 
@@ -31,20 +31,20 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 
-export default function Projects() {
+export default function Programs() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [selectedProgram, setSelectedProgram] = useState<Program | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
-  const [detailProject, setDetailProject] = useState<any>(null);
+  const [programToDelete, setProgramToDelete] = useState<Program | null>(null);
+  const [detailProgram, setDetailProgram] = useState<any>(null);
   const [filters, setFilters] = useState({
     estado: searchParams.get('estado') || '',
     area: searchParams.get('area') || ''
   });
   const { toast } = useToast();
   const { isAdmin } = useAuth();
-  const { canEditProjects } = usePermissions();
+  const { canEditPrograms } = usePermissions();
   const queryClient = useQueryClient();
 
   React.useEffect(() => {
@@ -54,7 +54,7 @@ export default function Projects() {
     setSearchParams(newSearchParams);
   }, [filters, setSearchParams]);
 
-  const { data: projects = [], isLoading } = useQuery<any[]>({
+  const { data: programs = [], isLoading } = useQuery<any[]>({
     queryKey: ['programs'],
     queryFn: async () => {
       const { data, error } = await (supabase as any)
@@ -92,13 +92,13 @@ export default function Projects() {
   });
 
   const uniqueStatus = useMemo(() => {
-    if (!projects) return [];
-    return projects
+    if (!programs) return [];
+    return programs
       .map((p: any) => p.estado)
       .filter(Boolean)
       .filter((s: any, i: number, a: any[]) => a.indexOf(s) === i)
       .sort();
-  }, [projects]);
+  }, [programs]);
 
   const deleteMutation = useMutation({
     mutationFn: async (programaId: string) => {
@@ -108,22 +108,22 @@ export default function Projects() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['programs'] });
       toast({ title: "Programa eliminado", description: "El programa ha sido eliminado exitosamente." });
-      setProjectToDelete(null);
+      setProgramToDelete(null);
     },
     onError: () => {
       toast({ title: "Error", description: "Hubo un error al eliminar el programa.", variant: "destructive" });
     }
   });
 
-  const filteredProjects = projects.filter((project: any) => {
-    const projectActors = project.actor_programs?.map((ap: any) => ap.actors?.nombre_actor).filter(Boolean) || [];
-    const ejeEstrategico = normalizeEje(project.eje_estrategico) || "";
+  const filteredPrograms = programs.filter((program: any) => {
+    const programActors = program.actor_programs?.map((ap: any) => ap.actors?.nombre_actor).filter(Boolean) || [];
+    const ejeEstrategico = normalizeEje(program.eje_estrategico) || "";
 
     const matchesSearch = fuzzyMatchAll(
-      [project.nombre, ejeEstrategico, project.objetivos, ...projectActors],
+      [program.nombre, ejeEstrategico, program.objetivos, ...programActors],
       searchTerm
     );
-    const matchesStatus = filters.estado === '' || project.estado === filters.estado;
+    const matchesStatus = filters.estado === '' || program.estado === filters.estado;
     const matchesArea = filters.area === '' || ejeEstrategico === filters.area;
     return matchesSearch && matchesStatus && matchesArea;
   });
@@ -136,23 +136,23 @@ export default function Projects() {
     setSearchParams(new URLSearchParams());
   };
 
-  const handleEdit = (project: any) => {
-    setSelectedProject(project as Project);
+  const handleEdit = (program: any) => {
+    setSelectedProgram(program as Program);
     setIsDialogOpen(true);
   };
 
   const handleCreateNew = () => {
-    setSelectedProject(null);
+    setSelectedProgram(null);
     setIsDialogOpen(true);
   };
 
-  const handleCardClick = (project: any) => {
-    setDetailProject(project);
+  const handleCardClick = (program: any) => {
+    setDetailProgram(program);
   };
 
   const handleEditFromDetail = () => {
-    setDetailProject(null);
-    handleEdit(detailProject);
+    setDetailProgram(null);
+    handleEdit(detailProgram);
   };
 
   if (isLoading) {
@@ -194,7 +194,7 @@ export default function Projects() {
                 Limpiar filtros
               </Button>
             )}
-            {canEditProjects() && (
+            {canEditPrograms() && (
               <Button onClick={handleCreateNew}>
                 <Plus className="mr-2 h-4 w-4" />
                 Nuevo Programa / Iniciativa
@@ -230,19 +230,19 @@ export default function Projects() {
 
         {hasActiveFilters && (
           <div className="text-sm text-muted-foreground">
-            {filteredProjects.length} programa{filteredProjects.length !== 1 ? 's' : ''} encontrado{filteredProjects.length !== 1 ? 's' : ''}
+            {filteredPrograms.length} programa{filteredPrograms.length !== 1 ? 's' : ''} encontrado{filteredPrograms.length !== 1 ? 's' : ''}
           </div>
         )}
       </div>
 
-      {filteredProjects.length === 0 ? (
+      {filteredPrograms.length === 0 ? (
         <div className="text-center py-12">
           <Target className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
           <h3 className="text-lg font-semibold mb-2">No hay programas e iniciativas</h3>
           <p className="text-muted-foreground mb-4">
             {searchTerm || hasActiveFilters ? "No se encontraron programas con ese criterio de búsqueda." : "Comienza creando tu primer programa o iniciativa."}
           </p>
-          {!searchTerm && !hasActiveFilters && canEditProjects() && (
+          {!searchTerm && !hasActiveFilters && canEditPrograms() && (
             <Button onClick={handleCreateNew}>
               <Plus className="mr-2 h-4 w-4" />
               Crear Primer Programa / Iniciativa
@@ -251,9 +251,9 @@ export default function Projects() {
         </div>
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {filteredProjects.map((project: any) => {
-            const indicators: any[] = Array.isArray(project.metas) ? project.metas : [];
-            const projectActors = project.actor_programs?.map((ap: any) => ap.actors).filter(Boolean) || [];
+          {filteredPrograms.map((program: any) => {
+            const indicators: any[] = Array.isArray(program.metas) ? program.metas : [];
+            const programActors = program.actor_programs?.map((ap: any) => ap.actors).filter(Boolean) || [];
             const overallProgress = indicators.length > 0
               ? Math.round(
                   indicators.reduce((sum: number, ind: any) => {
@@ -266,18 +266,18 @@ export default function Projects() {
 
             return (
               <Card
-                key={project.programa_id}
+                key={program.programa_id}
                 className="group cursor-pointer border hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5 bg-card"
-                onClick={() => handleCardClick(project)}
+                onClick={() => handleCardClick(program)}
               >
                 <CardContent className="p-6 space-y-4">
                   <div>
                     <h3 className="font-semibold text-base text-foreground group-hover:text-primary transition-colors line-clamp-2">
-                      {project.nombre}
+                      {program.nombre}
                     </h3>
                     <div className="flex gap-2 flex-wrap mt-2">
                       {(() => {
-                        const eje = normalizeEje(project.eje_estrategico);
+                        const eje = normalizeEje(program.eje_estrategico);
                         return eje ? (
                           <Badge className={EJE_BADGE_CLASS[eje] || "bg-muted text-muted-foreground"}>
                             {eje}
@@ -285,24 +285,24 @@ export default function Projects() {
                         ) : null;
                       })()}
 
-                      <Badge className={STATUS_COLORS[project.estado || 'Planificado'] || "bg-muted text-muted-foreground"}>
-                        {project.estado || 'Planificado'}
+                      <Badge className={STATUS_COLORS[program.estado || 'Planificado'] || "bg-muted text-muted-foreground"}>
+                        {program.estado || 'Planificado'}
                       </Badge>
                     </div>
                   </div>
 
-                  {projectActors.length > 0 && (
+                  {programActors.length > 0 && (
                     <div className="flex items-center gap-2">
                       <Users className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                       <div className="flex flex-wrap gap-1 flex-1 min-w-0">
-                        {projectActors.slice(0, 3).map((actor: any) => (
+                        {programActors.slice(0, 3).map((actor: any) => (
                           <span key={actor.actor_id} className="text-xs text-muted-foreground truncate max-w-[120px]">
                             {actor.nombre_actor}
                           </span>
                         ))}
-                        {projectActors.length > 3 && (
+                        {programActors.length > 3 && (
                           <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
-                            +{projectActors.length - 3}
+                            +{programActors.length - 3}
                           </Badge>
                         )}
                       </div>
@@ -323,35 +323,35 @@ export default function Projects() {
         </div>
       )}
 
-      <ProjectDetailView
-        open={!!detailProject}
-        onOpenChange={(open) => { if (!open) setDetailProject(null); }}
-        project={detailProject}
+      <ProgramDetailView
+        open={!!detailProgram}
+        onOpenChange={(open) => { if (!open) setDetailProgram(null); }}
+        program={detailProgram}
         isAdmin={isAdmin}
-        canEdit={canEditProjects()}
+        canEdit={canEditPrograms()}
         onEdit={handleEditFromDetail}
       />
 
-      <ProjectDialog
+      <ProgramDialog
         open={isDialogOpen}
         onOpenChange={setIsDialogOpen}
-        project={selectedProject}
-        onSuccess={() => setSelectedProject(null)}
+        program={selectedProgram}
+        onSuccess={() => setSelectedProgram(null)}
       />
 
-      <AlertDialog open={!!projectToDelete} onOpenChange={() => setProjectToDelete(null)}>
+      <AlertDialog open={!!programToDelete} onOpenChange={() => setProgramToDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
             <AlertDialogDescription>
               Esta acción no se puede deshacer. Esto eliminará permanentemente el programa
-              "{projectToDelete?.nombre}" y todos sus datos asociados.
+              "{programToDelete?.nombre}" y todos sus datos asociados.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => projectToDelete && deleteMutation.mutate((projectToDelete as any).programa_id)}
+              onClick={() => programToDelete && deleteMutation.mutate((programToDelete as any).programa_id)}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Eliminar

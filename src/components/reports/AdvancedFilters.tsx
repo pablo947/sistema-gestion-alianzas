@@ -13,13 +13,13 @@ import { EJES } from "@/lib/ejes";
 interface AdvancedFiltersProps {
   onDownloadFiltered: () => void;
   isLoading: boolean;
-  projects: any[];
+  programs: any[];
   actors: any[];
   activeMunicipios: string[];
   filters: {
     municipio: string[];
     tipoRelacion: string[];
-    proyecto: string[];
+    programa: string[];
     actor: string[];
     eje: string[];
     sector: string[];
@@ -36,7 +36,7 @@ interface AdvancedFiltersProps {
 export const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
   onDownloadFiltered,
   isLoading,
-  projects,
+  programs,
   actors,
   activeMunicipios,
   filters,
@@ -249,28 +249,28 @@ export const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
           </div>
 
           <div className="space-y-2">
-            <Label>Proyecto</Label>
-            <Select onValueChange={(value) => addFilter('proyecto', value)}>
+            <Label>Programa</Label>
+            <Select onValueChange={(value) => addFilter('programa', value)}>
               <SelectTrigger>
-                <SelectValue placeholder="Seleccionar proyecto" />
+                <SelectValue placeholder="Seleccionar programa" />
               </SelectTrigger>
               <SelectContent>
-                {projects.map(project => (
-                  <SelectItem key={project.programa_id} value={project.programa_id}>
-                    {project.nombre}
+                {programs.map(program => (
+                  <SelectItem key={program.programa_id} value={program.programa_id}>
+                    {program.nombre}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
             <div className="flex flex-wrap gap-1">
-              {(filters?.proyecto || []).map(item => {
-                const project = projects.find(p => p.programa_id === item);
+              {(filters?.programa || []).map(item => {
+                const program = programs.find(p => p.programa_id === item);
                 return (
                   <Badge key={item} variant="secondary" className="text-xs">
-                    {project?.nombre || item}
+                    {program?.nombre || item}
                     <X 
                       className="ml-1 h-3 w-3 cursor-pointer" 
-                      onClick={() => removeFilter('proyecto', item)}
+                      onClick={() => removeFilter('programa', item)}
                     />
                   </Badge>
                 );

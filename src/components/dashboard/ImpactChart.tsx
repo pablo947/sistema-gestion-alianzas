@@ -5,13 +5,13 @@ import { EJES, normalizeEje } from '@/lib/ejes';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement);
 
-interface Project {
+interface Program {
   eje_estrategico?: string | null;
   estado?: string | null;
 }
 
 interface ImpactChartProps {
-  projects: Project[];
+  programs: Program[];
 }
 
 const EJE_COLORS: Record<string, string> = {
@@ -23,14 +23,14 @@ const EJE_COLORS: Record<string, string> = {
   'Conocimiento e Incidencia': 'rgba(6, 182, 212, 0.6)',
 };
 
-export function ImpactChart({ projects }: ImpactChartProps) {
+export function ImpactChart({ programs }: ImpactChartProps) {
   const chartRef = useRef();
 
   const data = {
     datasets: EJES.map((eje) => {
-      const ejeProjects = projects.filter(p => normalizeEje(p.eje_estrategico) === eje);
-      const completed = ejeProjects.filter(p => p.estado === 'Finalizado').length;
-      const total = ejeProjects.length;
+      const ejePrograms = programs.filter(p => normalizeEje(p.eje_estrategico) === eje);
+      const completed = ejePrograms.filter(p => p.estado === 'Finalizado').length;
+      const total = ejePrograms.length;
       const impact = Math.random() * 80 + 20;
       const progress = total > 0 ? (completed / total) * 100 : 0;
       const color = EJE_COLORS[eje];

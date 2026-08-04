@@ -4,12 +4,12 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { UseFormReturn } from "react-hook-form";
 
-interface BasicProjectFieldsProps {
+interface BasicProgramFieldsProps {
   form: UseFormReturn<any>;
 }
 
-export function BasicProjectFields({ form }: BasicProjectFieldsProps) {
-  console.log("BasicProjectFields - Rendering, should NOT include 'resultados' field");
+export function BasicProgramFields({ form }: BasicProgramFieldsProps) {
+  console.log("BasicProgramFields - Rendering, should NOT include 'resultados' field");
   
   return (
     <div className="space-y-6">
@@ -18,10 +18,10 @@ export function BasicProjectFields({ form }: BasicProjectFieldsProps) {
         name="nombre"
         render={({ field }) => (
           <FormItem>
-            <FormLabel className="text-sm font-medium">Título del Proyecto *</FormLabel>
+            <FormLabel className="text-sm font-medium">Título del Programa *</FormLabel>
             <FormControl>
               <Input 
-                placeholder="Ingrese el título del proyecto" 
+                placeholder="Ingrese el título del programa" 
                 {...field} 
                 className="mt-1"
               />
@@ -39,7 +39,7 @@ export function BasicProjectFields({ form }: BasicProjectFieldsProps) {
             <FormLabel className="text-sm font-medium">Objetivos</FormLabel>
             <FormControl>
               <Textarea 
-                placeholder="Describa los objetivos del proyecto"
+                placeholder="Describa los objetivos del programa"
                 className="min-h-[120px] mt-1"
                 {...field}
               />

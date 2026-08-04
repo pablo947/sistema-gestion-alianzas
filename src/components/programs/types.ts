@@ -1,7 +1,7 @@
 
 import type { Eje } from "@/lib/ejes";
 
-export interface Project {
+export interface Program {
   programa_id: string;
   nombre: string;
   objetivos: string;
@@ -18,10 +18,10 @@ export interface Project {
   created_at: string;
 }
 
-export interface ProjectDialogProps {
+export interface ProgramDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  project?: Project | null;
+  program?: Program | null;
   onSuccess: () => void;
 }
 

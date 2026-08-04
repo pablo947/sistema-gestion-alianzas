@@ -13,11 +13,11 @@ import { useActiveMunicipios } from "@/hooks/useActiveMunicipios";
 interface ReportFiltersProps {
   reportType: 'global' | 'individual';
   onReportTypeChange: (type: 'global' | 'individual') => void;
-  selectedProject: string | null;
-  onProjectChange: (projectId: string | null) => void;
+  selectedProgram: string | null;
+  onProgramChange: (programId: string | null) => void;
   selectedActor: string | null;
   onActorChange: (actorId: string | null) => void;
-  projects: Array<{ programa_id: string; nombre: string }>;
+  programs: Array<{ programa_id: string; nombre: string }>;
   actors: Array<{ actor_id: string; nombre_actor: string }>;
   exportFormat: 'docx' | 'markdown';
   onFormatChange: (format: 'docx' | 'markdown') => void;
@@ -26,8 +26,8 @@ interface ReportFiltersProps {
   onMunicipiosChange: (municipios: string[]) => void;
   selectedTipoRelacion: string[];
   onTipoRelacionChange: (tipos: string[]) => void;
-  selectedProjects: string[];
-  onProjectsChange: (projects: string[]) => void;
+  selectedPrograms: string[];
+  onProgramsChange: (programs: string[]) => void;
   selectedActors: string[];
   onActorsChange: (actors: string[]) => void;
   // Función para descarga filtrada
@@ -38,11 +38,11 @@ interface ReportFiltersProps {
 export const ReportFilters: React.FC<ReportFiltersProps> = ({
   reportType,
   onReportTypeChange,
-  selectedProject,
-  onProjectChange,
+  selectedProgram,
+  onProgramChange,
   selectedActor,
   onActorChange,
-  projects,
+  programs,
   actors,
   exportFormat,
   onFormatChange,
@@ -50,8 +50,8 @@ export const ReportFilters: React.FC<ReportFiltersProps> = ({
   onMunicipiosChange,
   selectedTipoRelacion,
   onTipoRelacionChange,
-  selectedProjects,
-  onProjectsChange,
+  selectedPrograms,
+  onProgramsChange,
   selectedActors,
   onActorsChange,
   onDownloadFiltered,
@@ -61,7 +61,7 @@ export const ReportFilters: React.FC<ReportFiltersProps> = ({
 
   const hasFiltersSelected = selectedMunicipios.length > 0 || 
                            selectedTipoRelacion.length > 0 || 
-                           selectedProjects.length > 0 || 
+                           selectedPrograms.length > 0 || 
                            selectedActors.length > 0;
 
   return (
@@ -92,16 +92,16 @@ export const ReportFilters: React.FC<ReportFiltersProps> = ({
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label className="text-sm font-medium">Proyecto Específico</Label>
-                <Select value={selectedProject || "none"} onValueChange={(value) => onProjectChange(value === "none" ? null : value)}>
+                <Label className="text-sm font-medium">Programa Específico</Label>
+                <Select value={selectedProgram || "none"} onValueChange={(value) => onProgramChange(value === "none" ? null : value)}>
                   <SelectTrigger className="mt-1">
-                    <SelectValue placeholder="Seleccionar proyecto..." />
+                    <SelectValue placeholder="Seleccionar programa..." />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="none">Ninguno</SelectItem>
-                    {projects.map((project) => (
-                      <SelectItem key={project.programa_id} value={project.programa_id}>
-                        {project.nombre}
+                    {programs.map((program) => (
+                      <SelectItem key={program.programa_id} value={program.programa_id}>
+                        {program.nombre}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -215,25 +215,25 @@ export const ReportFilters: React.FC<ReportFiltersProps> = ({
                 </div>
               </div>
 
-              {/* Filtro por Proyectos */}
+              {/* Filtro por Programas */}
               <div>
-                <Label className="text-sm font-medium mb-3 block">Proyectos</Label>
+                <Label className="text-sm font-medium mb-3 block">Programas</Label>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-32 overflow-y-auto border rounded p-3">
-                  {projects.map((project) => (
-                    <div key={project.programa_id} className="flex items-center space-x-2">
+                  {programs.map((program) => (
+                    <div key={program.programa_id} className="flex items-center space-x-2">
                       <Checkbox
-                        id={`project-${project.programa_id}`}
-                        checked={selectedProjects.includes(project.programa_id)}
+                        id={`program-${program.programa_id}`}
+                        checked={selectedPrograms.includes(program.programa_id)}
                         onCheckedChange={(checked) => {
                           if (checked) {
-                            onProjectsChange([...selectedProjects, project.programa_id]);
+                            onProgramsChange([...selectedPrograms, program.programa_id]);
                           } else {
-                            onProjectsChange(selectedProjects.filter(p => p !== project.programa_id));
+                            onProgramsChange(selectedPrograms.filter(p => p !== program.programa_id));
                           }
                         }}
                       />
-                      <Label htmlFor={`project-${project.programa_id}`} className="text-sm">
-                        {project.nombre}
+                      <Label htmlFor={`program-${program.programa_id}`} className="text-sm">
+                        {program.nombre}
                       </Label>
                     </div>
                   ))}

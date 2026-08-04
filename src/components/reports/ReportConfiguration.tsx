@@ -8,26 +8,26 @@ import { Settings } from "lucide-react";
 interface ReportConfigurationProps {
   reportType: 'global' | 'individual';
   onReportTypeChange: (value: 'global' | 'individual') => void;
-  selectedProject: string;
-  onSelectedProjectChange: (value: string) => void;
+  selectedProgram: string;
+  onSelectedProgramChange: (value: string) => void;
   selectedActor: string;
   onSelectedActorChange: (value: string) => void;
   exportFormat: 'excel' | 'word';
   onExportFormatChange: (value: 'excel' | 'word') => void;
-  projects: any[];
+  programs: any[];
   actors: any[];
 }
 
 export const ReportConfiguration: React.FC<ReportConfigurationProps> = ({
   reportType,
   onReportTypeChange,
-  selectedProject,
-  onSelectedProjectChange,
+  selectedProgram,
+  onSelectedProgramChange,
   selectedActor,
   onSelectedActorChange,
   exportFormat,
   onExportFormatChange,
-  projects,
+  programs,
   actors
 }) => {
   return (
@@ -56,15 +56,15 @@ export const ReportConfiguration: React.FC<ReportConfigurationProps> = ({
         {reportType === 'individual' && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="project-select">Seleccionar Proyecto</Label>
-              <Select value={selectedProject} onValueChange={onSelectedProjectChange}>
-                <SelectTrigger id="project-select">
-                  <SelectValue placeholder="Selecciona un proyecto" />
+              <Label htmlFor="program-select">Seleccionar Programa</Label>
+              <Select value={selectedProgram} onValueChange={onSelectedProgramChange}>
+                <SelectTrigger id="program-select">
+                  <SelectValue placeholder="Selecciona un programa" />
                 </SelectTrigger>
                 <SelectContent>
-                  {projects.map((project) => (
-                    <SelectItem key={project.programa_id} value={project.programa_id}>
-                      {project.nombre}
+                  {programs.map((program) => (
+                    <SelectItem key={program.programa_id} value={program.programa_id}>
+                      {program.nombre}
                     </SelectItem>
                   ))}
                 </SelectContent>

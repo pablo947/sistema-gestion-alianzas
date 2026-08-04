@@ -19,29 +19,29 @@ export const useExcelExport = () => {
     return ids.map((id) => responsableMap.get(id) || '').filter(Boolean).join(', ');
   };
 
-  const exportProjectsReport = (data: any[]) => {
+  const exportProgramsReport = (data: any[]) => {
     try {
       const workbook = XLSX.utils.book_new();
       
-      // Hoja 1 - Información General de Proyectos
-      const generalData = data.map(project => ({
-        'Eje Estratégico': project.eje_estrategico || 'Sin clasificar',
-        'ID Proyecto': project.proyecto_id,
-        'Nombre': project.nombre,
-        'Eje': project.eje_estrategico || 'Sin clasificar',
-        'Estado': project.estado,
-        'Objetivos': project.objetivos || '',
-        'Resultados': project.resultados || '',
-        'Fecha Inicio': project.fecha_inicio || '',
-        'Fecha Cierre': project.fecha_cierre || '',
-        'Presupuesto Total': project.presupuesto_total || 0,
-        'Presupuesto Ejecutado': project.presupuesto_ejecutado || 0,
-        '% Ejecución Presupuestal': project.budgetExecution + '%',
-        'Total Indicadores': project.totalIndicators,
-        'Indicadores Completados': project.completedIndicators,
-        '% Cumplimiento Indicadores': project.indicatorCompletion + '%',
-        'Actores Involucrados': project.actorsInvolved,
-        'Fecha Creación': project.created_at
+      // Hoja 1 - Información General de Programas
+      const generalData = data.map(program => ({
+        'Eje Estratégico': program.eje_estrategico || 'Sin clasificar',
+        'ID Programa': program.programa_id,
+        'Nombre': program.nombre,
+        'Eje': program.eje_estrategico || 'Sin clasificar',
+        'Estado': program.estado,
+        'Objetivos': program.objetivos || '',
+        'Resultados': program.resultados || '',
+        'Fecha Inicio': program.fecha_inicio || '',
+        'Fecha Cierre': program.fecha_cierre || '',
+        'Presupuesto Total': program.presupuesto_total || 0,
+        'Presupuesto Ejecutado': program.presupuesto_ejecutado || 0,
+        '% Ejecución Presupuestal': program.budgetExecution + '%',
+        'Total Indicadores': program.totalIndicators,
+        'Indicadores Completados': program.completedIndicators,
+        '% Cumplimiento Indicadores': program.indicatorCompletion + '%',
+        'Actores Involucrados': program.actorsInvolved,
+        'Fecha Creación': program.created_at
       }));
       
       const generalSheet = XLSX.utils.json_to_sheet(generalData);
@@ -49,16 +49,16 @@ export const useExcelExport = () => {
       
       // Hoja 2 - Indicadores Técnicos
       const indicatorsData: any[] = [];
-      data.forEach(project => {
-        if (Array.isArray(project.metas)) {
-          project.metas.forEach((indicator: any) => {
+      data.forEach(program => {
+        if (Array.isArray(program.metas)) {
+          program.metas.forEach((indicator: any) => {
             const target = parseFloat(indicator.meta) || 0;
             const progress = parseFloat(indicator.avance_actual) || 0;
             const completion = target > 0 ? Math.round((progress / target) * 100) : 0;
             
             indicatorsData.push({
-              'Eje Estratégico': project.eje_estrategico || 'Sin clasificar',
-              'Proyecto': project.nombre,
+              'Eje Estratégico': program.eje_estrategico || 'Sin clasificar',
+              'Programa': program.nombre,
               'Código Indicador': indicator.id || '',
               'Descripción': indicator.indicador || '',
               'Tipo': indicator.tipo || '',
@@ -81,18 +81,18 @@ export const useExcelExport = () => {
       }
       
       // Generar y descargar archivo
-      const fileName = `Reporte_Proyectos_${new Date().toISOString().split('T')[0]}.xlsx`;
+      const fileName = `Reporte_Programas_${new Date().toISOString().split('T')[0]}.xlsx`;
       XLSX.writeFile(workbook, fileName);
       
       toast({
         title: "Reporte generado",
-        description: "El reporte de proyectos se ha descargado exitosamente.",
+        description: "El reporte de programas se ha descargado exitosamente.",
       });
     } catch (error) {
-      console.error('Error generating projects report:', error);
+      console.error('Error generating programs report:', error);
       toast({
         title: "Error",
-        description: "Hubo un error al generar el reporte de proyectos.",
+        description: "Hubo un error al generar el reporte de programas.",
         variant: "destructive",
       });
     }
@@ -127,7 +127,7 @@ export const useExcelExport = () => {
         'Responsables Seguimiento': formatResponsables(actor.responsable_seguimiento),
         'Municipios Actuación': actor.municipalities,
         'Departamentos Actuación': actor.departments,
-        'Proyectos Involucrados': actor.projectsInvolved,
+        'Programas Involucrados': actor.programsInvolved,
         'Ejes Involucrados': actor.ejesInvolved || '',
 
         'Años de Alianza Activa': actor.aniosAlianza || '',
@@ -225,15 +225,15 @@ export const useExcelExport = () => {
       const actorsData = data.map((actor, index) => {
         const contacts = actor.contacts || [];
         const actorPrograms = actor.actor_programs || [];
-        // Información de proyectos asociados (incluye eje inferido)
-        const projectsInfo = actorPrograms.map((ap: any) => {
+        // Información de programas asociados (incluye eje inferido)
+        const programsInfo = actorPrograms.map((ap: any) => {
           const program = ap.programs;
           if (!program) return 'N/A';
           const eje = program.eje_estrategico || 'Sin eje';
           return `${program.nombre} [${eje}]`;
         }).join('; ');
 
-        // Ejes únicos asociados al actor (vía proyectos)
+        // Ejes únicos asociados al actor (vía programas)
         const actorEjes = Array.from(new Set(
           actorPrograms.map((ap: any) => ap.programs?.eje_estrategico).filter(Boolean)
         )).join(', ');
@@ -261,9 +261,9 @@ export const useExcelExport = () => {
           'Nivel de Interés': getNivelDescripcion(actor.nivel_interes),
           'Estrategia': getStrategy(actor.nivel_influencia, actor.nivel_interes),
           'Contactos Asociados': contacts.length,
-          'Proyectos Asociados': actorPrograms.length,
+          'Programas Asociados': actorPrograms.length,
           'Ejes Involucrados': actorEjes || 'N/A',
-          'Detalles de Proyectos': projectsInfo || 'N/A',
+          'Detalles de Programas': programsInfo || 'N/A',
 
           'Años de Alianza Activa': Array.isArray((actor as any).anios_alianza) 
             ? (actor as any).anios_alianza.join(', ') : 'N/A',
@@ -302,7 +302,7 @@ export const useExcelExport = () => {
       if (filters.municipio?.length) filterInfo.push(`Municipios: ${filters.municipio.join(', ')}`);
       if (filters.tipoRelacion?.length) filterInfo.push(`Tipo Relación: ${filters.tipoRelacion.join(', ')}`);
       if (filters.eje?.length) filterInfo.push(`Ejes: ${filters.eje.join(', ')}`);
-      if (filters.proyecto?.length) filterInfo.push(`Proyectos: ${filters.proyecto.length} seleccionados`);
+      if (filters.programa?.length) filterInfo.push(`Programas: ${filters.programa.length} seleccionados`);
       if (filters.actor?.length) filterInfo.push(`Actores: ${filters.actor.length} seleccionados`);
       if (filters.sinContactos) filterInfo.push(`Solo actores sin contactos asociados`);
       if (filters.estrategia?.length) filterInfo.push(`Estrategias: ${filters.estrategia.join(', ')}`);
@@ -331,13 +331,13 @@ export const useExcelExport = () => {
     }
   };
 
-  const exportIndividualProjectReport = (data: any) => {
+  const exportIndividualProgramReport = (data: any) => {
     try {
       const workbook = XLSX.utils.book_new();
       
-      // Hoja 1 - Información General del Proyecto
+      // Hoja 1 - Información General del Programa
       const generalData = [{
-        'ID Proyecto': data.proyecto_id,
+        'ID Programa': data.programa_id,
         'Nombre': data.nombre,
         'Eje': data.eje_estrategico || 'Sin clasificar',
         'Estado': data.estado,
@@ -402,18 +402,18 @@ export const useExcelExport = () => {
       }
       
       // Generar y descargar archivo
-      const fileName = `Reporte_Proyecto_${data.nombre.replace(/[^a-z0-9]/gi, '_')}_${new Date().toISOString().split('T')[0]}.xlsx`;
+      const fileName = `Reporte_Programa_${data.nombre.replace(/[^a-z0-9]/gi, '_')}_${new Date().toISOString().split('T')[0]}.xlsx`;
       XLSX.writeFile(workbook, fileName);
       
       toast({
         title: "Reporte generado",
-        description: "El reporte del proyecto se ha descargado exitosamente.",
+        description: "El reporte del programa se ha descargado exitosamente.",
       });
     } catch (error) {
-      console.error('Error generating individual project report:', error);
+      console.error('Error generating individual program report:', error);
       toast({
         title: "Error",
-        description: "Hubo un error al generar el reporte del proyecto.",
+        description: "Hubo un error al generar el reporte del programa.",
         variant: "destructive",
       });
     }
@@ -459,8 +459,8 @@ export const useExcelExport = () => {
         'Años de Alianza Activa': String(contact.actorAniosAlianza || ''),
         'Sector del Actor': String(contact.actorSector || ''),
         'Departamentos (Actor)': String(contact.departamentos || ''),
-        'Ejes (Proyectos del Actor)': String(contact.ejes || ''),
-        'Proyectos del Actor': String(contact.proyectos || ''),
+        'Ejes (Programas del Actor)': String(contact.ejes || ''),
+        'Programas del Actor': String(contact.programas || ''),
 
         'Responsable de Seguimiento': formatResponsables(contact.responsable_seguimiento),
         'Notas': String(contact.notas || ''),
@@ -562,10 +562,10 @@ export const useExcelExport = () => {
   };
 
   return {
-    exportProjectsReport,
+    exportProgramsReport,
     exportActorsReport,
     exportFilteredReport,
-    exportIndividualProjectReport,
+    exportIndividualProgramReport,
     exportContactsReport,
     exportFilteredContactsReport
   };

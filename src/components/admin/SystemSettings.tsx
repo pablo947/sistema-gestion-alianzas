@@ -114,7 +114,7 @@ export function SystemSettings() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Button variant="outline" className="justify-start" asChild>
               <a 
-                href="https://supabase.com/dashboard/project/jhzwbtrgfnmqwcqgucyx/sql/new" 
+                href="https://supabase.com/dashboard/program/jhzwbtrgfnmqwcqgucyx/sql/new" 
                 target="_blank" 
                 rel="noopener noreferrer"
               >
@@ -126,7 +126,7 @@ export function SystemSettings() {
             
             <Button variant="outline" className="justify-start" asChild>
               <a 
-                href="https://supabase.com/dashboard/project/jhzwbtrgfnmqwcqgucyx/auth/users" 
+                href="https://supabase.com/dashboard/program/jhzwbtrgfnmqwcqgucyx/auth/users" 
                 target="_blank" 
                 rel="noopener noreferrer"
               >

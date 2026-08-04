@@ -40,7 +40,7 @@ const menuItems = [
   { title: "Actores", url: "/actors", icon: Building2, moduleId: 'actors' },
   { title: "Contactos", url: "/contacts", icon: Contact, moduleId: 'contacts' },
   { title: "Clasificación de Aliados", url: "/clasificacion-aliados", icon: Award, moduleId: 'strategies' },
-  { title: "Programas e Iniciativas", url: "/projects", icon: FolderKanban, moduleId: 'projects' },
+  { title: "Programas e Iniciativas", url: "/programs", icon: FolderKanban, moduleId: 'programs' },
   { title: "Equipo Fundación Luker", url: "/team", icon: Users, moduleId: 'team' },
   { title: "Descarga de Reportes", url: "/reports", icon: FileDown, moduleId: 'reports' },
   { title: "Guía de uso", url: "/guide", icon: BookOpen, moduleId: 'guide' },

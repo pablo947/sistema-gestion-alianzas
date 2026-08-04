@@ -134,7 +134,7 @@ export default function Auth() {
           <CardHeader className="space-y-1 text-center">
             <CardTitle className="text-2xl font-bold">Sistema de Gestión</CardTitle>
             <CardDescription>
-              Accede al sistema de gestión de actores y proyectos
+              Accede al sistema de gestión de actores y programas
             </CardDescription>
           </CardHeader>
           <CardContent>

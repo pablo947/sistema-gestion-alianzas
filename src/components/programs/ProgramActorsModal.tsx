@@ -9,7 +9,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Users, Building, Target } from 'lucide-react';
 
-interface ProjectActor {
+interface ProgramActor {
   actor_id: string;
   nombre_actor: string;
   sector_actor: string;
@@ -17,19 +17,19 @@ interface ProjectActor {
   ciudad_sede?: string;
 }
 
-interface ProjectActorsModalProps {
+interface ProgramActorsModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  projectName: string;
-  actors: ProjectActor[];
+  programName: string;
+  actors: ProgramActor[];
 }
 
-export function ProjectActorsModal({ 
+export function ProgramActorsModal({ 
   open, 
   onOpenChange, 
-  projectName, 
+  programName, 
   actors 
-}: ProjectActorsModalProps) {
+}: ProgramActorsModalProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
@@ -39,7 +39,7 @@ export function ProjectActorsModal({
             Actores Involucrados
           </DialogTitle>
           <DialogDescription>
-            Actores que participan en el proyecto: <strong>{projectName}</strong>
+            Actores que participan en el programa: <strong>{programName}</strong>
           </DialogDescription>
         </DialogHeader>
         
@@ -47,7 +47,7 @@ export function ProjectActorsModal({
           {actors.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <Users className="mx-auto h-12 w-12 mb-4 opacity-50" />
-              <p>No hay actores asignados a este proyecto</p>
+              <p>No hay actores asignados a este programa</p>
             </div>
           ) : (
             <div className="grid gap-3">
