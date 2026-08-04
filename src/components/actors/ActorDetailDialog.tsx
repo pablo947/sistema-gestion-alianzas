@@ -136,7 +136,7 @@ export function ActorDetailDialog({ open, onOpenChange, actor, onEdit }: ActorDe
                <h3 className="font-semibold text-sm mb-3 text-muted-foreground uppercase tracking-wider">Años de Alianza Activa</h3>
                {aniosAlianza.length > 0 ? (
                  <div className="flex gap-1.5 flex-wrap">
-                   {aniosAlianza.sort().map((y: number) => (
+                   {[...aniosAlianza].sort().map((y: number) => (
                      <Badge key={y} variant="outline" className="bg-muted/50">{y}</Badge>
                    ))}
                  </div>

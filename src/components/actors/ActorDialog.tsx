@@ -19,7 +19,6 @@ import { ActorFormFields } from './ActorFormFields';
 import { TagsManager } from './TagsManager';
 import { RelatedContactsDialog } from './RelatedContactsDialog';
 import { Actor, ActorDialogProps } from './types';
-import { useActorProjects } from '@/hooks/useProjects';
 import { useActorsList } from '@/hooks/useActorsList';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useAuth } from '@/hooks/useAuth';
@@ -50,7 +49,6 @@ const getActorSchema = (isAdmin: boolean) => z.object({
 
 export function ActorDialog({ open, onOpenChange, actor, onSuccess }: ActorDialogProps) {
   const queryClient = useQueryClient();
-  const { data: actorProjects } = useActorProjects(actor?.actor_id);
   const [showRelatedContacts, setShowRelatedContacts] = React.useState(false);
   const [acknowledgedDuplicateSignature, setAcknowledgedDuplicateSignature] = useState<string | null>(null);
   const { data: allActors = [] } = useActorsList();
@@ -115,7 +113,7 @@ export function ActorDialog({ open, onOpenChange, actor, onSuccess }: ActorDialo
         nivel_influencia: actor.nivel_influencia || undefined,
         nivel_interes: actor.nivel_interes || undefined,
         
-        programa_ids: actorProjects?.map((p: any) => p.programa_id) || [],
+        programa_ids: actor.proyectos?.map((p: any) => p.id) || [],
         responsable_seguimiento: Array.isArray(actor.responsable_seguimiento) ? actor.responsable_seguimiento : [],
         telefono_entidad: (actor as any).telefono_entidad || '',
         direccion_entidad: (actor as any).direccion_entidad || '',
@@ -140,7 +138,7 @@ export function ActorDialog({ open, onOpenChange, actor, onSuccess }: ActorDialo
         anios_alianza: [],
       });
     }
-  }, [actor, actorProjects, form]);
+  }, [actor, form]);
 
   const mutation = useMutation({
     mutationFn: async (values: z.infer<ReturnType<typeof getActorSchema>>) => {
