@@ -91,7 +91,7 @@ export function PendingRequestsPanel() {
   const approveChangeMutation = useMutation({
     mutationFn: async (request: any) => {
       // 1. Separate out non-actor table fields
-      const { proyecto_ids, ...actorData } = request.payload;
+      const { programa_ids, ...actorData } = request.payload;
 
       // 2. Update the actor with the payload
       const { error: updateError } = await supabase
@@ -101,7 +101,7 @@ export function PendingRequestsPanel() {
       if (updateError) throw updateError;
 
       // 3. Handle program associations if they were included in the change request
-      if (proyecto_ids !== undefined) {
+      if (programa_ids !== undefined) {
         const { error: deleteError } = await supabase
           .from('actor_programs')
           .delete()
@@ -112,8 +112,8 @@ export function PendingRequestsPanel() {
           throw deleteError;
         }
 
-        if (proyecto_ids.length > 0) {
-          const associations = proyecto_ids.map((programId: string) => ({
+        if (programa_ids.length > 0) {
+          const associations = programa_ids.map((programId: string) => ({
             actor_id: request.actor_id,
             program_id: programId,
           }));

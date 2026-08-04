@@ -40,7 +40,7 @@ const getActorSchema = (isAdmin: boolean) => z.object({
   nivel_influencia: isAdmin ? z.number().optional() : z.number({ required_error: 'Requerido' }).min(1).max(5),
   nivel_interes: isAdmin ? z.number().optional() : z.number({ required_error: 'Requerido' }).min(1).max(5),
   
-  proyecto_ids: z.array(z.string()).default([]),
+  programa_ids: z.array(z.string()).default([]),
   responsable_seguimiento: z.array(z.string()).default([]),
   telefono_entidad: z.string().default(''),
   direccion_entidad: z.string().default(''),
@@ -79,7 +79,7 @@ export function ActorDialog({ open, onOpenChange, actor, onSuccess }: ActorDialo
       tipo_relacion: [],
       nivel_interes: undefined,
       
-      proyecto_ids: [],
+      programa_ids: [],
       responsable_seguimiento: [],
       telefono_entidad: '',
       direccion_entidad: '',
@@ -115,7 +115,7 @@ export function ActorDialog({ open, onOpenChange, actor, onSuccess }: ActorDialo
         nivel_influencia: actor.nivel_influencia || undefined,
         nivel_interes: actor.nivel_interes || undefined,
         
-        proyecto_ids: actorProjects?.map((p: any) => p.programa_id) || [],
+        programa_ids: actorProjects?.map((p: any) => p.programa_id) || [],
         responsable_seguimiento: Array.isArray(actor.responsable_seguimiento) ? actor.responsable_seguimiento : [],
         telefono_entidad: (actor as any).telefono_entidad || '',
         direccion_entidad: (actor as any).direccion_entidad || '',
@@ -132,7 +132,7 @@ export function ActorDialog({ open, onOpenChange, actor, onSuccess }: ActorDialo
         nivel_influencia: undefined,
         nivel_interes: undefined,
         
-        proyecto_ids: [],
+        programa_ids: [],
         responsable_seguimiento: [],
         telefono_entidad: '',
         direccion_entidad: '',
@@ -214,8 +214,8 @@ export function ActorDialog({ open, onOpenChange, actor, onSuccess }: ActorDialo
           throw deleteError;
         }
 
-        if (values.proyecto_ids && values.proyecto_ids.length > 0) {
-          const associations = values.proyecto_ids.map(programId => ({
+        if (values.programa_ids && values.programa_ids.length > 0) {
+          const associations = values.programa_ids.map(programId => ({
             actor_id: actorId,
             program_id: programId,
           }));

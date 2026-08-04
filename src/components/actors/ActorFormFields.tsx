@@ -45,7 +45,7 @@ const actorSchema = z.object({
   nivel_influencia: z.number().min(1).max(5).optional(),
   nivel_interes: z.number().min(1).max(5).optional(),
   
-  proyecto_ids: z.array(z.string()).default([]),
+  programa_ids: z.array(z.string()).default([]),
   responsable_seguimiento: z.array(z.string()).default([]),
   telefono_entidad: z.string().default(''),
   direccion_entidad: z.string().default(''),
@@ -376,14 +376,14 @@ export function ActorFormFields({ control, setValue, duplicateWarning }: ActorFo
 
       <FormField
         control={control}
-        name="proyecto_ids"
+        name="programa_ids"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Proyectos Involucrado</FormLabel>
+            <FormLabel>Programas Involucrados</FormLabel>
             <FormControl>
               <div className="space-y-2 max-h-48 overflow-y-auto border rounded-md p-3">
                 {isLoadingProjects ? (
-                  <div className="text-sm text-muted-foreground">Cargando proyectos...</div>
+                  <div className="text-sm text-muted-foreground">Cargando programas...</div>
                 ) : projects && projects.length > 0 ? (
                   projects.map((project: any) => (
                     <div key={project.programa_id} className="flex items-center space-x-2">
@@ -408,7 +408,7 @@ export function ActorFormFields({ control, setValue, duplicateWarning }: ActorFo
                     </div>
                   ))
                 ) : (
-                  <div className="text-sm text-muted-foreground">No hay proyectos disponibles</div>
+                  <div className="text-sm text-muted-foreground">No hay programas disponibles</div>
                 )}
               </div>
             </FormControl>
