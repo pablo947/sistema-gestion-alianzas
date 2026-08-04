@@ -204,10 +204,15 @@ export function ActorDialog({ open, onOpenChange, actor, onSuccess }: ActorDialo
 
       // Handle program associations
       if (actorId) {
-        await (supabase as any)
+        const { error: deleteError } = await (supabase as any)
           .from('actor_programs')
           .delete()
           .eq('actor_id', actorId);
+          
+        if (deleteError) {
+          console.error('Error deleting previous programs:', deleteError);
+          throw deleteError;
+        }
 
         if (values.proyecto_ids && values.proyecto_ids.length > 0) {
           const associations = values.proyecto_ids.map(programId => ({

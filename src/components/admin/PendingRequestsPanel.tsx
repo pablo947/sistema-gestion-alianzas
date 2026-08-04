@@ -102,10 +102,15 @@ export function PendingRequestsPanel() {
 
       // 3. Handle program associations if they were included in the change request
       if (proyecto_ids !== undefined) {
-        await supabase
+        const { error: deleteError } = await supabase
           .from('actor_programs')
           .delete()
           .eq('actor_id', request.actor_id);
+          
+        if (deleteError) {
+          console.error('Error deleting actor programs:', deleteError);
+          throw deleteError;
+        }
 
         if (proyecto_ids.length > 0) {
           const associations = proyecto_ids.map((programId: string) => ({
@@ -131,6 +136,7 @@ export function PendingRequestsPanel() {
       toast({ title: 'Cambio Aprobado', description: 'Los datos del actor han sido actualizados.' });
       queryClient.invalidateQueries({ queryKey: ['pending-change-requests'] });
       queryClient.invalidateQueries({ queryKey: ['actors'] });
+      queryClient.invalidateQueries({ queryKey: ['actor-programs'] });
     },
   });
 
