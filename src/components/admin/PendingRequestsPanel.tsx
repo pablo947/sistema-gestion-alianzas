@@ -90,14 +90,37 @@ export function PendingRequestsPanel() {
 
   const approveChangeMutation = useMutation({
     mutationFn: async (request: any) => {
-      // 1. Update the actor with the payload
+      // 1. Separate out non-actor table fields
+      const { proyecto_ids, ...actorData } = request.payload;
+
+      // 2. Update the actor with the payload
       const { error: updateError } = await supabase
         .from('actors')
-        .update(request.payload)
+        .update(actorData)
         .eq('actor_id', request.actor_id);
       if (updateError) throw updateError;
 
-      // 2. Mark request as approved
+      // 3. Handle program associations if they were included in the change request
+      if (proyecto_ids !== undefined) {
+        await supabase
+          .from('actor_programs')
+          .delete()
+          .eq('actor_id', request.actor_id);
+
+        if (proyecto_ids.length > 0) {
+          const associations = proyecto_ids.map((programId: string) => ({
+            actor_id: request.actor_id,
+            program_id: programId,
+          }));
+
+          const { error: insertError } = await supabase
+            .from('actor_programs')
+            .insert(associations);
+          if (insertError) throw insertError;
+        }
+      }
+
+      // 4. Mark request as approved
       const { error: statusError } = await supabase
         .from('actor_change_requests')
         .update({ status: 'approved' })
