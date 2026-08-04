@@ -20,6 +20,11 @@ export interface Actor {
   correo_entidad?: string;
   departamento_actuacion?: string[];
   municipio_actuacion?: string[];
+  proyectos?: {
+    id: string;
+    nombre: string;
+    eje_estrategico?: string;
+  }[];
 }
 
 export interface ActorDialogProps {

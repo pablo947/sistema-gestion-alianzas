@@ -104,10 +104,22 @@ export default function Actors() {
         .order('nombre_actor');
       if (error) throw error;
 
-      const actorsWithContactCount = (data as any[])?.map(actor => ({
-        ...actor,
-        contact_count: actor.contacts?.length || 0,
-      })) || [];
+      const actorsWithContactCount = (data as any[])?.map(actor => {
+        const proyectos = (actor.actor_programs || [])
+          .map((ap: any) => ap.programs)
+          .filter(Boolean)
+          .map((p: any) => ({
+            id: p.programa_id,
+            nombre: p.nombre,
+            eje_estrategico: p.eje_estrategico
+          }));
+
+        return {
+          ...actor,
+          proyectos,
+          contact_count: actor.contacts?.length || 0,
+        };
+      }) || [];
 
       return actorsWithContactCount;
     },
@@ -117,9 +129,8 @@ export default function Actors() {
     if (!actors) return [];
     const set = new Set<string>();
     actors.forEach(a =>
-      a.actor_programs?.forEach((ap: any) => {
-        const n = ap.programs?.nombre;
-        if (n) set.add(n);
+      a.proyectos?.forEach((p: any) => {
+        if (p.nombre) set.add(p.nombre);
       })
     );
     return Array.from(set).sort();
@@ -172,7 +183,7 @@ export default function Actors() {
     const matchesSector = filters.sector.length === 0 || filters.sector.includes(actor.sector_actor);
     const matchesTipoRelacion = filters.tipoRelacion.length === 0 || (actor.tipo_relacion && (Array.isArray(actor.tipo_relacion) ? actor.tipo_relacion.some(r => filters.tipoRelacion.includes(r)) : filters.tipoRelacion.includes(actor.tipo_relacion)));
     const matchesSinContactos = filters.sinContactos === '' || (filters.sinContactos === 'sin_contactos' && actor.contact_count === 0) || (filters.sinContactos === 'con_contactos' && actor.contact_count > 0);
-    const programs = (actor.actor_programs || []).map((ap: any) => ap.programs).filter(Boolean);
+    const programs = actor.proyectos || [];
     const matchesEstrategia = filters.estrategiaMatriz.length === 0 || filters.estrategiaMatriz.includes(getEstrategiaMatriz(actor.nivel_influencia, actor.nivel_interes) || '');
     const matchesEje = filters.ejeEstrategico.length === 0 || programs.some((p: any) => { const eje = normalizeEje(p.eje_estrategico); return eje && filters.ejeEstrategico.includes(eje); });
     const matchesPrograma = filters.programa.length === 0 || programs.some((p: any) => filters.programa.includes(p.nombre));
@@ -367,11 +378,9 @@ export default function Actors() {
       {/* Listado */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {filteredActors.map(actor => {
-          const actorPrograms = (actor.actor_programs || [])
-            .map((ap: any) => ap.programs)
-            .filter(Boolean);
+          const proyectos = actor.proyectos || [];
           const responsableNames = getTeamMemberNames(actor.responsable_seguimiento || []);
-          const programCount = actorPrograms.length;
+          const programCount = proyectos.length;
           const estrategia = getEstrategiaMatriz(actor.nivel_influencia, actor.nivel_interes);
 
           return (
@@ -415,10 +424,10 @@ export default function Actors() {
                           </div>
                           {programCount > 0 ? (
                             <div className="space-y-1.5 max-h-64 overflow-y-auto pr-1">
-                              {actorPrograms.map((p: any) => (
+                              {proyectos.map((p: any) => (
                                 <button
-                                  key={p.programa_id}
-                                  onClick={() => navigate(`/projects?id=${p.programa_id}`)}
+                                  key={p.id}
+                                  onClick={() => navigate(`/projects?id=${p.id}`)}
                                   className="w-full text-left text-xs px-2 py-1.5 rounded hover:bg-muted transition-colors"
                                 >
                                   <span className="font-medium text-foreground">{p.nombre}</span>
@@ -430,7 +439,7 @@ export default function Actors() {
                             </div>
                           ) : (
                             <p className="text-xs text-muted-foreground italic">
-                              Sin programas vinculados
+                              Sin proyectos asignados
                             </p>
                           )}
                         </div>
@@ -494,26 +503,30 @@ export default function Actors() {
                   </div>
                 )}
 
-                {actorPrograms.length > 0 && (
-                  <div className="flex items-start space-x-2">
-                    <FolderOpen className="w-4 h-4 text-muted-foreground mt-0.5" />
-                    <div className="text-sm flex-1">
-                      <span className="font-medium">Programas:</span>
-                      <div className="flex flex-wrap gap-1 mt-1">
-                        {actorPrograms.slice(0, 2).map((p: any) => (
-                          <Badge key={p.programa_id} variant="default" className="text-xs">
-                            {p.nombre}
-                          </Badge>
-                        ))}
-                        {actorPrograms.length > 2 && (
-                          <Badge variant="secondary" className="text-xs">
-                            +{actorPrograms.length - 2} más
-                          </Badge>
-                        )}
-                      </div>
+                <div className="flex items-start space-x-2">
+                  <FolderOpen className="w-4 h-4 text-muted-foreground mt-0.5" />
+                  <div className="text-sm flex-1">
+                    <span className="font-medium">Proyectos:</span>
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {proyectos.length > 0 ? (
+                        <>
+                          {proyectos.slice(0, 2).map((p: any) => (
+                            <Badge key={p.id} variant="default" className="text-xs">
+                              {p.nombre}
+                            </Badge>
+                          ))}
+                          {proyectos.length > 2 && (
+                            <Badge variant="secondary" className="text-xs">
+                              +{proyectos.length - 2} más
+                            </Badge>
+                          )}
+                        </>
+                      ) : (
+                        <span className="text-muted-foreground italic text-xs">Sin proyectos asignados</span>
+                      )}
                     </div>
                   </div>
-                )}
+                </div>
 
                 {responsableNames.length > 0 && (
                   <div className="flex items-start space-x-2">
