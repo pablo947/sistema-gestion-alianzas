@@ -69,7 +69,7 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar collapsible="icon">
+    <Sidebar collapsible="offcanvas">
       <SidebarContent className="flex flex-col h-full">
         {/* Logo area */}
         <div className={cn("px-4 py-5 border-b border-sidebar-border flex items-center justify-between", collapsed ? "px-2 justify-center" : "")}>
