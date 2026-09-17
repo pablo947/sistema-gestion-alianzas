@@ -2,6 +2,7 @@
 import * as XLSX from 'xlsx';
 import { useToast } from "@/hooks/use-toast";
 import { useTeamMembers } from "@/hooks/useTeamMembers";
+import { supabase } from '@/integrations/supabase/client';
 
 export const useExcelExport = () => {
   const { toast } = useToast();
@@ -558,12 +559,72 @@ export const useExcelExport = () => {
     }
   };
 
+  const exportStrategicActionsReport = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('strategic_actions')
+        .select(`
+          *,
+          actor:actors(nombre_actor)
+        `)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      const getQuadrantName = (key: string) => {
+        const map: Record<string, string> = {
+          'close': 'Gestionar de cerca',
+          'satisfied': 'Mantener satisfechos',
+          'informed': 'Mantener informados',
+          'monitor': 'Monitorear'
+        };
+        return map[key] || key;
+      };
+
+      const actionsData = data.map((action: any) => ({
+        'Nombre del Actor': action.actor?.nombre_actor || '-',
+        'Cuadrante': getQuadrantName(action.quadrant_key),
+        'Alcance': action.scope === 'quadrant' ? 'General' : 'Específico',
+        'Acción Estratégica Sugerida': action.action_text || '',
+        'Directrices de trato específico': action.directrices_trato || '',
+        'Exigencias Contractuales': action.exigencias_contractuales ? 'Sí' : 'No',
+        'Detalles Exigencias': action.detalles_exigencias || '',
+        'Nivel de Criticidad': action.criticidad || '',
+        'Responsable': action.responsable_relacion || '',
+        'Fecha de próxima revisión': action.fecha_revision || '',
+        'Estado': action.status === 'approved' ? 'Aprobada' : action.status === 'pending_approval' ? 'Pendiente' : 'Rechazada',
+        'Autor': action.user_email,
+        'Fecha de Creación': action.created_at ? new Date(action.created_at).toLocaleDateString() : ''
+      }));
+
+      const workbook = XLSX.utils.book_new();
+      const sheet = XLSX.utils.json_to_sheet(actionsData);
+      XLSX.utils.book_append_sheet(workbook, sheet, 'Matriz Interna');
+
+      const fileName = `Reporte_Matriz_Interna_${new Date().toISOString().split('T')[0]}.xlsx`;
+      XLSX.writeFile(workbook, fileName);
+
+      toast({
+        title: "Reporte generado",
+        description: `Se han exportado ${data.length} acciones estratégicas.`,
+      });
+    } catch (error) {
+      console.error('Error generating strategic actions report:', error);
+      toast({
+        title: "Error",
+        description: "Hubo un error al generar el reporte de la matriz interna.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return {
     exportProgramsReport,
     exportActorsReport,
     exportFilteredReport,
     exportIndividualProgramReport,
     exportContactsReport,
-    exportFilteredContactsReport
+    exportFilteredContactsReport,
+    exportStrategicActionsReport
   };
 };

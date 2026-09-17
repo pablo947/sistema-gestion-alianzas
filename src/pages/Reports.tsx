@@ -105,8 +105,7 @@ export default function Reports() {
 
   const { data: filteredProgramsData = [], isLoading: isLoadingFilteredPrograms, error: filteredProgramsError } = useFilteredProgramsReport(programsFilters);
 
-  // Export hooks
-  const { exportProgramsReport, exportActorsReport, exportFilteredReport, exportIndividualProgramReport, exportContactsReport, exportFilteredContactsReport } = useExcelExport();
+  const { exportProgramsReport, exportActorsReport, exportFilteredReport, exportIndividualProgramReport, exportContactsReport, exportFilteredContactsReport, exportStrategicActionsReport } = useExcelExport();
   const { exportProgramAsDocx, exportActorAsDocx } = useDocumentExport();
   const { exportIndicators, exportBudget, exportActorsByProgram, exportSynergy } = useProgramsAdvancedExport();
 
@@ -168,6 +167,11 @@ export default function Reports() {
 
   const handleDownloadContactsAlumniReport = async () => {
     // removed
+  };
+
+  const handleDownloadStrategicActionsReport = async () => {
+    // We already do loading and error handling inside exportStrategicActionsReport, but let's wrap it if needed.
+    await exportStrategicActionsReport();
   };
 
   const handleDownloadProgramsReport = async () => {
@@ -358,6 +362,15 @@ export default function Reports() {
               buttonText="Descargar Reporte Global"
             />
 
+            <ReportCard
+              title="Reporte Matriz Interna (Recomendaciones)"
+              description="Exporta todas las recomendaciones y acciones estratégicas sugeridas, incluyendo directrices de trato y exigencias."
+              icon={<Users className="h-6 w-6 text-primary" />}
+              onDownload={handleDownloadStrategicActionsReport}
+              isLoading={false}
+              dataCount={0} // No tenemos la cuenta aquí a menos que hagamos fetch, pero no importa para exportar directamente
+              buttonText="Exportar Matriz Interna"
+            />
           </>
         )}
       </div>

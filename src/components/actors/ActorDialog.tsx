@@ -26,7 +26,7 @@ import { useDuplicateDetection } from '@/hooks/useDuplicateDetection';
 import { DuplicateWarning } from '@/components/DuplicateWarning';
 import { sanitizeFormData } from '@/lib/textUtils';
 import { ChangeRequestDialog } from './ChangeRequestDialog';
-import { RecommendationsDialog } from './RecommendationsDialog';
+import { StrategicActionDialog } from '../strategies/StrategicActionDialog';
 import { useToast } from '@/hooks/use-toast';
 import { useAuditLog } from '@/hooks/useAuditLog';
 
@@ -378,10 +378,13 @@ export function ActorDialog({ open, onOpenChange, actor, onSuccess }: ActorDialo
         )}
         
         {actor && (
-          <RecommendationsDialog
+          <StrategicActionDialog
             open={isRecommendationsOpen}
             onOpenChange={setIsRecommendationsOpen}
-            actor={actor}
+            defaultScope="actor"
+            defaultActorId={actor.actor_id}
+            lockedActor={true}
+            showTrigger={false}
           />
         )}
       </DialogContent>

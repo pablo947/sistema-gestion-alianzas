@@ -9,6 +9,121 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
 import { usePermissions } from '@/hooks/usePermissions';
 import { HeatMap } from '@/components/dashboard/HeatMap';
+import { InternalMatrixTable } from '@/components/strategies/InternalMatrixTable';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Cell } from 'recharts';
+import { useInfluenceInterest } from '@/hooks/useInfluenceInterest';
+import { useActorRelations } from '@/hooks/useActorRelations';
+import { PageHeader } from '@/components/layout/PageHeader';
+import Grafos from './Grafos';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Lightbulb, StickyNote } from 'lucide-react';
+import { StrategicActionDialog } from '@/components/strategies/StrategicActionDialog';
+
+const BAR_COLORS = ['#F59E0B', '#22C55E', '#1E3A5F', '#06B6D4', '#6366F1', '#EC4899', '#8B5CF6'];
+
+interface StrategicAction {
+  id: string;
+  scope: 'quadrant' | 'actor';
+  quadrant_key: string;
+  actor_id: string | null;
+  action_text: string;
+}
+
+
+interface ActorItem {
+  actor_id: string;
+  nombre_actor: string;
+  nivel_influencia: number | null;
+  nivel_interes: number | null;
+  tipo_relacion: string[] | null;
+}
+
+interface ProgramInfo {
+  programa_id: string;
+  nombre: string;
+  eje_estrategico: string | null;
+}
+
+const quadrants = [
+  {
+    key: 'satisfied',
+    title: 'Mantener Satisfechos',
+    description: 'Alta influencia, bajo interés',
+    filter: (a: ActorItem) => (a.nivel_influencia || 0) >= 4 && (a.nivel_interes || 0) < 4,
+    color: 'border-l-4 border-l-yellow-600',
+    bg: 'bg-yellow-50 dark:bg-yellow-950/20',
+  },
+  {
+    key: 'close',
+    title: 'Gestionar de Cerca',
+    description: 'Alta influencia, alto interés',
+    filter: (a: ActorItem) => (a.nivel_influencia || 0) >= 4 && (a.nivel_interes || 0) >= 4,
+    color: 'border-l-4 border-l-green-600',
+    bg: 'bg-green-50 dark:bg-green-950/20',
+  },
+  {
+    key: 'monitor',
+    title: 'Monitorear',
+    description: 'Baja influencia, bajo interés',
+    filter: (a: ActorItem) => (a.nivel_influencia || 0) < 4 && (a.nivel_interes || 0) < 4,
+    color: 'border-l-4 border-l-gray-600',
+    bg: 'bg-gray-50 dark:bg-gray-950/20',
+  },
+  {
+    key: 'informed',
+    title: 'Mantener Informados',
+    description: 'Baja influencia, alto interés',
+    filter: (a: ActorItem) => (a.nivel_influencia || 0) < 4 && (a.nivel_interes || 0) >= 4,
+    color: 'border-l-4 border-l-blue-600',
+    bg: 'bg-blue-50 dark:bg-blue-950/20',
+  },
+];
+
+const allyTypes = [
+  {
+    key: 'Co-Implementador',
+    title: 'Co-Implementador',
+    definition: 'Organización que participa activamente en la ejecución conjunta de programas e iniciativas de la Fundacion Luker.',
+    color: 'border-l-4 border-l-amber-500',
+  },
+  {
+    key: 'Co-gestor',
+    title: 'Co-gestor',
+    definition: 'Entidad que comparte la gestión y coordinación de iniciativas estratégicas con la Fundacion Luker.',
+    color: 'border-l-4 border-l-green-500',
+  },
+  {
+    key: 'Donante',
+    title: 'Donante',
+    definition: 'Organización o entidad que aporta recursos financieros para el desarrollo de los programas.',
+    color: 'border-l-4 border-l-blue-800',
+  },
+  {
+    key: 'Beneficiario',
+    title: 'Beneficiario',
+    definition: 'Actor que recibe directamente los beneficios o servicios de los programas de la Fundacion Luker.',
+    color: 'border-l-4 border-l-cyan-500',
+  },
+  {
+    key: 'Membresía',
+    title: 'Membresía',
+    definition: 'Organización vinculada a través de una membresía formal o acuerdo de pertenencia.',
+    color: 'border-l-4 border-l-indigo-500',
+  },
+  {
+    key: 'Prospecto',
+    title: 'Prospecto',
+    definition: 'Organización identificada como potencial aliado con la que se exploran oportunidades de colaboración.',
+    color: 'border-l-4 border-l-pink-500',
+  },
+];
+
+export default function Strategies() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [actors, setActors] = useState<ActorItem[]>([]);
+  const [programsByActor, setProgramsByActor] = useState<Record<string, ProgramInfo[]>>({});
+import { InternalMatrixTable } from '@/components/strategies/InternalMatrixTable';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Cell } from 'recharts';
 import { useInfluenceInterest } from '@/hooks/useInfluenceInterest';
 import { useActorRelations } from '@/hooks/useActorRelations';
@@ -130,8 +245,8 @@ export default function Strategies() {
 
   const pathParts = location.pathname.split('/');
   const lastPart = pathParts[pathParts.length - 1];
-  const validTabs = ['matriz', 'tipos', 'analisis-redes'];
-  const activeTab = validTabs.includes(lastPart) ? lastPart : 'matriz';
+  const validTabs = ['vista-grafica', 'matriz-interna', 'tipos', 'analisis-redes'];
+  const activeTab = validTabs.includes(lastPart) ? lastPart : 'vista-grafica';
 
   const handleTabChange = (value: string) => {
     navigate(`/clasificacion-aliados/${value}`);
@@ -279,15 +394,16 @@ export default function Strategies() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
-        <TabsList className="grid w-full lg:max-w-4xl grid-cols-2 lg:grid-cols-3 mb-10 lg:mb-0">
-          <TabsTrigger value="matriz" className="text-xs lg:text-sm">Matriz Interna</TabsTrigger>
+        <TabsList className="grid w-full lg:max-w-4xl grid-cols-2 lg:grid-cols-4 mb-10 lg:mb-0">
+          <TabsTrigger value="vista-grafica" className="text-xs lg:text-sm">Vista Gráfica</TabsTrigger>
+          <TabsTrigger value="matriz-interna" className="text-xs lg:text-sm">Matriz Interna</TabsTrigger>
           <TabsTrigger value="tipos" className="text-xs lg:text-sm">Tipos de Aliado</TabsTrigger>
-          <TabsTrigger value="analisis-redes" className="text-xs lg:text-sm">Análisis de Redes y Relaciones</TabsTrigger>
+          <TabsTrigger value="analisis-redes" className="text-xs lg:text-sm">Análisis de Redes</TabsTrigger>
         </TabsList>
 
 
-        {/* Section A: Influence/Interest Quadrants */}
-        <TabsContent value="matriz" className="space-y-6">
+        {/* Section A: Graph View */}
+        <TabsContent value="vista-grafica" className="space-y-8">
           <p className="text-sm text-muted-foreground">
             Organización de actores según su nivel de influencia e interés para definir estrategias de relacionamiento.
           </p>
@@ -450,6 +566,11 @@ export default function Strategies() {
         {/* Section C: Network Analysis */}
         <TabsContent value="analisis-redes" className="space-y-4">
           <Grafos />
+        </TabsContent>
+
+        {/* Section D: Internal Matrix Table */}
+        <TabsContent value="matriz-interna" className="space-y-4">
+          <InternalMatrixTable />
         </TabsContent>
       </Tabs>
     </div>
