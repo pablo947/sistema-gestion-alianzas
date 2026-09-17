@@ -72,11 +72,12 @@ export default {
 					orange: 'hsl(var(--luker-orange))',
 					red: 'hsl(var(--luker-red))',
 					teal: 'hsl(var(--luker-teal))',
+					cream: 'hsl(var(--luker-cream))',
 				},
 			},
 			boxShadow: {
-				sm: '0 2px 8px -2px hsl(0 0% 0% / 0.06)',
-				hover: '0 8px 24px -4px hsl(0 0% 0% / 0.12)',
+				sm: 'var(--shadow-card)',
+				hover: 'var(--shadow-hover)',
 			},
 			borderRadius: {
 				lg: 'var(--radius)',

@@ -19,7 +19,7 @@ export function PageHeader({ title, description, action }: PageHeaderProps) {
           <ArrowLeft className="w-4 h-4" />
         </Button>
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
+          <h1 className="text-3xl font-heading font-black tracking-tighter text-luker-brown">{title}</h1>
           {description && (
             <p className="text-sm text-muted-foreground">{description}</p>
           )}

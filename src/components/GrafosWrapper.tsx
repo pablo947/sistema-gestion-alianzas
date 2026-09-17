@@ -2375,8 +2375,8 @@ export default function Grafos() {
           {!hasApplied && (
             <div className="flex-1 flex items-center justify-center text-center p-8">
               <div className="max-w-md space-y-6">
-                <div className="w-24 h-24 mx-auto bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-full flex items-center justify-center">
-                  <svg className="w-12 h-12 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-24 h-24 mx-auto bg-luker-teal/10 rounded-full flex items-center justify-center">
+                  <svg className="w-12 h-12 text-luker-teal" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
                   </svg>
                 </div>
@@ -2388,9 +2388,9 @@ export default function Grafos() {
                   <p className="text-lg text-gray-600 mb-4">
                     Comience seleccionando un tipo de red para explorar las relaciones entre organizaciones
                   </p>
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm">
-                    <h4 className="font-semibold text-blue-800 mb-2">¿Qué puede analizar?</h4>
-                    <ul className="text-blue-700 space-y-1 text-left">
+                  <div className="bg-luker-teal/10 border border-luker-teal/20 rounded-lg p-4 text-sm">
+                    <h4 className="font-semibold text-luker-teal mb-2">¿Qué puede analizar?</h4>
+                    <ul className="text-luker-brown space-y-1 text-left">
                       <li>• <strong>Relacionamiento:</strong> Colaboraciones actuales</li>
                       <li>• <strong>Reconocimiento:</strong> Organizaciones referentes</li>
                       <li>• <strong>Recomendación:</strong> Socios potenciales</li>
@@ -2403,8 +2403,8 @@ export default function Grafos() {
           {hasApplied && (!viewData.nodes.length || !viewData.links.length) && (
             <div className="flex-1 flex items-center justify-center text-center p-8">
               <div className="max-w-md space-y-6">
-                <div className="w-20 h-20 mx-auto bg-gradient-to-br from-yellow-500/20 to-orange-500/20 rounded-full flex items-center justify-center">
-                  <svg className="w-10 h-10 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-20 h-20 mx-auto bg-luker-orange/10 rounded-full flex items-center justify-center">
+                  <svg className="w-10 h-10 text-luker-orange" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 18.5c-.77.833.192 2.5 1.732 2.5z" />
                   </svg>
                 </div>
