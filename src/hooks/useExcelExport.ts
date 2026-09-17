@@ -131,9 +131,6 @@ export const useExcelExport = () => {
         'Ejes Involucrados': actor.ejesInvolved || '',
 
         'Años de Alianza Activa': actor.aniosAlianza || '',
-        'Índice de Importancia (0-100)': actor.importance_index ?? '',
-        'Puntaje Matriz Interna': actor.importance_internal ?? '',
-        'Puntaje SNA': actor.importance_sna ?? '',
       }));
 
       

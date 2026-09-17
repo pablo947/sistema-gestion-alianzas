@@ -33,10 +33,6 @@ export const useActorsReport = () => {
           direccion_entidad,
           correo_entidad,
           anios_alianza,
-          importance_internal,
-          importance_sna,
-          importance_index,
-          importance_updated_at,
 
           actor_programs (
             program_id,

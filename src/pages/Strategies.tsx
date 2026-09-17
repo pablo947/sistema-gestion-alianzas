@@ -7,7 +7,6 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
-import { ImportanceIndexTab } from '@/components/strategies/ImportanceIndexTab';
 import { usePermissions } from '@/hooks/usePermissions';
 import { HeatMap } from '@/components/dashboard/HeatMap';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Cell } from 'recharts';
@@ -131,7 +130,7 @@ export default function Strategies() {
 
   const pathParts = location.pathname.split('/');
   const lastPart = pathParts[pathParts.length - 1];
-  const validTabs = ['matriz', 'tipos', 'analisis-redes', 'importancia'];
+  const validTabs = ['matriz', 'tipos', 'analisis-redes'];
   const activeTab = validTabs.includes(lastPart) ? lastPart : 'matriz';
 
   const handleTabChange = (value: string) => {
@@ -280,11 +279,10 @@ export default function Strategies() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
-        <TabsList className="grid w-full lg:max-w-4xl grid-cols-2 lg:grid-cols-4 mb-10 lg:mb-0">
+        <TabsList className="grid w-full lg:max-w-4xl grid-cols-2 lg:grid-cols-3 mb-10 lg:mb-0">
           <TabsTrigger value="matriz" className="text-xs lg:text-sm">Matriz Interna</TabsTrigger>
           <TabsTrigger value="tipos" className="text-xs lg:text-sm">Tipos de Aliado</TabsTrigger>
           <TabsTrigger value="analisis-redes" className="text-xs lg:text-sm">Análisis de Redes y Relaciones</TabsTrigger>
-          <TabsTrigger value="importancia" className="text-xs lg:text-sm">Índice de Importancia</TabsTrigger>
         </TabsList>
 
 
@@ -453,13 +451,7 @@ export default function Strategies() {
         <TabsContent value="analisis-redes" className="space-y-4">
           <Grafos />
         </TabsContent>
-
-        {/* Section D: Composite Importance Index */}
-        <TabsContent value="importancia" className="space-y-4">
-          <ImportanceIndexTab />
-        </TabsContent>
       </Tabs>
     </div>
   );
 }
-
