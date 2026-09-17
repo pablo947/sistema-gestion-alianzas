@@ -8,6 +8,7 @@ import { SystemSettings } from '@/components/admin/SystemSettings';
 import { UserActivationPanel } from '@/components/admin/UserActivationPanel';
 import { AuditLogPanel } from '@/components/admin/AuditLogPanel';
 import { PendingRequestsPanel } from '@/components/admin/PendingRequestsPanel';
+import { EventApprovalsPanel } from '@/components/admin/EventApprovalsPanel';
 import { Users, Shield, Settings, UserCheck, ClipboardList } from 'lucide-react';
 import { PageHeader } from '@/components/layout/PageHeader';
 
@@ -70,10 +71,14 @@ export default function Administration() {
             <Tabs defaultValue="pending" className="w-full">
               <TabsList className="mb-4">
                 <TabsTrigger value="pending">Solicitudes Pendientes</TabsTrigger>
+                <TabsTrigger value="events">Eventos Pendientes</TabsTrigger>
                 <TabsTrigger value="history">Log de Actividad</TabsTrigger>
               </TabsList>
               <TabsContent value="pending">
                 <PendingRequestsPanel />
+              </TabsContent>
+              <TabsContent value="events">
+                <EventApprovalsPanel />
               </TabsContent>
               <TabsContent value="history">
                 <AuditLogPanel />

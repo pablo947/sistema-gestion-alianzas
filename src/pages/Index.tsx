@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Building2, Contact, FolderKanban, FileDown, Award, Users, BookOpen, Shield } from 'lucide-react';
 import { Tooltip as UITooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Button } from '@/components/ui/button';
+import { EventsCalendar } from '@/components/calendar/EventsCalendar';
 
 const modules = [
   {
@@ -155,6 +156,11 @@ const Index = () => {
           })}
         </div>
       </TooltipProvider>
+
+      {/* Events Calendar */}
+      <div className="mt-16">
+        <EventsCalendar />
+      </div>
     </div>
   );
 };
