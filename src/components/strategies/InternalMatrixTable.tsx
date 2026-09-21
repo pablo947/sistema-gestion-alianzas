@@ -20,16 +20,31 @@ import {
 } from '@/components/ui/select';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale/es';
-import { Search, Info } from 'lucide-react';
+import { Search, Info, Trash2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 export function InternalMatrixTable() {
   const { userProfile, isAdmin } = useAuth();
+  const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
   const [quadrantFilter, setQuadrantFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  const { data: actions, isLoading } = useQuery({
+  const { data: actions, isLoading, refetch } = useQuery({
     queryKey: ['internal-matrix', userProfile?.id, isAdmin],
     queryFn: async () => {
       let query = supabase
@@ -77,6 +92,41 @@ export function InternalMatrixTable() {
     if (status === 'pending_approval') return <span className="px-2 py-1 text-xs rounded-full bg-luker-orange/10 text-luker-orange font-medium">Pendiente</span>;
     if (status === 'rejected') return <span className="px-2 py-1 text-xs rounded-full bg-red-100 text-red-700 font-medium">Rechazada</span>;
     return <span>{status}</span>;
+  };
+
+  const canDeleteAction = (action: any) => {
+    if (isAdmin) return true;
+    if (userProfile?.role === 'strategic' && action.created_by === userProfile.id && action.status === 'pending_approval') {
+      return true;
+    }
+    return false;
+  };
+
+  const handleDelete = async (actionId: string) => {
+    try {
+      setIsDeleting(true);
+      const { error } = await supabase
+        .from('strategic_actions')
+        .delete()
+        .eq('id', actionId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Registro eliminado",
+        description: "La acción estratégica fue eliminada exitosamente.",
+      });
+      refetch();
+    } catch (error) {
+      console.error('Error al eliminar:', error);
+      toast({
+        title: "Error al eliminar",
+        description: "Hubo un problema al intentar borrar el registro.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   if (isLoading) {
@@ -131,6 +181,7 @@ export function InternalMatrixTable() {
                 <TableHead className="w-[30%]">Acción Estratégica</TableHead>
                 <TableHead>Estado</TableHead>
                 <TableHead>Autor</TableHead>
+                <TableHead className="text-right">Acciones</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -166,6 +217,34 @@ export function InternalMatrixTable() {
                     </TableCell>
                     <TableCell className="text-sm truncate max-w-[150px]" title={action.user_email}>
                       {action.user_email}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {canDeleteAction(action) && (
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10" disabled={isDeleting}>
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>¿Estás seguro de que deseas eliminar esta acción estratégica?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Esta acción no se puede deshacer. Se eliminará permanentemente el registro de la base de datos.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                              <AlertDialogAction 
+                                onClick={() => handleDelete(action.id)}
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                              >
+                                Eliminar
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      )}
                     </TableCell>
                   </TableRow>
                 ))
