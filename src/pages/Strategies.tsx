@@ -108,21 +108,6 @@ const allyTypes = [
     key: 'Membresía',
     title: 'Membresía',
     definition: 'Organización vinculada a través de una membresía formal o acuerdo de pertenencia.',
-    color: 'border-l-4 border-l-indigo-500',
-  },
-  {
-    key: 'Prospecto',
-    title: 'Prospecto',
-    definition: 'Organización identificada como potencial aliado con la que se exploran oportunidades de colaboración.',
-    color: 'border-l-4 border-l-pink-500',
-  },
-];
-
-export default function Strategies() {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const [actors, setActors] = useState<ActorItem[]>([]);
-  const [programsByActor, setProgramsByActor] = useState<Record<string, ProgramInfo[]>>({});
 import { InternalMatrixTable } from '@/components/strategies/InternalMatrixTable';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Cell } from 'recharts';
 import { useInfluenceInterest } from '@/hooks/useInfluenceInterest';
