@@ -115,8 +115,22 @@ import { useActorRelations } from '@/hooks/useActorRelations';
 import { PageHeader } from '@/components/layout/PageHeader';
 import Grafos from './Grafos';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Lightbulb, StickyNote } from 'lucide-react';
+import { Lightbulb, StickyNote, Trash2, Edit2 } from 'lucide-react';
 import { StrategicActionDialog } from '@/components/strategies/StrategicActionDialog';
+
+import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/use-toast';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 const BAR_COLORS = ['#F59E0B', '#22C55E', '#1E3A5F', '#06B6D4', '#6366F1', '#EC4899', '#8B5CF6'];
 
@@ -126,6 +140,8 @@ interface StrategicAction {
   quadrant_key: string;
   actor_id: string | null;
   action_text: string;
+  created_by: string;
+  status: string;
 }
 
 
@@ -225,8 +241,12 @@ export default function Strategies() {
   const [allyNotes, setAllyNotes] = useState<Record<string, string>>({});
   const [approvedActions, setApprovedActions] = useState<StrategicAction[]>([]);
   const { canEdit, canEditRecommendations } = usePermissions();
+  const { userProfile, isAdmin } = useAuth();
+  const { toast } = useToast();
   const { data: influenceInterest } = useInfluenceInterest();
   const { data: relationsData } = useActorRelations();
+  const [editingAction, setEditingAction] = useState<StrategicAction | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const pathParts = location.pathname.split('/');
   const lastPart = pathParts[pathParts.length - 1];
@@ -239,14 +259,25 @@ export default function Strategies() {
 
   useEffect(() => {
   const loadData = async () => {
-    const [{ data: actorsData }, { data: linksData }, { data: programsData }, { data: actionsData }] = await Promise.all([
-      supabase
-        .from('actors')
-        .select('actor_id, nombre_actor, nivel_influencia, nivel_interes, tipo_relacion'),
-      supabase.from('actor_programs').select('actor_id, program_id'),
-      supabase.from('programs').select('programa_id, nombre, eje_estrategico'),
-      supabase.from('strategic_actions').select('*').eq('status', 'approved'),
-    ]);
+    const loadData = async () => {
+      let actionsQuery = supabase.from('strategic_actions').select('*');
+      if (!isAdmin && userProfile?.id) {
+        actionsQuery = actionsQuery.or(`status.eq.approved,created_by.eq.${userProfile.id}`);
+      } else if (isAdmin) {
+        // Si es admin, puede ver pending_approval también o solo approved?
+        // En matriz interna ve todo. En vista gráfica, suele verse lo aprobado, pero 
+        // para poder editar pending, debería cargar todo.
+        // Carguemos todo.
+      }
+
+      const [{ data: actorsData }, { data: linksData }, { data: programsData }, { data: actionsData }] = await Promise.all([
+        supabase
+          .from('actors')
+          .select('actor_id, nombre_actor, nivel_influencia, nivel_interes, tipo_relacion'),
+        supabase.from('actor_programs').select('actor_id, program_id'),
+        supabase.from('programs').select('programa_id, nombre, eje_estrategico'),
+        actionsQuery,
+      ]);
 
     if (actorsData) setActors(actorsData);
     if (actionsData) setApprovedActions(actionsData as StrategicAction[]);
@@ -276,6 +307,37 @@ export default function Strategies() {
       if (!a.tipo_relacion) return false;
       return a.tipo_relacion.some((t) => t.toLowerCase().includes(type.toLowerCase()));
     });
+  };
+
+  const reloadActions = async () => {
+    let actionsQuery = supabase.from('strategic_actions').select('*');
+    if (!isAdmin && userProfile?.id) {
+      actionsQuery = actionsQuery.or(`status.eq.approved,created_by.eq.${userProfile.id}`);
+    }
+    const { data } = await actionsQuery;
+    if (data) setApprovedActions(data as StrategicAction[]);
+  };
+
+  const canModifyAction = (action: StrategicAction) => {
+    if (isAdmin) return true;
+    if (userProfile?.role === 'strategic' && action.created_by === userProfile?.id && action.status === 'pending_approval') {
+      return true;
+    }
+    return false;
+  };
+
+  const handleDeleteAction = async (actionId: string) => {
+    try {
+      setIsDeleting(true);
+      const { error } = await supabase.from('strategic_actions').delete().eq('id', actionId);
+      if (error) throw error;
+      toast({ title: 'Acción eliminada', description: 'La sugerencia fue eliminada exitosamente.' });
+      reloadActions();
+    } catch (error) {
+      toast({ title: 'Error', description: 'No se pudo eliminar la acción.', variant: 'destructive' });
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   const handleProgramClick = (programaId: string) => {
@@ -427,14 +489,46 @@ export default function Strategies() {
                     
                     {generalActions.length > 0 && (
                       <div className="mt-4 pt-3 border-t border-border/50">
-                        <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-                          Acciones del Cuadrante
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-2">
+                          ACCIONES DEL CUADRANTE
                         </p>
                         <ul className="space-y-1.5">
                           {generalActions.map((action) => (
-                            <li key={action.id} className="text-xs text-foreground bg-background/50 p-2 rounded-md border border-border/30 flex items-start gap-2">
+                            <li key={action.id} className="text-xs text-foreground bg-background/50 p-2 rounded-md border border-border/30 flex items-start gap-2 group/action">
                               <StickyNote className="h-3.5 w-3.5 text-primary shrink-0 mt-0.5" />
-                              <span className="leading-tight">{action.action_text}</span>
+                              <span className="leading-tight flex-1">{action.action_text}</span>
+                              {canModifyAction(action) && (
+                                <div className="flex items-center gap-1 opacity-0 group-hover/action:opacity-100 transition-opacity">
+                                  <Button 
+                                    variant="ghost" 
+                                    size="icon" 
+                                    className="h-6 w-6 text-muted-foreground hover:text-primary"
+                                    onClick={() => setEditingAction(action)}
+                                  >
+                                    <Edit2 className="h-3 w-3" />
+                                  </Button>
+                                  
+                                  <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                      <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-destructive" disabled={isDeleting}>
+                                        <Trash2 className="h-3 w-3" />
+                                      </Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                      <AlertDialogHeader>
+                                        <AlertDialogTitle>¿Eliminar acción?</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                          Esta acción no se puede deshacer.
+                                        </AlertDialogDescription>
+                                      </AlertDialogHeader>
+                                      <AlertDialogFooter>
+                                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                        <AlertDialogAction onClick={() => handleDeleteAction(action.id)} className="bg-destructive hover:bg-destructive/90">Eliminar</AlertDialogAction>
+                                      </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                  </AlertDialog>
+                                </div>
+                              )}
                             </li>
                           ))}
                         </ul>
@@ -447,9 +541,7 @@ export default function Strategies() {
                           quadrantKey={q.key} 
                           quadrantTitle={q.title} 
                           actors={filtered} 
-                          onSuccess={() => {
-                            // En la vida real, se recargaría pero como está pending_approval no aparecerá inmediatamente.
-                          }} 
+                          onSuccess={reloadActions} 
                         />
                       </div>
                     )}
@@ -558,6 +650,20 @@ export default function Strategies() {
           <InternalMatrixTable />
         </TabsContent>
       </Tabs>
+      
+      {editingAction && (
+        <StrategicActionDialog
+          open={!!editingAction}
+          onOpenChange={(open) => !open && setEditingAction(null)}
+          editAction={editingAction}
+          quadrantKey={editingAction.quadrant_key}
+          onSuccess={() => {
+            setEditingAction(null);
+            reloadActions();
+          }}
+          showTrigger={false}
+        />
+      )}
     </div>
   );
 }

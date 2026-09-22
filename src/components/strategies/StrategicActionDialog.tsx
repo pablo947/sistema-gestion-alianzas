@@ -44,6 +44,7 @@ interface StrategicActionDialogProps {
   lockedActor?: boolean;
   showTrigger?: boolean;
   
+  editAction?: any;
   onSuccess?: () => void;
 }
 
@@ -57,6 +58,7 @@ export function StrategicActionDialog({
   defaultActorId = '',
   lockedActor = false,
   showTrigger = true,
+  editAction,
   onSuccess
 }: StrategicActionDialogProps) {
   const { session, isAdmin } = useAuth();
@@ -81,17 +83,29 @@ export function StrategicActionDialog({
 
   useEffect(() => {
     if (open) {
-      setScope(defaultScope);
-      setActorId(defaultActorId);
-      setActionText('');
-      setDirectrices('');
-      setExigencias(false);
-      setDetallesExigencias('');
-      setCriticidad('');
-      setResponsable('');
-      setFechaRevision('');
+      if (editAction) {
+        setScope(editAction.scope || defaultScope);
+        setActorId(editAction.actor_id || defaultActorId);
+        setActionText(editAction.action_text || '');
+        setDirectrices(editAction.directrices_trato || '');
+        setExigencias(editAction.exigencias_contractuales || false);
+        setDetallesExigencias(editAction.detalles_exigencias || '');
+        setCriticidad(editAction.criticidad || '');
+        setResponsable(editAction.responsable_relacion || '');
+        setFechaRevision(editAction.fecha_revision || '');
+      } else {
+        setScope(defaultScope);
+        setActorId(defaultActorId);
+        setActionText('');
+        setDirectrices('');
+        setExigencias(false);
+        setDetallesExigencias('');
+        setCriticidad('');
+        setResponsable('');
+        setFechaRevision('');
+      }
     }
-  }, [open, defaultScope, defaultActorId]);
+  }, [open, defaultScope, defaultActorId, editAction]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -119,7 +133,7 @@ export function StrategicActionDialog({
     try {
       const status = isAdmin ? 'approved' : 'pending_approval';
 
-      const { error } = await supabase.from('strategic_actions').insert({
+      const payload = {
         scope,
         quadrant_key: quadrantKey,
         actor_id: scope === 'actor' ? actorId : null,
@@ -132,10 +146,26 @@ export function StrategicActionDialog({
         responsable_relacion: responsable || null,
         fecha_revision: fechaRevision || null,
         
-        created_by: session.user.id,
-        user_email: session.user.email || '',
         status
-      });
+      };
+
+      let error;
+      if (editAction?.id) {
+        const { error: updateError } = await supabase
+          .from('strategic_actions')
+          .update(payload)
+          .eq('id', editAction.id);
+        error = updateError;
+      } else {
+        const { error: insertError } = await supabase
+          .from('strategic_actions')
+          .insert({
+            ...payload,
+            created_by: session.user.id,
+            user_email: session.user.email || '',
+          });
+        error = insertError;
+      }
 
       if (error) throw error;
 
@@ -173,10 +203,10 @@ export function StrategicActionDialog({
       <DialogContent className="sm:max-w-[550px] max-h-[90vh] overflow-y-auto">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>Recomendaciones y Gestión de Relación</DialogTitle>
+            <DialogTitle>{editAction ? 'Editar Acción Estratégica' : 'Recomendaciones y Gestión de Relación'}</DialogTitle>
             <DialogDescription>
-              Proponga una recomendación o acción estratégica.
-              {!isAdmin && ' Esta sugerencia pasará por un proceso de aprobación.'}
+              {editAction ? 'Modifique los detalles de la acción estratégica.' : 'Proponga una recomendación o acción estratégica.'}
+              {!isAdmin && !editAction && ' Esta sugerencia pasará por un proceso de aprobación.'}
             </DialogDescription>
           </DialogHeader>
 

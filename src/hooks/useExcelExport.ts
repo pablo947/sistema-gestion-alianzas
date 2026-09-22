@@ -236,6 +236,12 @@ export const useExcelExport = () => {
           actorPrograms.map((ap: any) => ap.programs?.eje_estrategico).filter(Boolean)
         )).join(', ');
 
+        const strategicActions = actor.strategic_actions || [];
+        const accionesCuadrante = strategicActions
+          .map((a: any) => a.action_text)
+          .filter(Boolean)
+          .join(' | ');
+
         return {
           'No.': index + 1,
           'Nombre del Actor': actor.nombre_actor || 'N/A',
@@ -262,6 +268,7 @@ export const useExcelExport = () => {
           'Programas Asociados': actorPrograms.length,
           'Ejes Involucrados': actorEjes || 'N/A',
           'Detalles de Programas': programsInfo || 'N/A',
+          'Acciones del Cuadrante (Recomendaciones)': accionesCuadrante || 'Ninguna',
 
           'Años de Alianza Activa': Array.isArray((actor as any).anios_alianza) 
             ? (actor as any).anios_alianza.join(', ') : 'N/A',

@@ -24,7 +24,8 @@ export const useFilteredReports = (filters: ReportFilters) => {
           contacts(*),
           actor_programs(
             programs(*)
-          )
+          ),
+          strategic_actions(*)
         `);
 
       if (filters.municipio && filters.municipio.length > 0) {
